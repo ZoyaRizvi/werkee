@@ -1,5 +1,5 @@
-import { doSignInWithEmailAndPassword, doSignInWithGoogle, doSignOut } from '../../firebase/auth'
-import { useAuth } from '../../context/authContext/index'
+import { doSignInWithEmailAndPassword, doSignInWithGoogle, doSignOut } from '../../firebase/auth';
+import { useAuth } from '../../context/authContext/index';
 
 import { useLocation, Link } from "react-router-dom";
 import {
@@ -30,7 +30,7 @@ import {
 } from "@/context";
 
 export function DashboardNavbar() {
-  const { userLoggedIn } = useAuth()
+  const { userLoggedIn } = useAuth();
   const [controller, dispatch] = useMaterialTailwindController();
   const { fixedNavbar, openSidenav } = controller;
   const { pathname } = useLocation();
@@ -88,26 +88,29 @@ export function DashboardNavbar() {
             <Bars3Icon strokeWidth={3} className="h-6 w-6 text-blue-gray-500" />
           </IconButton>
 
-          {!userLoggedIn ?
-                  <Link to="/auth/sign-in">
-                    <Button
-                      variant="text"
-                      color="blue-gray"
-                      className="hidden items-center gap-1 px-4 xl:flex normal-case"
-                    >
-                      <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-                      Sign In
-                    </Button>
-                    <IconButton
-                      variant="text"
-                      color="blue-gray"
-                      className="grid xl:hidden"
-                    >
-                      <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-                    </IconButton>
-                  </Link>
-                  :
-                  <Link to="/">
+          {!userLoggedIn ? (
+            <Link to="/auth/sign-in">
+              <Button
+                variant="text"
+                color="blue-gray"
+                className="hidden items-center gap-1 px-4 xl:flex normal-case"
+              >
+                <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
+                Sign In
+              </Button>
+              <IconButton
+                variant="text"
+                color="blue-gray"
+                className="grid xl:hidden"
+              >
+                <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
+              </IconButton>
+            </Link>
+          ) : (
+            <div>
+              {localStorage.getItem('user') && JSON.parse(localStorage.getItem('user')).displayName}
+              <span>
+                <Link to="/">
                   <Button
                     onClick={(e) => { doSignOut(e) }}
                     variant="text"
@@ -125,7 +128,10 @@ export function DashboardNavbar() {
                     <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
                   </IconButton>
                 </Link>
-                }
+              </span>
+            </div>
+          )}
+
           <Menu>
             <MenuHandler>
               <IconButton variant="text" color="blue-gray">
@@ -135,7 +141,7 @@ export function DashboardNavbar() {
             <MenuList className="w-max border-0">
               <MenuItem className="flex items-center gap-3">
                 <Avatar
-                  src="https://demos.creative-tim.com/material-dashboard/assets/img/team-2.jpg"
+                  src="/public/img/team-2.jpg"
                   alt="item-1"
                   size="sm"
                   variant="circular"
@@ -159,7 +165,7 @@ export function DashboardNavbar() {
               </MenuItem>
               <MenuItem className="flex items-center gap-4">
                 <Avatar
-                  src="https://demos.creative-tim.com/material-dashboard/assets/img/small-logos/logo-spotify.svg"
+                  src="public/img/small-logos/logo-spotify.svg"
                   alt="item-1"
                   size="sm"
                   variant="circular"
@@ -220,3 +226,4 @@ export function DashboardNavbar() {
 DashboardNavbar.displayName = "/src/widgets/layout/dashboard-navbar.jsx";
 
 export default DashboardNavbar;
+

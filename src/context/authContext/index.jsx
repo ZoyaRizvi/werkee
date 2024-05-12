@@ -23,7 +23,7 @@ export function AuthProvider({ children }) {
 
   async function initializeUser(user) {
     if (user) {
-
+      localStorage.setItem("user", JSON.stringify(user));
       setCurrentUser({ ...user });
 
       // check if provider is email and password login
