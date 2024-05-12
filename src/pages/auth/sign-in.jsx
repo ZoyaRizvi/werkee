@@ -7,6 +7,14 @@ import {
 } from "@material-tailwind/react";
 import { Link } from "react-router-dom";
 
+function handleLogin() {
+  const { userLoggedIn } = useAuth()
+
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [isSigningIn, setIsSigningIn] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+}
 
 export function SignIn() {
   return (
@@ -16,7 +24,7 @@ export function SignIn() {
           <Typography variant="h2" className="font-bold mb-4">Sign In</Typography>
           <Typography variant="paragraph" color="blue-gray" className="text-lg font-normal">Enter your email and password to Sign In.</Typography>
         </div>
-        <form className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
+        <form onSubmit={onSubmit} className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
           <div className="mb-1 flex flex-col gap-6">
             <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
               Your email
