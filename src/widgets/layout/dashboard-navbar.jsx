@@ -1,3 +1,6 @@
+import { doSignInWithEmailAndPassword, doSignInWithGoogle, doSignOut } from '../../firebase/auth'
+import { useAuth } from '../../context/authContext/index'
+
 import { useLocation, Link } from "react-router-dom";
 import {
   Navbar,
@@ -27,6 +30,7 @@ import {
 } from "@/context";
 
 export function DashboardNavbar() {
+  const { userLoggedIn } = useAuth()
   const [controller, dispatch] = useMaterialTailwindController();
   const { fixedNavbar, openSidenav } = controller;
   const { pathname } = useLocation();
@@ -83,23 +87,45 @@ export function DashboardNavbar() {
           >
             <Bars3Icon strokeWidth={3} className="h-6 w-6 text-blue-gray-500" />
           </IconButton>
-          <Link to="/auth/sign-in">
-            <Button
-              variant="text"
-              color="blue-gray"
-              className="hidden items-center gap-1 px-4 xl:flex normal-case"
-            >
-              <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-              Sign In
-            </Button>
-            <IconButton
-              variant="text"
-              color="blue-gray"
-              className="grid xl:hidden"
-            >
-              <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-            </IconButton>
-          </Link>
+
+          {!userLoggedIn ?
+                  <Link to="/auth/sign-in">
+                    <Button
+                      variant="text"
+                      color="blue-gray"
+                      className="hidden items-center gap-1 px-4 xl:flex normal-case"
+                    >
+                      <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
+                      Sign In
+                    </Button>
+                    <IconButton
+                      variant="text"
+                      color="blue-gray"
+                      className="grid xl:hidden"
+                    >
+                      <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
+                    </IconButton>
+                  </Link>
+                  :
+                  <Link to="/">
+                  <Button
+                    onClick={(e) => { doSignOut(e) }}
+                    variant="text"
+                    color="blue-gray"
+                    className="hidden items-center gap-1 px-4 xl:flex normal-case"
+                  >
+                    <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
+                    Sign Out
+                  </Button>
+                  <IconButton
+                    variant="text"
+                    color="blue-gray"
+                    className="grid xl:hidden"
+                  >
+                    <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
+                  </IconButton>
+                </Link>
+                }
           <Menu>
             <MenuHandler>
               <IconButton variant="text" color="blue-gray">

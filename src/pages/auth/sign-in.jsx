@@ -5,20 +5,45 @@ import {
   Button,
   Typography,
 } from "@material-tailwind/react";
-import { Link } from "react-router-dom";
+import { Navigate, Link } from "react-router-dom";
+import { doSignInWithEmailAndPassword, doSignInWithGoogle } from '../../firebase/auth'
+import { useAuth } from '../../context/authContext/index'
+import React, { useState } from 'react'
 
-function handleLogin() {
+export function SignIn() {
   const { userLoggedIn } = useAuth()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isSigningIn, setIsSigningIn] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
-}
 
-export function SignIn() {
+  const onSubmit = async (e) => {
+      // e.preventDefault()
+      if(!isSigningIn) {
+          setIsSigningIn(true)
+          await doSignInWithEmailAndPassword(email, password)
+          // doSendEmailVerification()
+      }
+  }
+
+  const onGoogleSignIn = (e) => {
+      e.preventDefault()
+      if (!isSigningIn) {
+          setIsSigningIn(true)
+          doSignInWithGoogle().catch(err => {
+              setIsSigningIn(false)
+          })
+      }
+  }
+
+  const onSignInWithEmailAndPassword =()=>{
+    signInWithEmailAndPassword(auth ,email, password ).then(value => alert('success')).catch((err)=> console.log(err))
+  }
+
   return (
     <section className="m-8 flex gap-4">
+      {userLoggedIn && (<Navigate to={'/dashboard/home'} replace={true} />)}
       <div className="w-full lg:w-3/5 mt-24">
         <div className="text-center">
           <Typography variant="h2" className="font-bold mb-4">Sign In</Typography>
@@ -36,6 +61,8 @@ export function SignIn() {
               labelProps={{
                 className: "before:content-none after:content-none",
               }}
+              value={email}
+              onChange={e =>setEmail(e.target.value)}
             />
             <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
               Password
@@ -48,6 +75,8 @@ export function SignIn() {
               labelProps={{
                 className: "before:content-none after:content-none",
               }}
+              value={password}
+              onChange={e =>setPassword(e.target.value)}
             />
           </div>
           <Checkbox
@@ -57,7 +86,7 @@ export function SignIn() {
                 color="gray"
                 className="flex items-center justify-start font-medium"
               >
-                I agree the&nbsp;
+                I agree to the&nbsp;
                 <a
                   href="#"
                   className="font-normal text-black transition-colors hover:text-gray-900 underline"
@@ -68,7 +97,9 @@ export function SignIn() {
             }
             containerProps={{ className: "-ml-2.5" }}
           />
-          <Button className="mt-6" fullWidth>
+          <Button
+          disabled={isSigningIn}
+          onClick={(e) => { onSubmit() }} className="mt-6" fullWidth>
             Sign In
           </Button>
 
@@ -92,7 +123,9 @@ export function SignIn() {
             </Typography>
           </div>
           <div className="space-y-4 mt-8">
-            <Button size="lg" color="white" className="flex items-center gap-2 justify-center shadow-md" fullWidth>
+            <Button size="lg" color="white" className="flex items-center gap-2 justify-center shadow-md" fullWidth
+              disabled={isSigningIn}
+              onClick={(e) => { onGoogleSignIn(e) }}>
               <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <g clipPath="url(#clip0_1156_824)">
                   <path d="M16.3442 8.18429C16.3442 7.64047 16.3001 7.09371 16.206 6.55872H8.66016V9.63937H12.9813C12.802 10.6329 12.2258 11.5119 11.3822 12.0704V14.0693H13.9602C15.4741 12.6759 16.3442 10.6182 16.3442 8.18429Z" fill="#4285F4" />
@@ -106,7 +139,7 @@ export function SignIn() {
                   </clipPath>
                 </defs>
               </svg>
-              <span>Sign in With Google</span>
+              {isSigningIn ? <span>Signing In</span> : <span>Sign in With Google</span>}
             </Button>
             <Button size="lg" color="white" className="flex items-center gap-2 justify-center shadow-md" fullWidth>
               <img src="/img/twitter-logo.svg" height={24} width={24} alt="" />
