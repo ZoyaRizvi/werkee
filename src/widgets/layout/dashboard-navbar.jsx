@@ -1,7 +1,7 @@
 import { doSignInWithEmailAndPassword, doSignInWithGoogle, doSignOut } from '../../firebase/auth';
 import { useAuth } from '../../context/authContext/index';
 
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
 import {
   Navbar,
   Typography,
@@ -35,6 +35,12 @@ export function DashboardNavbar() {
   const { fixedNavbar, openSidenav } = controller;
   const { pathname } = useLocation();
   const [layout, page] = pathname.split("/").filter((el) => el !== "");
+  // const navigate = useNavigate()
+
+  const signOut = async (e) => {
+    e.preventDefault()
+    doSignOut(e)
+  }
 
   return (
     <Navbar
@@ -89,49 +95,64 @@ export function DashboardNavbar() {
           </IconButton>
 
           {!userLoggedIn ? (
-            <Link to="/auth/sign-in">
+            <>
+              <Link to="/auth/sign-in">
+                <Button
+                  variant="text"
+                  color="blue-gray"
+                  className="hidden items-center gap-1 px-4 xl:flex normal-case"
+                >
+                  <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
+                  Sign In
+                </Button>
+                <IconButton
+                  variant="text"
+                  color="blue-gray"
+                  className="grid xl:hidden"
+                >
+                  <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
+                </IconButton>
+              </Link>
+            </>
+          ) : (
+            <>
+            <Typography
+            style={{ 'fontSize': '13px', 'paddingTop': '4px' }}
+            variant="small"
+            color="blue-gray"
+            className="mb-1 font-normal"
+            >
+              {localStorage.getItem('user') && JSON.parse(localStorage.getItem('user')).displayName}
+            </Typography>
+
+            {/* <span> */}
+            <Link to="/">
+              {/* <Button onClick={console.log("hello")}>
+                Test
+              </Button> */}
               <Button
+                onClick={(e) => { signOut(e).then(
+                      // navigate("/auth/sign-in")
+    localStorage.removeItem("user"),
+    window.location.href="/auth/sign-in"
+                ) }}
                 variant="text"
                 color="blue-gray"
-                className="hidden items-center gap-1 px-4 xl:flex normal-case"
-              >
+                className="hidden items-center gap-1 px-4 xl:flex normal-case">
                 <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-                Sign In
+                  Sign Out
               </Button>
               <IconButton
                 variant="text"
                 color="blue-gray"
-                className="grid xl:hidden"
-              >
+                className="grid xl:hidden">
                 <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
               </IconButton>
             </Link>
-          ) : (
-            <div>
-              {localStorage.getItem('user') && JSON.parse(localStorage.getItem('user')).displayName}
-              <span>
-                <Link to="/">
-                  <Button
-                    onClick={(e) => { doSignOut(e) }}
-                    variant="text"
-                    color="blue-gray"
-                    className="hidden items-center gap-1 px-4 xl:flex normal-case"
-                  >
-                    <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-                    Sign Out
-                  </Button>
-                  <IconButton
-                    variant="text"
-                    color="blue-gray"
-                    className="grid xl:hidden"
-                  >
-                    <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-                  </IconButton>
-                </Link>
-              </span>
-            </div>
-          )}
-
+              {/* </span> */}
+            </>
+                )
+                }
           <Menu>
             <MenuHandler>
               <IconButton variant="text" color="blue-gray">

@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { Cog6ToothIcon } from "@heroicons/react/24/solid";
 import { IconButton } from "@material-tailwind/react";
 import {
@@ -6,17 +6,23 @@ import {
   DashboardNavbar,
   Configurator,
 } from "@/widgets/layout";
-import routes from "@/routes";
+import sideNavRoutes from "../sideNavRoutes.jsx";
 import { useMaterialTailwindController, setOpenConfigurator } from "@/context";
+import { useAuth } from '../context/authContext/index'
 
 export function Dashboard() {
   const [controller, dispatch] = useMaterialTailwindController();
   const { sidenavType } = controller;
 
+  const { userLoggedIn } = useAuth()
+
   return (
+    <>
+    {!userLoggedIn ? (<Navigate to={'/auth/sign-in'} replace={true} />)
+    :
     <div className="min-h-screen bg-blue-gray-50/50">
       <Sidenav
-        routes={routes}
+        routes={sideNavRoutes}
         brandImg={
           sidenavType === "dark" ? "/img/logo-ct.png" : "/img/logo-ct-dark.png"
         }
@@ -34,7 +40,7 @@ export function Dashboard() {
           <Cog6ToothIcon className="h-5 w-5" />
         </IconButton>
         <Routes>
-          {routes.map(
+          {sideNavRoutes.map(
             ({ layout, pages }) =>
               layout === "dashboard" &&
               pages.map(({ path, element }) => (
@@ -46,6 +52,9 @@ export function Dashboard() {
         </div>
       </div>
     </div>
+    }
+   </>
+    
   );
 }
 

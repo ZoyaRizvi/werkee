@@ -5,13 +5,31 @@ import {
   Button,
   Typography,
 } from "@material-tailwind/react";
-import { Link } from "react-router-dom";
-
+import { Link, Navigate } from "react-router-dom";
+import React, { useState } from 'react'
+import { doCreateUserWithEmailAndPassword } from '../../firebase/auth'
+import { useAuth } from '../../context/authContext/index'
 
 export function SignUp() {
+  const { userLoggedIn } = useAuth()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [isRegistering, setIsRegistering] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+
+  const onSubmit = async (e) => {
+    // e.preventDefault()
+    if(!isRegistering) {
+        setIsRegistering(true)
+        await doCreateUserWithEmailAndPassword(email, password)
+    }
+  }
   return (
-    <section className="m-8 flex">
-            <div className="w-2/5 h-full hidden lg:block">
+    <>
+      {userLoggedIn ? (<Navigate to={'/dashboard/home'} replace={true} />)
+      :
+      <section className="m-8 flex">
+      <div className="w-2/5 h-full hidden lg:block">
         <img
           src="/img/pattern.png"
           className="h-full w-full object-cover rounded-3xl"
@@ -22,7 +40,7 @@ export function SignUp() {
           <Typography variant="h2" className="font-bold mb-4">Join Us Today</Typography>
           <Typography variant="paragraph" color="blue-gray" className="text-lg font-normal">Enter your email and password to register.</Typography>
         </div>
-        <form className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
+        <form onSubmit={onSubmit} className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
           <div className="mb-1 flex flex-col gap-6">
             <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
               Your email
@@ -34,6 +52,22 @@ export function SignUp() {
               labelProps={{
                 className: "before:content-none after:content-none",
               }}
+              value={email}
+              onChange={e =>setEmail(e.target.value)}
+            />
+            <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
+              Password
+            </Typography>
+            <Input
+              type="password"
+              size="lg"
+              placeholder="********"
+              className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
+              labelProps={{
+                className: "before:content-none after:content-none",
+              }}
+              value={password}
+              onChange={e =>setPassword(e.target.value)}
             />
           </div>
           <Checkbox
@@ -43,7 +77,7 @@ export function SignUp() {
                 color="gray"
                 className="flex items-center justify-start font-medium"
               >
-                I agree the&nbsp;
+                I agree to the&nbsp;
                 <a
                   href="#"
                   className="font-normal text-black transition-colors hover:text-gray-900 underline"
@@ -54,7 +88,10 @@ export function SignUp() {
             }
             containerProps={{ className: "-ml-2.5" }}
           />
-          <Button className="mt-6" fullWidth>
+          <Button
+          disabled={isRegistering}
+          onClick={(e) => { onSubmit() }}
+          className="mt-6" fullWidth>
             Register Now
           </Button>
 
@@ -84,6 +121,8 @@ export function SignUp() {
 
       </div>
     </section>
+      }
+    </>
   );
 }
 
