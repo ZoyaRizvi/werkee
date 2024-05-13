@@ -13,6 +13,7 @@ import { useAuth } from '../../context/authContext/index'
 export function SignUp() {
   const { userLoggedIn } = useAuth()
   const [email, setEmail] = useState('')
+  const [name, setName] = useState('')
   const [password, setPassword] = useState('')
   const [isRegistering, setIsRegistering] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
@@ -20,8 +21,21 @@ export function SignUp() {
   const onSubmit = async (e) => {
     // e.preventDefault()
     if(!isRegistering) {
-        setIsRegistering(true)
-        await doCreateUserWithEmailAndPassword(email, password)
+      setIsRegistering(true)
+        await doCreateUserWithEmailAndPassword(email, password, name)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          updateProfile(user, {
+            displayName: name,
+          });
+          console.log(userInfo); //just to see in the console what it saved
+        })
+        .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.log(errorCode);
+            console.log(errorMessage);
+        });
     }
   }
   return (
@@ -56,6 +70,19 @@ export function SignUp() {
               onChange={e =>setEmail(e.target.value)}
             />
             <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
+              Your Full Name
+            </Typography>
+            <Input
+              size="lg"
+              placeholder="Joshua Levitt"
+              className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
+              labelProps={{
+                className: "before:content-none after:content-none",
+              }}
+              value={name}
+              onChange={e =>setName(e.target.value)}
+            />
+            <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
               Password
             </Typography>
             <Input
@@ -70,6 +97,7 @@ export function SignUp() {
               onChange={e =>setPassword(e.target.value)}
             />
           </div>
+          {errorMessage ? <span className='text-red-600 font-bold'>{errorMessage}</span> : <></>}
           <Checkbox
             label={
               <Typography

@@ -1,6 +1,5 @@
 import { doSignInWithEmailAndPassword, doSignInWithGoogle, doSignOut } from '../../firebase/auth';
 import { useAuth } from '../../context/authContext/index';
-
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import {
   Navbar,
@@ -122,7 +121,8 @@ export function DashboardNavbar() {
             color="blue-gray"
             className="mb-1 font-normal"
             >
-              {localStorage.getItem('user') && JSON.parse(localStorage.getItem('user')).displayName}
+              { (JSON.parse(localStorage.getItem('user')).displayName != null) ?
+                JSON.parse(localStorage.getItem('user')).displayName : JSON.parse(localStorage.getItem('user')).email }
             </Typography>
 
             {/* <span> */}

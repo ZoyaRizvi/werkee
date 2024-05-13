@@ -7,10 +7,11 @@ import {
   updatePassword,
   signInWithPopup,
   GoogleAuthProvider,
+  updateProfile
 } from "firebase/auth";
 
 export const doCreateUserWithEmailAndPassword = async (email, password) => {
-  return createUserWithEmailAndPassword(auth, email, password);
+  return createUserWithEmailAndPassword(auth, email, password)
 };
 
 export const doSignInWithEmailAndPassword = (email, password) => {
@@ -26,7 +27,6 @@ export const doSignInWithGoogle = async () => {
 };
 
 export const doSignOut = () => {
-  console.log("signed-out")
   return auth.signOut();
 };
 

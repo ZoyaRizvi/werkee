@@ -20,9 +20,12 @@ import {
 } from "@heroicons/react/24/solid";
 import { Link } from "react-router-dom";
 import { ProfileInfoCard, MessageCard } from "@/widgets/cards";
-import { platformSettingsData, conversationsData, projectsData } from "@/data";
+import { platformSettingsData, conversationsData } from "@/data";
+import { useAuth } from '../../context/authContext/index';
 
 export function Profile() {
+  const { userLoggedIn } = useAuth();
+
   return (
     <>
       <div className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-[url('/img/background-image.png')] bg-cover	bg-center">
@@ -41,7 +44,9 @@ export function Profile() {
               />
               <div>
                 <Typography variant="h5" color="blue-gray" className="mb-1">
-                  Richard Davis
+                { (JSON.parse(localStorage.getItem('user')).displayName != null) ?
+                JSON.parse(localStorage.getItem('user')).displayName : JSON.parse(localStorage.getItem('user')).email }
+                  {/* localStorage.getItem("myCat") */}
                 </Typography>
                 <Typography
                   variant="small"
@@ -150,7 +155,7 @@ export function Profile() {
               Architects design houses
             </Typography>
             <div className="mt-6 grid grid-cols-1 gap-12 md:grid-cols-2 xl:grid-cols-4">
-              {projectsData.map(
+              {/* {projectsData.map(
                 ({ img, title, description, tag, route, members }) => (
                   <Card key={title} color="transparent" shadow={false}>
                     <CardHeader
@@ -209,7 +214,7 @@ export function Profile() {
                     </CardFooter>
                   </Card>
                 )
-              )}
+              )} */}
             </div>
           </div>
         </CardBody>
