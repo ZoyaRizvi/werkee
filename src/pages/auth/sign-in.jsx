@@ -104,18 +104,6 @@ export function SignIn() {
           </Button>
 
           <div className="flex items-center justify-between gap-2 mt-6">
-            <Checkbox
-              label={
-                <Typography
-                  variant="small"
-                  color="gray"
-                  className="flex items-center justify-start font-medium"
-                >
-                  Subscribe me to newsletter
-                </Typography>
-              }
-              containerProps={{ className: "-ml-2.5" }}
-            />
             <Typography variant="small" className="font-medium text-gray-900">
               <a href="#">
                 Forgot Password
@@ -140,10 +128,6 @@ export function SignIn() {
                 </defs>
               </svg>
               {isSigningIn ? <span>Signing In</span> : <span>Sign in With Google</span>}
-            </Button>
-            <Button size="lg" color="white" className="flex items-center gap-2 justify-center shadow-md" fullWidth>
-              <img src="/img/twitter-logo.svg" height={24} width={24} alt="" />
-              <span>Sign in With Twitter</span>
             </Button>
           </div>
           <Typography variant="paragraph" className="text-center text-blue-gray-500 font-medium mt-4">

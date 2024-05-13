@@ -16,7 +16,7 @@ export default function Nav() {
                 <li><a href="">Teanagers</a></li>
                 <li><a href="">Companies</a></li>
                 
-                <a href="/auth/sign-in">Login</a>
+                <a href="/auth/sign-in">Sign in</a>
                 <a href="/auth/sign-up">Sign Up</a>
                 {/* <button className="login">
                     <a href="/auth/sign-up" />Sign Up</button> */}
