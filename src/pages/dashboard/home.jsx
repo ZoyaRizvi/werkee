@@ -149,13 +149,6 @@ const prevPage = () =>{
               <Typography variant="h6" color="blue-gray" className="mb-1">
                 Projects
               </Typography>
-              <Typography
-                variant="small"
-                className="flex items-center gap-1 font-normal text-blue-gray-600"
-              >
-                <CheckCircleIcon strokeWidth={3} className="h-4 w-4 text-blue-gray-200" />
-                <strong>30 done</strong> this month
-              </Typography>
             </div>
             <Menu placement="left-start">
               <MenuHandler>
@@ -176,7 +169,7 @@ const prevPage = () =>{
           </CardHeader>
           <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
             {/* Add data here */}
-            <div className=" bg-[#] md:grid grid-cols-4 gap-8 lg:px-24 px-4 py-12">
+            <div className=" bg-[#] md:grid grid-cols-4 gap-8 lg:px-24 px-4">
               {/*  Left side */}
               {/* <div className=" bg-white rounded p-4"><Location handleChange = {handleChange} handleClick= {handleClick}/>
               <Jobpostingdate handleChange = {handleChange} handleClick= {handleClick}/>
