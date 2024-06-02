@@ -7,7 +7,7 @@ import {
 } from "@material-tailwind/react";
 import { Link, Navigate } from "react-router-dom";
 import React, { useState } from 'react'
-import { doCreateUserWithEmailAndPassword } from '../../firebase/auth'
+import { doCreateUserWithEmailAndPassword, doSignInWithGoogle } from '../../firebase/auth'
 import { useAuth } from '../../context/authContext/index'
 
 export function SignUp() {
