@@ -90,19 +90,20 @@ export function Chat() {
         <div className="border border-gray-200 rounded-lg h-full flex flex-col overflow-hidden">
           <div className="flex-1 overflow-y-auto p-4">
             {selectedChat ? (
-              messages.map((message, index) => (
-                <div key={index} className={`flex items-start mb-4 ${message.author === "You" ? "justify-end" : ""}`}>
-                  {message.author !== "You" && <Avatar src={selectedChat.img} alt={selectedChat.name} size="sm" variant="rounded" className="mr-2" />}
-                  <div className={`flex flex-col max-w-md p-2 rounded-lg ${message.author === "You" ? "bg-blue-500 text-white self-end" : "bg-gray-200"}`}>
-                    <Typography variant="small" className="font-semibold">
-                      {message.author}
-                    </Typography>
-                    <Typography>{message.text}</Typography>
-                    <Typography variant="small" className="text-gray-500">
-                      {message.timestamp}
-                    </Typography>
-                  </div>
-                </div>
+     messages.map((message, index) => (
+        <div key={index} className={`flex ${message.author === "You" ? "justify-end" : ""} mb-4`}>
+          <div className={`flex flex-col ${message.author === "You" ? "items-end" : "items-start"}`}>
+            <Typography variant="small" color="blue-gray" className="font-semibold">
+              {message.author}
+            </Typography>
+            <Typography className="bg-blue-100 p-2 rounded-md text-blue-gray-800">
+              {message.text}
+            </Typography>
+            <Typography variant="small" className="text-blue-gray-500">
+              {message.timestamp}
+            </Typography>
+          </div>
+        </div>
               ))
             ) : (
               <Typography className="text-center text-blue-gray-500">
