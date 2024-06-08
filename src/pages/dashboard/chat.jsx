@@ -1,66 +1,52 @@
-import { useState, useEffect } from "react";
-import {
-  getFirestore, onSnapshot, collection, addDoc, orderBy, query, serverTimestamp
-} from 'firebase/firestore';
-import { auth, chat } from "../../firebase/firebase";
-import { onAuthStateChanged } from 'firebase/auth';
-import { Avatar, Button, Input, Typography } from "@material-tailwind/react";
-import { PlusIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import { useEffect, useState } from "react";
 import { authorsTableData } from "@/data";
-
-const db = getFirestore(chat);
+import {
+  Avatar,
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  IconButton,
+  Input,
+  Typography,
+} from "@material-tailwind/react";
+import { PlusIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import { db } from "../../firebase/firebase";
+import { collection, addDoc, query, orderBy, onSnapshot } from "firebase/firestore";
 
 export function Chat() {
-  const [user, setUser] = useState(null);
   const [selectedChat, setSelectedChat] = useState(null);
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState({});
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    const q = query(collection(db, "messages"), orderBy("timestamp"));
-    const unsubscribe = onSnapshot(q, snapshot => {
-      setMessages(snapshot.docs.map(doc => ({
-        id: doc.id,
-        data: doc.data()
-      })));
-    });
-    return unsubscribe;
-  }, []);
-
-  useEffect(() => {
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        setUser(user);
-      } else {
-        setUser(null);
-      }
-    });
-  }, []);
-
-  const sendMessage = async () => {
-    if (newMessage.trim()) {
-      await addDoc(collection(db, "messages"), {
-        uid: user.uid,
-        photoURL: user.photoURL,
-        displayName: user.displayName,
-        text: newMessage,
-        timestamp: serverTimestamp()
+    if (selectedChat) {
+      const q = query(collection(db, `chats/${selectedChat.id}/messages`), orderBy("timestamp"));
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const chatMessages = querySnapshot.docs.map((doc) => doc.data());
+        setMessages((prevMessages) => ({
+          ...prevMessages,
+          [selectedChat.id]: chatMessages,
+        }));
       });
-      setNewMessage("");
+      return () => unsubscribe();
     }
-  };
+  }, [selectedChat]);
 
   const handleSelectChat = (chat) => {
     setSelectedChat(chat);
-    setMessages([
-      { author: chat.name, text: "Hello, how are you?", timestamp: "10:00 AM" },
-      { author: "You", text: "I'm good, thanks! How about you?", timestamp: "10:02 AM" },
-    ]);
   };
 
-  const handleSendMessage = () => {
-    sendMessage();
+  const handleSendMessage = async () => {
+    if (newMessage.trim()) {
+      await addDoc(collection(db, `chats/${selectedChat.id}/messages`), {
+        author: "You",
+        text: newMessage,
+        timestamp: new Date().toISOString(),
+      });
+      setNewMessage("");
+    }
   };
 
   const handleKeyPress = (event) => {
@@ -88,15 +74,14 @@ export function Chat() {
             onChange={handleSearch}
             placeholder="Search chats..."
             icon={<MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />}
-            inputClassName="placeholder-gray-400 italic"
             className="w-full"
           />
           <PlusIcon className="h-4 w-8" />
         </div>
         {filteredChats.map((chat) => (
           <div
-            key={chat.name}
-            className={`flex items-center gap-4 p-4 cursor-pointer hover:bg-gray-100 ${selectedChat === chat ? 'bg-gray-100' : ''}`}
+            key={chat.id}
+            className={`flex items-center gap-4 p-4 cursor-pointer hover:bg-gray-100 ${selectedChat && selectedChat.id === chat.id ? 'bg-gray-100' : ''}`}
             onClick={() => handleSelectChat(chat)}
           >
             <Avatar src={chat.img} alt={chat.name} size="sm" variant="rounded" />
@@ -115,19 +100,27 @@ export function Chat() {
       {/* Chat Window */}
       <div className="flex-1 p-4 bg-white">
         <div className="border border-gray-200 rounded-lg h-full flex flex-col overflow-hidden">
+          {selectedChat && (
+            <div className="border-b border-gray-200 p-4 flex items-center">
+              <Avatar src={selectedChat.img} alt={selectedChat.name} size="sm" variant="rounded" />
+              <Typography variant="h6" color="blue-gray" className="ml-4">
+                {selectedChat.name}
+              </Typography>
+            </div>
+          )}
           <div className="flex-1 overflow-y-auto p-4">
             {selectedChat ? (
-              messages.map((message, index) => (
-                <div key={index} className={`flex ${message.data.uid === user.uid ? "justify-end" : ""} mb-4`}>
-                  <div className={`flex flex-col ${message.data.uid === user.uid ? "items-end" : "items-start"}`}>
+              (messages[selectedChat.id] || []).map((message, index) => (
+                <div key={index} className={`flex ${message.author === "You" ? "justify-end" : ""} mb-4`}>
+                  <div className={`flex flex-col ${message.author === "You" ? "items-end" : "items-start"}`}>
                     <Typography variant="small" color="blue-gray" className="font-semibold">
-                      {message.data.displayName}
+                      {message.author}
                     </Typography>
-                    <Typography className={`p-2 rounded-md ${message.data.uid === user.uid ? "bg-blue-500 text-white" : "bg-gray-100 text-black"}`}>
-                      {message.data.text}
+                    <Typography className="bg-blue-100 p-2 rounded-md text-blue-gray-800">
+                      {message.text}
                     </Typography>
                     <Typography variant="small" className="text-blue-gray-500">
-                      {new Date(message.data.timestamp?.toDate()).toLocaleTimeString()}
+                      {message.timestamp}
                     </Typography>
                   </div>
                 </div>
@@ -162,7 +155,3 @@ export function Chat() {
 }
 
 export default Chat;
-
-
-  
-  
