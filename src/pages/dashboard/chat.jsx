@@ -1,22 +1,55 @@
-import { useState } from "react";
-import { authorsTableData } from "@/data";
+import { useState, useEffect } from "react";
 import {
-  Avatar,
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  IconButton,
-  Input,
-  Typography,
-} from "@material-tailwind/react";
+  getFirestore, onSnapshot, collection, addDoc, orderBy, query, serverTimestamp
+} from 'firebase/firestore';
+import { auth, chat } from "../../firebase/firebase";
+import { onAuthStateChanged } from 'firebase/auth';
+import { Avatar, Button, Input, Typography } from "@material-tailwind/react";
 import { PlusIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import { authorsTableData } from "@/data";
+
+const db = getFirestore(chat);
 
 export function Chat() {
+  const [user, setUser] = useState(null);
   const [selectedChat, setSelectedChat] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    const q = query(collection(db, "messages"), orderBy("timestamp"));
+    const unsubscribe = onSnapshot(q, snapshot => {
+      setMessages(snapshot.docs.map(doc => ({
+        id: doc.id,
+        data: doc.data()
+      })));
+    });
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        setUser(user);
+      } else {
+        setUser(null);
+      }
+    });
+  }, []);
+
+  const sendMessage = async () => {
+    if (newMessage.trim()) {
+      await addDoc(collection(db, "messages"), {
+        uid: user.uid,
+        photoURL: user.photoURL,
+        displayName: user.displayName,
+        text: newMessage,
+        timestamp: serverTimestamp()
+      });
+      setNewMessage("");
+    }
+  };
 
   const handleSelectChat = (chat) => {
     setSelectedChat(chat);
@@ -27,13 +60,7 @@ export function Chat() {
   };
 
   const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      setMessages([
-        ...messages,
-        { author: "You", text: newMessage, timestamp: new Date().toLocaleTimeString() },
-      ]);
-      setNewMessage("");
-    }
+    sendMessage();
   };
 
   const handleKeyPress = (event) => {
@@ -64,9 +91,9 @@ export function Chat() {
             inputClassName="placeholder-gray-400 italic"
             className="w-full"
           />
-            <PlusIcon className="h-4 w-8" />
+          <PlusIcon className="h-4 w-8" />
         </div>
-        {filteredChats.map((chat, key) => (
+        {filteredChats.map((chat) => (
           <div
             key={chat.name}
             className={`flex items-center gap-4 p-4 cursor-pointer hover:bg-gray-100 ${selectedChat === chat ? 'bg-gray-100' : ''}`}
@@ -90,20 +117,20 @@ export function Chat() {
         <div className="border border-gray-200 rounded-lg h-full flex flex-col overflow-hidden">
           <div className="flex-1 overflow-y-auto p-4">
             {selectedChat ? (
-     messages.map((message, index) => (
-        <div key={index} className={`flex ${message.author === "You" ? "justify-end" : ""} mb-4`}>
-          <div className={`flex flex-col ${message.author === "You" ? "items-end" : "items-start"}`}>
-            <Typography variant="small" color="blue-gray" className="font-semibold">
-              {message.author}
-            </Typography>
-            <Typography className="bg-blue-100 p-2 rounded-md text-blue-gray-800">
-              {message.text}
-            </Typography>
-            <Typography variant="small" className="text-blue-gray-500">
-              {message.timestamp}
-            </Typography>
-          </div>
-        </div>
+              messages.map((message, index) => (
+                <div key={index} className={`flex ${message.data.uid === user.uid ? "justify-end" : ""} mb-4`}>
+                  <div className={`flex flex-col ${message.data.uid === user.uid ? "items-end" : "items-start"}`}>
+                    <Typography variant="small" color="blue-gray" className="font-semibold">
+                      {message.data.displayName}
+                    </Typography>
+                    <Typography className={`p-2 rounded-md ${message.data.uid === user.uid ? "bg-blue-500 text-white" : "bg-gray-100 text-black"}`}>
+                      {message.data.text}
+                    </Typography>
+                    <Typography variant="small" className="text-blue-gray-500">
+                      {new Date(message.data.timestamp?.toDate()).toLocaleTimeString()}
+                    </Typography>
+                  </div>
+                </div>
               ))
             ) : (
               <Typography className="text-center text-blue-gray-500">
@@ -134,6 +161,8 @@ export function Chat() {
   );
 }
 
-  export default Chat;
+export default Chat;
+
+
   
   
