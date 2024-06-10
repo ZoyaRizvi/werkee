@@ -9,10 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@heroicons/react": "2.0.18",
+    "@heroicons/react": "^2.0.18",
     "@material-tailwind/react": "^2.1.9",
     "apexcharts": "3.44.0",
-    "firebase": "^10.11.1",
+    "firebase": "^10.12.2",
     "firebase-admin": "^12.1.0",
     "firebase-functions": "^5.0.1",
     "prop-types": "15.8.1",

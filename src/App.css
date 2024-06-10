@@ -4,7 +4,14 @@
   padding: 2rem;
   text-align: center;
 }
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
 
+.dropdown-menu {
+  right: 0px;
+  top: 65px;
+}
 .logo {
   height: 6em;
   padding: 1.5em;

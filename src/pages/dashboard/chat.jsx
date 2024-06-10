@@ -1,49 +1,60 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { authorsTableData } from "@/data";
 import {
   Avatar,
   Button,
-  Card,
-  CardBody,
-  CardHeader,
-  IconButton,
   Input,
   Typography,
 } from "@material-tailwind/react";
 import { PlusIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import { db } from "../../firebase/firebase";
-import { collection, addDoc, query, orderBy, onSnapshot } from "firebase/firestore";
+import { collection, addDoc, query, orderBy, onSnapshot, Timestamp } from "firebase/firestore";
 
 export function Chat() {
-  const [selectedChat, setSelectedChat] = useState(null);
-  const [messages, setMessages] = useState({});
+  const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
-    if (selectedChat) {
-      const q = query(collection(db, `chats/${selectedChat.id}/messages`), orderBy("timestamp"));
-      const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        const chatMessages = querySnapshot.docs.map((doc) => doc.data());
-        setMessages((prevMessages) => ({
-          ...prevMessages,
-          [selectedChat.id]: chatMessages,
-        }));
-      });
-      return () => unsubscribe();
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user) {
+      setUserEmail(user.email);
     }
-  }, [selectedChat]);
+  }, []);
 
-  const handleSelectChat = (chat) => {
+  useEffect(() => {
+    if (!userEmail) return;
+
+    let chat = authorsTableData.find(e => e.email === userEmail);
+    if (chat && chat.email === 'admin@test.com') {
+      chat = authorsTableData.find(e => e.email === "beta-tester@test.com");
+    } else if (!chat) {
+      chat = authorsTableData.find(e => e.email === "admin@test.com");
+    }
     setSelectedChat(chat);
-  };
+  }, [userEmail]);
+
+  useEffect(() => {
+    if (!selectedChat) return;
+
+    const q = query(collection(db, "messages"), orderBy("timestamp"));
+    const unsubscribe = onSnapshot(q, snapshot => {
+      setMessages(snapshot.docs.map(doc => ({
+        id: doc.id,
+        data: doc.data()
+      })));
+    });
+    return () => unsubscribe();
+  }, [selectedChat]);
 
   const handleSendMessage = async () => {
     if (newMessage.trim()) {
-      await addDoc(collection(db, `chats/${selectedChat.id}/messages`), {
-        author: "You",
+      await addDoc(collection(db, 'messages'), {
+        userID: userEmail,
         text: newMessage,
-        timestamp: new Date().toISOString(),
+        timestamp: Timestamp.now(),
       });
       setNewMessage("");
     }
@@ -82,11 +93,11 @@ export function Chat() {
           <div
             key={chat.id}
             className={`flex items-center gap-4 p-4 cursor-pointer hover:bg-gray-100 ${selectedChat && selectedChat.id === chat.id ? 'bg-gray-100' : ''}`}
-            onClick={() => handleSelectChat(chat)}
+            onClick={() => setSelectedChat(chat)}
           >
             <Avatar src={chat.img} alt={chat.name} size="sm" variant="rounded" />
             <div>
-              <Typography variant="small" color="blue-gray" className="font-semibold">
+              <Typography variant="small" color="blue-gray" className={(selectedChat && selectedChat.name === chat.name) ? 'font-semibold' : 'body1'}>
                 {chat.name}
               </Typography>
               <Typography className="text-xs font-normal text-blue-gray-500">
@@ -109,27 +120,21 @@ export function Chat() {
             </div>
           )}
           <div className="flex-1 overflow-y-auto p-4">
-            {selectedChat ? (
-              (messages[selectedChat.id] || []).map((message, index) => (
-                <div key={index} className={`flex ${message.author === "You" ? "justify-end" : ""} mb-4`}>
-                  <div className={`flex flex-col ${message.author === "You" ? "items-end" : "items-start"}`}>
-                    <Typography variant="small" color="blue-gray" className="font-semibold">
-                      {message.author}
-                    </Typography>
-                    <Typography className="bg-blue-100 p-2 rounded-md text-blue-gray-800">
-                      {message.text}
-                    </Typography>
-                    <Typography variant="small" className="text-blue-gray-500">
-                      {message.timestamp}
-                    </Typography>
-                  </div>
+            {messages.map((message) => (
+              <div key={message.id} className={`flex ${message.data.userID === userEmail ? "justify-end" : ""} mb-4`}>
+                <div className={`flex flex-col ${message.data.userID === userEmail ? "items-end" : "items-start"}`}>
+                  <Typography variant="small" color="blue-gray" className='font-semibold'>
+                    {message.data.userID}
+                  </Typography>
+                  <Typography className="bg-blue-100 p-2 rounded-md text-blue-gray-800">
+                    {message.data.text}
+                  </Typography>
+                  <Typography variant="small" className="text-blue-gray-500">
+                    {message.data.timestamp.toDate().toUTCString()}
+                  </Typography>
                 </div>
-              ))
-            ) : (
-              <Typography className="text-center text-blue-gray-500">
-                Select a chat to start messaging
-              </Typography>
-            )}
+              </div>
+            ))}
           </div>
           {selectedChat && (
             <div className="border-t border-gray-200 p-4">
