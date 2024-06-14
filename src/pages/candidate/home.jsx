@@ -147,7 +147,7 @@ const prevPage = () =>{
           >
             <div>
               <Typography variant="h6" color="blue-gray" className="mb-1">
-                Projects
+                Projects: Viewing as Candidate
               </Typography>
             </div>
             <Menu placement="left-start">

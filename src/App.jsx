@@ -19,6 +19,10 @@ function App() {
       path: '/dashboard/*',
       element: <Dashboard />,
     },
+    // {
+    //   path: '/candidate/*',
+    //   element: <CandidateDashboard />,
+    // },
     {
       path: '/candidate/*',
       element: <Dashboard />,

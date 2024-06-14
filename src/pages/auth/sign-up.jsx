@@ -3,6 +3,7 @@ import {
   Input,
   Button,
   Typography,
+  Radio,
 } from "@material-tailwind/react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import React, { useState } from 'react';
@@ -12,7 +13,7 @@ import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { getAuth, updateProfile } from "firebase/auth";
 
 const db = getFirestore();
-const auth = getAuth();
+// const auth = getAuth();
 
 export function SignUp() {
   const { userLoggedIn } = useAuth();
@@ -21,6 +22,12 @@ export function SignUp() {
   const [password, setPassword] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  // Needs to pull from user object
+  const [role, setRole] = useState('candidate');
+
+  const [candidateDetails, setCandidateDetails] = useState({ skillset: '', experience: '' });
+  const [recruiterDetails, setRecruiterDetails] = useState({ company: '', position: '' });
   const navigate = useNavigate();
 
   const onSubmit = async (e) => {
@@ -37,10 +44,18 @@ export function SignUp() {
           uid: user.uid,
           email: user.email,
           displayName: name,
+          role: role,
           createdAt: new Date()
         });
 
-        navigate('/auth/signupform'); // Redirect to form page after successful sign-up
+        if ( role == 'candidate') {
+          navigate('/candidate/home');
+          // return <Navigate to={'/candidate/home'} replace={true} />
+        } else if ( role == 'recruiter') {
+          navigate('/dashboard/home');
+          // return <Navigate to={'/dashboard/home'} replace={true} />
+        }
+        // navigate('/auth/signupform'); // Redirect to form page after successful sign-up
       } catch (error) {
         const errorMessage = error.message;
         console.log(errorMessage);
@@ -159,6 +174,70 @@ export function SignUp() {
               </Typography>
             </form>
           </div>
+          <Card className="m-8 p-8 max-w-md mx-auto">
+            <Typography variant="h4" className="mb-4">Join as {role === 'candidate' ? 'Candidate' : 'Recruiter'}</Typography>
+            {/* Merge this form with above form */}
+            <form>
+              <div className="mb-4">
+                <Radio
+                  id="candidate"
+                  name="role"
+                  label="Join as Candidate"
+                  checked={role === 'candidate'}
+                  onChange={() => setRole('candidate')}
+                />
+                <Radio
+                  id="recruiter"
+                  name="role"
+                  label="Join as Recruiter"
+                  checked={role === 'recruiter'}
+                  onChange={() => setRole('recruiter')}
+                />
+              </div>
+              
+              {role === 'candidate' && (
+                <>
+                  <Input
+                    size="lg"
+                    label="Skillset"
+                    value={candidateDetails.skillset}
+                    onChange={e => setCandidateDetails({ ...candidateDetails, skillset: e.target.value })}
+                    className="mb-4"
+                  />
+                  <Input
+                    size="lg"
+                    label="Experience (Years)"
+                    value={candidateDetails.experience}
+                    onChange={e => setCandidateDetails({ ...candidateDetails, experience: e.target.value })}
+                    className="mb-4"
+                  />
+                </>
+              )}
+
+              {role === 'recruiter' && (
+                <>
+                  <Input
+                    size="lg"
+                    label="Company"
+                    value={recruiterDetails.company}
+                    onChange={e => setRecruiterDetails({ ...recruiterDetails, company: e.target.value })}
+                    className="mb-4"
+                  />
+                  <Input
+                    size="lg"
+                    label="Position"
+                    value={recruiterDetails.position}
+                    onChange={e => setRecruiterDetails({ ...recruiterDetails, position: e.target.value })}
+                    className="mb-4"
+                  />
+                </>
+              )}
+
+              {/* <Button type="submit" className="mt-6" fullWidth>
+                Submit
+              </Button> */}
+            </form>
+          </Card>
         </section>
       )}
     </>

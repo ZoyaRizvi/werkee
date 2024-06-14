@@ -44,6 +44,7 @@ export function Home() {
         .then((querySnapshot)=>{
             const newData = querySnapshot.docs
                 .map((doc) => ({...doc.data(), id:doc.id }))
+                // .forEach((doc) => {console.log(doc.data())})
             setJobs(newData)
             console.log(jobs, newData)
         }).catch(function(error) {
@@ -147,7 +148,7 @@ const prevPage = () =>{
           >
             <div>
               <Typography variant="h6" color="blue-gray" className="mb-1">
-                Projects
+                Projects: Viewing as Recruiter
               </Typography>
             </div>
             <Menu placement="left-start">

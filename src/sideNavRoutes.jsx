@@ -16,6 +16,7 @@ import {
   Chat as CandidateChat,
   Notifications as CandidateNotifications,
 } from '@/pages/candidate';
+
 import Posting from './pages/dashboard/posting';
 
 const icon = {
@@ -26,30 +27,30 @@ const sideNavRoutes = (userRole) => {
   if (userRole === 'candidate') {
     return [
       {
-        layout: 'candidate',
+        layout: 'dashboard',
         pages: [
           {
             icon: <HomeIcon {...icon} />,
             name: 'Home',
-            path: '/candidate/home',
+            path: '/home',
             element: <CandidateHome />,
           },
           {
             icon: <UserCircleIcon {...icon} />,
             name: 'Profile',
-            path: '/candidate/profile',
+            path: '/profile',
             element: <CandidateProfile />,
           },
           {
             icon: <ChatBubbleOvalLeftIcon {...icon} />,
             name: 'Chat',
-            path: '/candidate/chat',
+            path: '/chat',
             element: <CandidateChat />,
           },
           {
             icon: <InformationCircleIcon {...icon} />,
             name: 'Notifications',
-            path: '/candidate/notifications',
+            path: '/notifications',
             element: <CandidateNotifications />,
           },
         ],
@@ -63,31 +64,31 @@ const sideNavRoutes = (userRole) => {
           {
             icon: <HomeIcon {...icon} />,
             name: 'Dashboard',
-            path: '/dashboard/home',
+            path: '/home',
             element: <DashboardHome />,
           },
           {
             icon: <UserCircleIcon {...icon} />,
             name: 'Profile',
-            path: '/dashboard/profile',
+            path: '/profile',
             element: <DashboardProfile />,
           },
           {
             icon: <ChatBubbleOvalLeftIcon {...icon} />,
             name: 'Chat',
-            path: '/dashboard/chat',
+            path: '/chat',
             element: <DashboardChat />,
           },
           {
             icon: <InformationCircleIcon {...icon} />,
             name: 'Notifications',
-            path: '/dashboard/notifications',
+            path: '/notifications',
             element: <DashboardNotifications />,
           },
           {
             icon: <InformationCircleIcon {...icon} />,
             name: 'Posting',
-            path: '/dashboard/posting',
+            path: '/posting',
             element: <Posting />,
           },
         ],
