@@ -13,7 +13,6 @@ import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { getAuth, updateProfile } from "firebase/auth";
 
 const db = getFirestore();
-// const auth = getAuth();
 
 export function SignUp() {
   const { userLoggedIn } = useAuth();
@@ -22,16 +21,13 @@ export function SignUp() {
   const [password, setPassword] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-
-  // Needs to pull from user object
   const [role, setRole] = useState('candidate');
-
   const [candidateDetails, setCandidateDetails] = useState({ skillset: '', experience: '' });
   const [recruiterDetails, setRecruiterDetails] = useState({ company: '', position: '' });
   const navigate = useNavigate();
 
   const onSubmit = async (e) => {
-    e.preventDefault(); // Prevent form submission from reloading the page
+    e.preventDefault();
     if (!isRegistering) {
       setIsRegistering(true);
       try {
@@ -39,27 +35,22 @@ export function SignUp() {
         const user = userCredential.user;
         await updateProfile(user, { displayName: name });
 
-        // Save user details in Firestore
         await setDoc(doc(db, "users", user.uid), {
           uid: user.uid,
           email: user.email,
           displayName: name,
           role: role,
-          createdAt: new Date()
+          createdAt: new Date(),
+          ...role === 'candidate' ? candidateDetails : recruiterDetails
         });
 
-        if ( role == 'candidate') {
+        if (role === 'candidate') {
           navigate('/candidate/home');
-          // return <Navigate to={'/candidate/home'} replace={true} />
-        } else if ( role == 'recruiter') {
+        } else if (role === 'recruiter') {
           navigate('/dashboard/home');
-          // return <Navigate to={'/dashboard/home'} replace={true} />
         }
-        // navigate('/auth/signupform'); // Redirect to form page after successful sign-up
       } catch (error) {
-        const errorMessage = error.message;
-        console.log(errorMessage);
-        setErrorMessage(errorMessage); // Display error message to user
+        setErrorMessage(error.message);
       } finally {
         setIsRegistering(false);
       }
@@ -71,7 +62,7 @@ export function SignUp() {
     if (!isRegistering) {
       setIsRegistering(true);
       doSignInWithGoogle().then(() => {
-        navigate('/auth/signupform'); // Redirect to form page after successful sign-in with Google
+        navigate('/auth/signupform');
       }).catch(err => {
         setErrorMessage(`Auth Error: ${err.code}`);
         setIsRegistering(false);
@@ -86,9 +77,10 @@ export function SignUp() {
       ) : (
         <section className="m-8 flex">
           <div className="w-2/5 h-full hidden lg:block">
-            <img
+          <img
               src="/img/pattern.png"
               className="h-full w-full object-cover rounded-3xl"
+              alt="Pattern"
             />
           </div>
           <div className="w-full lg:w-3/5 flex flex-col items-center justify-center">
@@ -97,49 +89,105 @@ export function SignUp() {
               <Typography variant="paragraph" color="blue-gray" className="text-lg font-normal">Enter your email and password to register.</Typography>
             </div>
             <form onSubmit={onSubmit} className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
-              <div className="mb-1 flex flex-col gap-6">
-                <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
-                  Your email
-                </Typography>
+              <div className="mb-4">
+                <Typography variant="small" color="blue-gray" className="font-medium">Your Email</Typography>
                 <Input
                   size="lg"
                   placeholder="name@mail.com"
-                  className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
-                  labelProps={{
-                    className: "before:content-none after:content-none",
-                  }}
+                  className="border border-gray-300 rounded-md mt-2"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                 />
-                <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
-                  Your Full Name
-                </Typography>
+              </div>
+              <div className="mb-4">
+                <Typography variant="small" color="blue-gray" className="font-medium">Your Full Name</Typography>
                 <Input
                   size="lg"
                   placeholder="Joshua Levitt"
-                  className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
-                  labelProps={{
-                    className: "before:content-none after:content-none",
-                  }}
+                  className="border border-gray-300 rounded-md mt-2"
                   value={name}
                   onChange={e => setName(e.target.value)}
                 />
-                <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
-                  Password
-                </Typography>
+              </div>
+              <div className="mb-4">
+                <Typography variant="small" color="blue-gray" className="font-medium">Password</Typography>
                 <Input
                   type="password"
                   size="lg"
                   placeholder="********"
-                  className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
-                  labelProps={{
-                    className: "before:content-none after:content-none",
-                  }}
+                  className="border border-gray-300 rounded-md mt-2"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                 />
               </div>
-              {errorMessage ? <span className='text-red-600 font-bold'>{errorMessage}</span> : null}
+              <Card className="mb-4 p-4 bg-gray-50 rounded-lg shadow-sm">
+                <Typography variant="h5" className="mb-4 text-center">Join as {role === 'candidate' ? 'Candidate' : 'Recruiter'}</Typography>
+                <div className="mb-4 flex justify-around">
+                  <Radio
+                    id="candidate"
+                    name="role"
+                    label="Candidate"
+                    checked={role === 'candidate'}
+                    onChange={() => setRole('candidate')}
+                  />
+                  <Radio
+                    id="recruiter"
+                    name="role"
+                    label="Recruiter"
+                    checked={role === 'recruiter'}
+                    onChange={() => setRole('recruiter')}
+                  />
+                </div>
+                {role === 'candidate' && (
+                  <>
+                    <div className="mb-4">
+                      <Typography variant="small" color="blue-gray" className="font-medium">Skillset</Typography>
+                      <Input
+                        size="lg"
+                        placeholder="Skillset"
+                        value={candidateDetails.skillset}
+                        onChange={e => setCandidateDetails({ ...candidateDetails, skillset: e.target.value })}
+                        className="border border-gray-300 rounded-md mt-2"
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <Typography variant="small" color="blue-gray" className="font-medium">Experience (Years)</Typography>
+                      <Input
+                        size="lg"
+                        placeholder="Experience (Years)"
+                        value={candidateDetails.experience}
+                        onChange={e => setCandidateDetails({ ...candidateDetails, experience: e.target.value })}
+                        className="border border-gray-300 rounded-md mt-2"
+                      />
+                    </div>
+                  </>
+                )}
+                {role === 'recruiter' && (
+                  <>
+                    <div className="mb-4">
+                      <Typography variant="small" color="blue-gray" className="font-medium">Company</Typography>
+                      <Input
+                        size="lg"
+                        placeholder="Company"
+                        value={recruiterDetails.company}
+                        onChange={e => setRecruiterDetails({ ...recruiterDetails, company: e.target.value })}
+                        className="border border-gray-300 rounded-md mt-2"
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <Typography variant="small" color="blue-gray" className="font-medium">Position</Typography>
+                      <Input
+                        size="lg"
+                        placeholder="Position"
+                        value={recruiterDetails.position}
+                        onChange={e => setRecruiterDetails({ ...recruiterDetails, position: e.target.value })}
+                        className="border border-gray-300 rounded-md mt-2"
+                      />
+                    </div>
+                  </>
+                )}
+              </Card>
+              {errorMessage && <div className='text-red-600 font-bold text-center mb-4'>{errorMessage}</div>}
               <Button
                 disabled={isRegistering}
                 type="submit"
@@ -147,9 +195,8 @@ export function SignUp() {
                 fullWidth>
                 Register Now
               </Button>
-
               <div className="space-y-4 mt-8">
-                <Button size="lg" color="white" className="flex items-center gap-2 justify-center shadow-md" fullWidth
+                <Button size="lg" color="white" className="flex items-center gap-2 justify-center shadow-md border border-gray-300 rounded-full" fullWidth
                   disabled={isRegistering}
                   onClick={onGoogleSignIn}>
                   <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -170,74 +217,10 @@ export function SignUp() {
               </div>
               <Typography variant="paragraph" className="text-center text-blue-gray-500 font-medium mt-4">
                 Already have an account?
-                <Link to="/auth/sign-in" className="text-gray-900 ml-1">Sign in</Link>
+                <Link to="/auth/sign-in" className="text-blue-600 hover:text-blue-800 ml-1">Sign in</Link>
               </Typography>
             </form>
           </div>
-          <Card className="m-8 p-8 max-w-md mx-auto">
-            <Typography variant="h4" className="mb-4">Join as {role === 'candidate' ? 'Candidate' : 'Recruiter'}</Typography>
-            {/* Merge this form with above form */}
-            <form>
-              <div className="mb-4">
-                <Radio
-                  id="candidate"
-                  name="role"
-                  label="Join as Candidate"
-                  checked={role === 'candidate'}
-                  onChange={() => setRole('candidate')}
-                />
-                <Radio
-                  id="recruiter"
-                  name="role"
-                  label="Join as Recruiter"
-                  checked={role === 'recruiter'}
-                  onChange={() => setRole('recruiter')}
-                />
-              </div>
-              
-              {role === 'candidate' && (
-                <>
-                  <Input
-                    size="lg"
-                    label="Skillset"
-                    value={candidateDetails.skillset}
-                    onChange={e => setCandidateDetails({ ...candidateDetails, skillset: e.target.value })}
-                    className="mb-4"
-                  />
-                  <Input
-                    size="lg"
-                    label="Experience (Years)"
-                    value={candidateDetails.experience}
-                    onChange={e => setCandidateDetails({ ...candidateDetails, experience: e.target.value })}
-                    className="mb-4"
-                  />
-                </>
-              )}
-
-              {role === 'recruiter' && (
-                <>
-                  <Input
-                    size="lg"
-                    label="Company"
-                    value={recruiterDetails.company}
-                    onChange={e => setRecruiterDetails({ ...recruiterDetails, company: e.target.value })}
-                    className="mb-4"
-                  />
-                  <Input
-                    size="lg"
-                    label="Position"
-                    value={recruiterDetails.position}
-                    onChange={e => setRecruiterDetails({ ...recruiterDetails, position: e.target.value })}
-                    className="mb-4"
-                  />
-                </>
-              )}
-
-              {/* <Button type="submit" className="mt-6" fullWidth>
-                Submit
-              </Button> */}
-            </form>
-          </Card>
         </section>
       )}
     </>
