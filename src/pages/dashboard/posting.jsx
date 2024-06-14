@@ -18,14 +18,14 @@ export function Posting() {
     try {
       const value = collection(db, "projects");
       await addDoc(value, {
-        jobTitle: jobTitle,
-        Requirements: Requirements,
-        experienceLevel: experienceLevel,
-        employmentType: employmentType,
-        jobLocation: jobLocation,
+        Title: jobTitle,
+        skils: Requirements,
+        experience: experienceLevel,
+        employment: employmentType,
+        Location: jobLocation,
         describe: description,
-        companyName: companyName,
-        companyLogo: companyLogo
+        Name: companyName,
+        Logo: companyLogo
       });
       // Reset form after successful submission
       setjobTitle('');

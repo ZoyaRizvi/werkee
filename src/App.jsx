@@ -1,25 +1,32 @@
-import { Routes, Route, Navigate, useRoutes } from "react-router-dom";
-import { Dashboard, Auth } from "@/layouts";
+import React from 'react';
+import { useRoutes } from 'react-router-dom';
 import Landing from './layouts/landing/Landing.jsx';
-import { AuthProvider } from "./context/authContext/index.jsx"
+import { AuthProvider } from './context/authContext/index.jsx';
+import Dashboard from './layouts/dashboard.jsx';
+import Auth from './layouts/auth.jsx';
 
 function App() {
-  //   {/* <Route path="*" element={<Navigate to="/dashboard" replace />} /> */}
   const routes = [
     {
-      path: "/",
+      path: '/',
       element: <Landing />,
     },
     {
-      path: "/auth/*",
+      path: '/auth/*',
       element: <Auth />,
     },
     {
-      path: "/dashboard/*",
+      path: '/dashboard/*',
       element: <Dashboard />,
     },
-  ]
-  let routesElement= useRoutes(routes)
+    {
+      path: '/candidate/*',
+      element: <Dashboard />,
+    },
+  ];
+
+  let routesElement = useRoutes(routes);
+
   return (
     <AuthProvider>
       {routesElement}
