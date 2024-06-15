@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import { doCreateUserWithEmailAndPassword, doSignInWithGoogle } from '../../firebase/auth';
 import { useAuth } from '../../context/authContext/index';
 import { getFirestore, doc, setDoc } from "firebase/firestore";
-import { getAuth, updateProfile } from "firebase/auth";
+import { updateProfile } from "firebase/auth";
 
 const db = getFirestore();
 
@@ -21,6 +21,7 @@ export function SignUp() {
   const [password, setPassword] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  
   const [role, setRole] = useState('candidate');
   const [candidateDetails, setCandidateDetails] = useState({ skillset: '', experience: '' });
   const [recruiterDetails, setRecruiterDetails] = useState({ company: '', position: '' });
@@ -43,12 +44,6 @@ export function SignUp() {
           createdAt: new Date(),
           ...role === 'candidate' ? candidateDetails : recruiterDetails
         });
-
-        if (role === 'candidate') {
-          navigate('/candidate/home');
-        } else if (role === 'recruiter') {
-          navigate('/dashboard/home');
-        }
       } catch (error) {
         setErrorMessage(error.message);
       } finally {
@@ -62,7 +57,6 @@ export function SignUp() {
     if (!isRegistering) {
       setIsRegistering(true);
       doSignInWithGoogle().then(() => {
-        navigate('/auth/signupform');
       }).catch(err => {
         setErrorMessage(`Auth Error: ${err.code}`);
         setIsRegistering(false);

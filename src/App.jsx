@@ -23,10 +23,10 @@ function App() {
     //   path: '/candidate/*',
     //   element: <CandidateDashboard />,
     // },
-    {
-      path: '/candidate/*',
-      element: <Dashboard />,
-    },
+    // {
+    //   path: '/candidate/*',
+    //   element: <Dashboard />,
+    // },
   ];
 
   let routesElement = useRoutes(routes);

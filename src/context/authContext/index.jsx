@@ -17,7 +17,7 @@ export function AuthProvider({ children }) {
   const [isEmailUser, setIsEmailUser] = useState(false);
   const [isGoogleUser, setIsGoogleUser] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [dbUser, setDbUser] = useState();
+  const [dbUser, setDbUser] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, initializeUser);
@@ -30,7 +30,7 @@ export function AuthProvider({ children }) {
     const querySnapshot = await getDocs(q);
 
     querySnapshot.forEach((doc) => {
-      setDbUser(JSON.stringify(doc.data()))
+      setDbUser(doc.data())
       localStorage.setItem("user", JSON.stringify(doc.data()))
     });
   }
