@@ -23,15 +23,15 @@ const Dashboard = () => {
   }
 
   useEffect(() => {
-    console.log(JSON.stringify(dbUser))
-    console.log(userLoggedIn)
+    // console.log(JSON.stringify(dbUser))
+    // console.log(userLoggedIn)
   }, [dbUser])
 
 
   return (
     <>
     { dbUser && userLoggedIn ? 
-    (    <div className="min-h-screen bg-blue-gray-50/50">
+    (    <div className="bg-blue-gray-50/50" style={{height: 'calc(100vh - 100px'}}>
         <Sidenav
           routes={sideNavRoutes(dbUser.role)} // Assuming routes[0].pages is correct based on sideNavRoutes structure
           brandImg={sidenavType === 'dark' ? '/img/logo.png' : '/img/logo-ct-dark.png'}
