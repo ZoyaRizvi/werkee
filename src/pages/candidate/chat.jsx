@@ -75,7 +75,7 @@ export function Chat() {
   );
 
   return (
-    <div className="flex h-screen">
+    <div className="flex" style={"height: calc(100vh - 100px"}>
       {/* Sidebar */}
       <div className="w-1/4 bg-white border-r border-gray-200 p-4 overflow-y-auto">
         <div className="flex items-center justify-between mb-4">

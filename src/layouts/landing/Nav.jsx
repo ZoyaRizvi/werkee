@@ -13,7 +13,7 @@ export default function Nav() {
             <ul className="nav-list">
                 <li><a href="">Home</a></li>
                 <li><a href="">About Us</a></li>
-                <li><a href="">Teanagers</a></li>
+                <li><a href="">Teenagers</a></li>
                 <li><a href="">Companies</a></li>
                 
                 <a href="/auth/sign-in">Login</a>

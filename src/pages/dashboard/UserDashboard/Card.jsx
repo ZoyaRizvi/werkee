@@ -8,7 +8,7 @@ const Card = ({data}) => {
 
   return (
     <section className='card' style={{'paddingTop': '20px'}}>
-        <Link to={"/"}c className=' flex gap-4 flex-col sm:flex-row items-start'>
+        <Link to={"/"} className=' flex gap-4 flex-col sm:flex-row items-start'>
             <img src={`${companyLogo}`} alt="" />
             <div>
                 <h3 className=' text-lg mb-2 font-semibold'>{jobTitle}</h3>

@@ -30,7 +30,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
         <Link to="/" className="py-6 px-8 text-center">
           <Typography
             variant="h6"
-            color={sidenavType === "dark" ? "white" : "blue-gray"}
+            color={sidenavTypes === "dark" ? "white" : "blue-gray"}
           >
             {brandName}
           </Typography>
@@ -53,7 +53,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
               <li className="mx-3.5 mt-4 mb-2">
                 <Typography
                   variant="small"
-                  color={sidenavType === "dark" ? "white" : "blue-gray"}
+                  color={sidenavTypes === "dark" ? "white" : "blue-gray"}
                   className="font-black uppercase opacity-75"
                 >
                   {title}
@@ -66,13 +66,13 @@ export function Sidenav({ brandImg, brandName, routes }) {
                   {({ isActive }) => (
                     <Button
                       variant={isActive ? "gradient" : "text"}
-                      color={
-                        isActive
-                          ? sidenavColor
-                          : sidenavType === "dark"
-                          ? "white"
-                          : "blue-gray"
-                      }
+                      // color={
+                      //   isActive
+                      //     ? sidenavColor
+                      //     : sidenavTypes === "dark"
+                      //     ? "white"
+                      //     : "blue-gray"
+                      // }
                       className="flex items-center gap-4 px-4 capitalize"
                       fullWidth
                     >

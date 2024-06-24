@@ -45,7 +45,7 @@ export function Home() {
             const newData = querySnapshot.docs
                 .map((doc) => ({...doc.data(), id:doc.id }))
             setJobs(newData)
-            console.log(jobs, newData)
+            // console.log(jobs, newData)
         }).catch(function(error) {
           console.log(error);
         });
@@ -61,11 +61,6 @@ export function Home() {
     }).catch(function(error) {
       console.log(error);
     });
-    // fetch("../src/data/projects-data.json").then(res => res.json()).then(data =>{
-    //   console.log(data)
-    //   setJobs(data);
-    //   setIsLoading(false)
-    // })
   },[])
 
   const [query, setQuery] = useState("");
