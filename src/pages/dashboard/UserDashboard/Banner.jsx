@@ -2,8 +2,8 @@ import React, { useState } from 'react'
 import {FiMapPin, FiSearch} from 'react-icons/fi'
 const Banner = ({query, handleInputChange}) => {
   return (
-    <div className="max-w-screen-2xl container mx-auto xl:px-24 px-4 bg-[#FFF2E1] md:py-20 py-14" style={{"marginTop": "24px"}}>
-      <h1 className="font-bold text-primary mb-3 text-5xl">Find your <span className="text-[#51834f]">new job</span> today</h1>
+    <div className="max-w-screen-2xl container mx-auto xl:px-24 px-4 bg-white md:py-20 py-14" style={{"marginTop": "24px"}}>
+      <h1 className="font-bold text-primary mb-3 text-5xl">Find your <span className="text-[teal]">new job</span> today</h1>
       <p className=" text-black/70 mb-8 text-lg">Thousands of jobs in Developemnt, Content writing and Designing sectors are waiting for you.</p>
       <form>
         <div className=" flex justify-start md:flex-row flex-col md:gap-0 gap-4">

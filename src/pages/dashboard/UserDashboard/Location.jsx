@@ -1,6 +1,6 @@
 import React from 'react'
 import Inputfield from './Inputfield'
-//import Inputfield from '../Component/Inputfield'
+// import Inputfield from '../Component/Inputfield'
 
 const Location = ({handleChange}) => {
   return (

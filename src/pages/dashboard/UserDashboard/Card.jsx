@@ -7,9 +7,10 @@ const Card = ({data}) => {
     postingDate,employmentType, experienceLevel, description} = data;
 
   return (
-    <section className='card' style={{'paddingTop': '20px'}}>
-        <Link to={"/"} className=' flex gap-4 flex-col sm:flex-row items-start'>
-            <img src={`${companyLogo}`} alt="" />
+
+    <section className='card'>
+        <Link to={"/"}c className=' flex gap-4 flex-col sm:flex-row items-start'>
+            <img src={companyLogo} alt="" />
             <div>
                 <h3 className=' text-lg mb-2 font-semibold'>{jobTitle}</h3>
                 <h4 className=' text-primary mb-1'>{companyName}</h4>
@@ -29,4 +30,3 @@ const Card = ({data}) => {
 }
 
 export default Card;
-

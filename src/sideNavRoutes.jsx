@@ -1,103 +1,57 @@
 import {
   HomeIcon,
   UserCircleIcon,
+  TableCellsIcon,
   ChatBubbleOvalLeftIcon,
   InformationCircleIcon,
-} from '@heroicons/react/24/solid';
-import {
-  Home as DashboardHome,
-  Profile as DashboardProfile,
-  Chat as DashboardChat,
-  Notifications as DashboardNotifications,
-} from '@/pages/dashboard';
-import {
-  Home as CandidateHome,
-  Profile as CandidateProfile,
-  Chat as CandidateChat,
-  Notifications as CandidateNotifications,
-} from '@/pages/candidate';
+  ServerStackIcon,
+  RectangleStackIcon,
+} from "@heroicons/react/24/solid";
+import { Home, Profile, Chat, Notifications} from "@/pages/dashboard/";
+import { SignIn, SignUp } from "@/pages/auth";
+import Posting from "./pages/dashboard/posting";
 
-import Posting from './pages/dashboard/posting';
 
 const icon = {
-  className: 'w-5 h-5 text-inherit',
+  className: "w-5 h-5 text-inherit",
 };
 
-const sideNavRoutes = (userRole) => {
-  if (userRole === 'candidate') {
-    return [
+export const sideNavRoutes = [
+  {
+    layout: "dashboard",
+    pages: [
       {
-        layout: 'dashboard',
-        pages: [
-          {
-            icon: <HomeIcon {...icon} />,
-            name: 'Home',
-            path: '/home',
-            element: <CandidateHome />,
-          },
-          {
-            icon: <UserCircleIcon {...icon} />,
-            name: 'Profile',
-            path: '/profile',
-            element: <CandidateProfile />,
-          },
-          {
-            icon: <ChatBubbleOvalLeftIcon {...icon} />,
-            name: 'Chat',
-            path: '/chat',
-            element: <CandidateChat />,
-          },
-          {
-            icon: <InformationCircleIcon {...icon} />,
-            name: 'Notifications',
-            path: '/notifications',
-            element: <CandidateNotifications />,
-          },
-        ],
+        icon: <HomeIcon {...icon} />,
+        name: "dashboard",
+        path: "/home",
+        element: <Home />,
       },
-    ];
-  } else if (userRole === 'recruiter') {
-    return [
       {
-        layout: 'dashboard',
-        pages: [
-          {
-            icon: <HomeIcon {...icon} />,
-            name: 'Dashboard',
-            path: '/home',
-            element: <DashboardHome />,
-          },
-          {
-            icon: <UserCircleIcon {...icon} />,
-            name: 'Profile',
-            path: '/profile',
-            element: <DashboardProfile />,
-          },
-          {
-            icon: <ChatBubbleOvalLeftIcon {...icon} />,
-            name: 'Chat',
-            path: '/chat',
-            element: <DashboardChat />,
-          },
-          {
-            icon: <InformationCircleIcon {...icon} />,
-            name: 'Notifications',
-            path: '/notifications',
-            element: <DashboardNotifications />,
-          },
-          {
-            icon: <InformationCircleIcon {...icon} />,
-            name: 'Posting',
-            path: '/posting',
-            element: <Posting />,
-          },
-        ],
+        icon: <UserCircleIcon {...icon} />,
+        name: "profile",
+        path: "/profile",
+        element: <Profile />,
       },
-    ];
-  } else {
-    // Default fallback if role is not recognized
-    return [];
+      {
+        icon: <ChatBubbleOvalLeftIcon {...icon} />,
+        name: "Chat",
+        path: "/chat",
+        element: <Chat />,
+      },
+      {
+        icon: <InformationCircleIcon {...icon} />,
+        name: "notifications",
+        path: "/notifications",
+        element: <Notifications />,
+      },
+      {
+        icon: <InformationCircleIcon {...icon} />,
+        name: "posting",
+        path: "/posting",
+        element: <Posting/>,
+      },
+    ],
   }
-};
+];
 
 export default sideNavRoutes;

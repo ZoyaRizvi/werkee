@@ -3,7 +3,7 @@ import { Jobs } from "./Jobs";
 import Card from "./Card";
 import Location from "./Location";
 import Jobpostingdate from "./Jobpostingdate";
-import Banner from "./Banner";
+// import Banner from "./Banner";
 
 const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);

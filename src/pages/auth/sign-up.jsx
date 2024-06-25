@@ -1,18 +1,19 @@
 import {
   Card,
   Input,
+  Checkbox,
   Button,
   Typography,
-  Radio,
 } from "@material-tailwind/react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import React, { useState } from 'react';
 import { doCreateUserWithEmailAndPassword, doSignInWithGoogle } from '../../firebase/auth';
 import { useAuth } from '../../context/authContext/index';
 import { getFirestore, doc, setDoc } from "firebase/firestore";
-import { updateProfile } from "firebase/auth";
+import { getAuth, updateProfile } from "firebase/auth";
 
 const db = getFirestore();
+const auth = getAuth();
 
 export function SignUp() {
   const { userLoggedIn } = useAuth();
@@ -21,14 +22,9 @@ export function SignUp() {
   const [password, setPassword] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  
-  const [role, setRole] = useState('candidate');
-  const [candidateDetails, setCandidateDetails] = useState({ skillset: '', experience: '' });
-  const [recruiterDetails, setRecruiterDetails] = useState({ company: '', position: '' });
-  const navigate = useNavigate();
 
   const onSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent form submission from reloading the page
     if (!isRegistering) {
       setIsRegistering(true);
       try {
@@ -36,16 +32,21 @@ export function SignUp() {
         const user = userCredential.user;
         await updateProfile(user, { displayName: name });
 
+        // Save user details in Firestore
         await setDoc(doc(db, "users", user.uid), {
           uid: user.uid,
           email: user.email,
           displayName: name,
-          role: role,
-          createdAt: new Date(),
-          ...role === 'candidate' ? candidateDetails : recruiterDetails
+          createdAt: new Date()
         });
+
+        console.log(user);
       } catch (error) {
-        setErrorMessage(error.message);
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log(errorCode);
+        console.log(errorMessage);
+        setErrorMessage(errorMessage); // Display error message to user
       } finally {
         setIsRegistering(false);
       }
@@ -56,8 +57,7 @@ export function SignUp() {
     e.preventDefault();
     if (!isRegistering) {
       setIsRegistering(true);
-      doSignInWithGoogle().then(() => {
-      }).catch(err => {
+      doSignInWithGoogle().catch(err => {
         setErrorMessage(`Auth Error: ${err.code}`);
         setIsRegistering(false);
       });
@@ -66,15 +66,13 @@ export function SignUp() {
 
   return (
     <>
-      {userLoggedIn ? (
-        <Navigate to={'/dashboard/home'} replace={true} />
-      ) : (
+      {userLoggedIn ? (<Navigate to={'/dashboard/home'} replace={true} />)
+        :
         <section className="m-8 flex">
           <div className="w-2/5 h-full hidden lg:block">
-          <img
+            <img
               src="/img/pattern.png"
               className="h-full w-full object-cover rounded-3xl"
-              alt="Pattern"
             />
           </div>
           <div className="w-full lg:w-3/5 flex flex-col items-center justify-center">
@@ -83,116 +81,60 @@ export function SignUp() {
               <Typography variant="paragraph" color="blue-gray" className="text-lg font-normal">Enter your email and password to register.</Typography>
             </div>
             <form onSubmit={onSubmit} className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
-              <div className="mb-4">
-                <Typography variant="small" color="blue-gray" className="font-medium">Your Email</Typography>
+              <div className="mb-1 flex flex-col gap-6">
+                <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
+                  Your email
+                </Typography>
                 <Input
                   size="lg"
                   placeholder="name@mail.com"
-                  className="border border-gray-300 rounded-md mt-2"
+                  className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
+                  labelProps={{
+                    className: "before:content-none after:content-none",
+                  }}
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                 />
-              </div>
-              <div className="mb-4">
-                <Typography variant="small" color="blue-gray" className="font-medium">Your Full Name</Typography>
+                <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
+                  Your Full Name
+                </Typography>
                 <Input
                   size="lg"
                   placeholder="Joshua Levitt"
-                  className="border border-gray-300 rounded-md mt-2"
+                  className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
+                  labelProps={{
+                    className: "before:content-none after:content-none",
+                  }}
                   value={name}
                   onChange={e => setName(e.target.value)}
                 />
-              </div>
-              <div className="mb-4">
-                <Typography variant="small" color="blue-gray" className="font-medium">Password</Typography>
+                <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
+                  Password
+                </Typography>
                 <Input
                   type="password"
                   size="lg"
                   placeholder="********"
-                  className="border border-gray-300 rounded-md mt-2"
+                  className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
+                  labelProps={{
+                    className: "before:content-none after:content-none",
+                  }}
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                 />
               </div>
-              <Card className="mb-4 p-4 bg-gray-50 rounded-lg shadow-sm">
-                <Typography variant="h5" className="mb-4 text-center">Join as {role === 'candidate' ? 'Candidate' : 'Recruiter'}</Typography>
-                <div className="mb-4 flex justify-around">
-                  <Radio
-                    id="candidate"
-                    name="role"
-                    label="Candidate"
-                    checked={role === 'candidate'}
-                    onChange={() => setRole('candidate')}
-                  />
-                  <Radio
-                    id="recruiter"
-                    name="role"
-                    label="Recruiter"
-                    checked={role === 'recruiter'}
-                    onChange={() => setRole('recruiter')}
-                  />
-                </div>
-                {role === 'candidate' && (
-                  <>
-                    <div className="mb-4">
-                      <Typography variant="small" color="blue-gray" className="font-medium">Skillset</Typography>
-                      <Input
-                        size="lg"
-                        placeholder="Skillset"
-                        value={candidateDetails.skillset}
-                        onChange={e => setCandidateDetails({ ...candidateDetails, skillset: e.target.value })}
-                        className="border border-gray-300 rounded-md mt-2"
-                      />
-                    </div>
-                    <div className="mb-4">
-                      <Typography variant="small" color="blue-gray" className="font-medium">Experience (Years)</Typography>
-                      <Input
-                        size="lg"
-                        placeholder="Experience (Years)"
-                        value={candidateDetails.experience}
-                        onChange={e => setCandidateDetails({ ...candidateDetails, experience: e.target.value })}
-                        className="border border-gray-300 rounded-md mt-2"
-                      />
-                    </div>
-                  </>
-                )}
-                {role === 'recruiter' && (
-                  <>
-                    <div className="mb-4">
-                      <Typography variant="small" color="blue-gray" className="font-medium">Company</Typography>
-                      <Input
-                        size="lg"
-                        placeholder="Company"
-                        value={recruiterDetails.company}
-                        onChange={e => setRecruiterDetails({ ...recruiterDetails, company: e.target.value })}
-                        className="border border-gray-300 rounded-md mt-2"
-                      />
-                    </div>
-                    <div className="mb-4">
-                      <Typography variant="small" color="blue-gray" className="font-medium">Position</Typography>
-                      <Input
-                        size="lg"
-                        placeholder="Position"
-                        value={recruiterDetails.position}
-                        onChange={e => setRecruiterDetails({ ...recruiterDetails, position: e.target.value })}
-                        className="border border-gray-300 rounded-md mt-2"
-                      />
-                    </div>
-                  </>
-                )}
-              </Card>
-              {errorMessage && <div className='text-red-600 font-bold text-center mb-4'>{errorMessage}</div>}
+              {errorMessage ? <span className='text-red-600 font-bold'>{errorMessage}</span> : <></>}
               <Button
                 disabled={isRegistering}
-                type="submit"
-                className="mt-6"
-                fullWidth>
+                type="submit" // Ensure the button is of type "submit"
+                className="mt-6" fullWidth>
                 Register Now
               </Button>
+
               <div className="space-y-4 mt-8">
-                <Button size="lg" color="white" className="flex items-center gap-2 justify-center shadow-md border border-gray-300 rounded-full" fullWidth
+                <Button size="lg" color="white" className="flex items-center gap-2 justify-center shadow-md" fullWidth
                   disabled={isRegistering}
-                  onClick={onGoogleSignIn}>
+                  onClick={(e) => { onGoogleSignIn(e) }}>
                   <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <g clipPath="url(#clip0_1156_824)">
                       <path d="M16.3442 8.18429C16.3442 7.64047 16.3001 7.09371 16.206 6.55872H8.66016V9.63937H12.9813C12.802 10.6329 12.2258 11.5119 11.3822 12.0704V14.0693H13.9602C15.4741 12.6759 16.3442 10.6182 16.3442 8.18429Z" fill="#4285F4" />
@@ -211,12 +153,12 @@ export function SignUp() {
               </div>
               <Typography variant="paragraph" className="text-center text-blue-gray-500 font-medium mt-4">
                 Already have an account?
-                <Link to="/auth/sign-in" className="text-blue-600 hover:text-blue-800 ml-1">Sign in</Link>
+                <Link to="/auth/sign-in" className="text-gray-900 ml-1">Sign in</Link>
               </Typography>
             </form>
           </div>
         </section>
-      )}
+      }
     </>
   );
 }
