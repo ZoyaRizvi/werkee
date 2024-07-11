@@ -19,16 +19,20 @@ export function SignIn() {
   const [errorMessage, setErrorMessage] = useState('')
 
   const onSubmit = async (e) => {
-      // e.preventDefault()
+      e.preventDefault()
       if(!isSigningIn) {
           setIsSigningIn(true)
-          await doSignInWithEmailAndPassword(email, password)
-          .catch((err)=> {
-            setErrorMessage(`Auth Error: ${err.code}`)
-            // console.log(err)
-            setIsSigningIn(false)
-          })
-          // doSendEmailVerification()
+          if (email === 'admin@werky.com' && password === 'admin123') {
+              // Navigate to admin page if credentials match
+              return window.location.href = "/admin/home"
+          } else {
+              await doSignInWithEmailAndPassword(email, password)
+              .catch((err)=> {
+                setErrorMessage(`Auth Error: ${err.code}`)
+                // console.log(err)
+                setIsSigningIn(false)
+              })
+          }
       }
   }
 
@@ -92,7 +96,7 @@ export function SignIn() {
             </Button>
             <Button
             disabled={isSigningIn}
-            onClick={(e) => { onSubmit() }}
+            onClick={(e) => { onSubmit(e) }}
             className="mt-4" fullWidth>
               Sign In
             </Button>
