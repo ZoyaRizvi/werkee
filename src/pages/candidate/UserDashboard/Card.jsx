@@ -2,18 +2,20 @@ import React from 'react'
 import { Link } from 'react-router-dom';
 import { FiCalendar, FiClock, FiDollarSign, FiMapPin } from 'react-icons/fi';
 
+// Todo - add recruiter field to Add Post page
 const Card = ({data}) => {
     const {companyName, jobTitle, companyLogo,  Requirements, minPrice, maxPrice, salaryType, jobLocation, 
-    postingDate,employmentType, experienceLevel, description} = data;
+    postingDate,employmentType, experienceLevel, description, recruiter} = data;
 
   return (
     <section className='card' style={{'paddingTop': '20px'}}>
-        <Link to={"/"}c className=' flex gap-4 flex-col sm:flex-row items-start'>
+        <div className=' flex gap-4 flex-col sm:flex-row items-start'>
             <img src={`${companyLogo}`} alt="" />
             <div>
                 <h3 className=' text-lg mb-2 font-semibold'>{jobTitle}</h3>
                 <h4 className=' text-primary mb-1'>{companyName}</h4>
-                 <h4 className=' text-base text-primary/70 pb-2'>{Requirements}</h4>
+                <h4 className=' text-base text-primary/70 pb-2'>{Requirements}</h4>
+                <h4 className=' text-base text-primary/70 pb-2'>Recruiter: {recruiter}</h4>
                 <div className=' text-primary/70 text-base flex flex-wrap gap-2 mb-2'>
                     <span className=' flex items-center gap-2'><FiMapPin/>{jobLocation}</span>
                     <span className=' flex items-center gap-2'><FiClock/>{employmentType}</span>
@@ -21,9 +23,10 @@ const Card = ({data}) => {
                     <span className=' flex items-center gap-2'><FiCalendar/>{postingDate}</span>
                 </div>
 
-                <p className=' text-base text-primary/70'>{description}</p>
+                <p className=' text-base text-primary/70 pt-3'>{description}</p>
+                <Link to={'/dashboard/chat?reference='+encodeURI(recruiter)+'&'+'job='+encodeURI(jobTitle)}><p className=' text-base text-primary/70 pt-3'>Message recruiter</p></Link>
             </div>
-        </Link>
+        </div>
     </section>
   )
 }
