@@ -5,8 +5,8 @@ export default function () {
     <div>
         <div className="sm:flex items-center sm:space-x-8 mt-36 max-w-screen-lg  container mx-auto flex justify-center items-center mt-24">
       <div data-aos="fade-right" className="sm:w-1/2 relative">
-        <div className="bg-yellow-500 rounded-full absolute w-12 h-12 z-0 -left-4 -top-3 animate-pulse"></div>
-        <h1 className="font-semibold text-2xl relative z-50 text-darken lg:pr-10">Discover Your Path with <span className="text-yellow-500">Personalized Career <br/> Counseling </span></h1>
+        <div className="bg-teal-500 rounded-full absolute w-12 h-12 z-0 -left-4 -top-3 animate-pulse"></div>
+        <h1 className="font-semibold text-2xl relative z-50 text-darken lg:pr-10">Discover Your Path with <span className="text-teal-500">Personalized Career <br/> Counseling </span></h1>
         <p className="py-5 lg:pr-32">
           Navigate your career journey with confidence using our AI-powered virtual assistant.
           Receive personalized guidance tailored to your skills, interests, and goals. Whether you're a student exploring career options or a professional seeking new opportunities,
@@ -22,7 +22,7 @@ export default function () {
             <path d="M22.5751 12.8097C23.2212 13.1983 23.2212 14.135 22.5751 14.5236L1.51538 27.1891C0.848878 27.5899 5.91205e-07 27.1099 6.25202e-07 26.3321L1.73245e-06 1.00123C1.76645e-06 0.223477 0.848877 -0.256572 1.51538 0.14427L22.5751 12.8097Z" fill="#23BDEE" />
           </svg>
         </button>
-        <div className="bg-yellow-500 w-40 h-40 floating absolute rounded-lg z-10 -bottom-3 -right-3"></div>
+        <div className="bg-teal-500 w-40 h-40 floating absolute rounded-lg z-10 -bottom-3 -right-3"></div>
       </div>
     </div>
     </div>
