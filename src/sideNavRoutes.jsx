@@ -17,6 +17,8 @@ import {
   Notifications as CandidateNotifications,
 } from '@/pages/candidate';
 
+import Posting from './pages/dashboard/posting';
+
 import {
   Home as AdminHome,
  } from '@/pages/admin';
