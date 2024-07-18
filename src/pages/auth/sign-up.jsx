@@ -52,17 +52,17 @@ export function SignUp() {
     }
   };
 
-  const onGoogleSignIn = (e) => {
-    e.preventDefault();
-    if (!isRegistering) {
-      setIsRegistering(true);
-      doSignInWithGoogle().then(() => {
-      }).catch(err => {
-        setErrorMessage(`Auth Error: ${err.code}`);
-        setIsRegistering(false);
-      });
-    }
-  };
+  // const onGoogleSignIn = (e) => {
+  //   e.preventDefault();
+  //   if (!isRegistering) {
+  //     setIsRegistering(true);
+  //     doSignInWithGoogle().then(() => {
+  //     }).catch(err => {
+  //       setErrorMessage(`Auth Error: ${err.code}`);
+  //       setIsRegistering(false);
+  //     });
+  //   }
+  // };
 
   return (
     <>
@@ -189,7 +189,7 @@ export function SignUp() {
                 fullWidth>
                 Register Now
               </Button>
-              <div className="space-y-4 mt-8">
+              {/* <div className="space-y-4 mt-8">
                 <Button size="lg" color="white" className="flex items-center gap-2 justify-center shadow-md border border-gray-300 rounded-full" fullWidth
                   disabled={isRegistering}
                   onClick={onGoogleSignIn}>
@@ -208,7 +208,7 @@ export function SignUp() {
                   </svg>
                   <span>Sign in With Google</span>
                 </Button>
-              </div>
+              </div> */}
               <Typography variant="paragraph" className="text-center text-blue-gray-500 font-medium mt-4">
                 Already have an account?
                 <Link to="/auth/sign-in" className="text-blue-600 hover:text-blue-800 ml-1">Sign in</Link>
