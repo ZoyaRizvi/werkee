@@ -51,12 +51,12 @@ const sideNavRoutes = (userRole) => {
             path: '/chat',
             element: <CandidateChat />,
           },
-          {
-            icon: <InformationCircleIcon {...icon} />,
-            name: 'Notifications',
-            path: '/notifications',
-            element: <CandidateNotifications />,
-          },
+          // {
+          //   icon: <InformationCircleIcon {...icon} />,
+          //   name: 'Notifications',
+          //   path: '/notifications',
+          //   element: <CandidateNotifications />,
+          // },
         ],
       },
     ];
@@ -83,12 +83,12 @@ const sideNavRoutes = (userRole) => {
             path: '/chat',
             element: <DashboardChat />,
           },
-          {
-            icon: <InformationCircleIcon {...icon} />,
-            name: 'Notifications',
-            path: '/notifications',
-            element: <DashboardNotifications />,
-          },
+          // {
+          //   icon: <InformationCircleIcon {...icon} />,
+          //   name: 'Notifications',
+          //   path: '/notifications',
+          //   element: <DashboardNotifications />,
+          // },
           {
             icon: <InformationCircleIcon {...icon} />,
             name: 'Posting',
