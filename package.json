@@ -9,10 +9,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+<<<<<<< Updated upstream
     "@google/generative-ai": "^0.15.0",
+=======
+    "@emotion/react": "^11.13.0",
+    "@emotion/styled": "^11.13.0",
+>>>>>>> Stashed changes
     "@heroicons/react": "^2.0.18",
     "@material-tailwind/react": "^2.1.9",
+    "@mui/material": "^5.16.4",
     "apexcharts": "3.44.0",
+    "axios": "^1.7.2",
     "firebase": "^10.12.2",
     "firebase-admin": "^12.1.0",
     "firebase-functions": "^5.0.1",

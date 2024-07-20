@@ -4,6 +4,7 @@ import Landing from './layouts/landing/Landing.jsx';
 import { AuthProvider } from './context/authContext/index.jsx';
 import Dashboard from './layouts/dashboard.jsx';
 import Auth from './layouts/auth.jsx';
+import SkillAssessment from './pages/candidate/skillassessment.jsx';
 
 function App() {
   const routes = [
@@ -18,6 +19,10 @@ function App() {
     {
       path: '/dashboard/*',
       element: <Dashboard />,
+    },
+    {
+      path: '/skillassessment',
+      element: <SkillAssessment />,
     },
     // {
     //   path: '/candidate/*',
