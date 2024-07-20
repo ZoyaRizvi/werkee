@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.15.0",
     "@heroicons/react": "^2.0.18",
     "@material-tailwind/react": "^2.1.9",
     "apexcharts": "3.44.0",

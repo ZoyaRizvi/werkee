@@ -1,5 +1,3 @@
-// Dashboard.jsx
-
 import React, {useEffect, useState} from 'react';
 import { Link, Navigate, useNavigate, Routes, Route } from "react-router-dom";
 import { Cog6ToothIcon } from '@heroicons/react/24/solid';

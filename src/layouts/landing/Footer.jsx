@@ -10,7 +10,7 @@ const Footer = () => {
           <div className="space-y-8">
             <img
               className="h-20"
-              src="./img/werkylogo.png"
+              src="./img/logo.png"
               alt="Company name"
             />
             <p className="text-sm leading-6 text-gray-600">

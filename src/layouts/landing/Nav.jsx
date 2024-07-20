@@ -8,7 +8,7 @@ function Navbar() {
             <div className="flex flex-col max-w-screen-xl px-8 mx-auto md:items-center md:justify-between md:flex-row">
                 <div className="flex flex-row items-center justify-between">
                     <div className="relative md:mt-8">
-                        <a href="#" className="text-lg relative z-50 font-bold tracking-widest text-gray-900 rounded-lg focus:outline-none focus:shadow-outline"><img width={"200px"} height={"100px"} src='./img/logo-removebg-preview(1)'></img></a>
+                        <a href="#" className="text-lg relative z-50 font-bold tracking-widest text-gray-900 rounded-lg focus:outline-none focus:shadow-outline"><img width={"200px"} height={"100px"} src='./img/logo.png'></img></a>
                     </div>
                     <button className="rounded-lg md:hidden focus:outline-none focus:shadow-outline" onClick={() => setOpen(!open)}>
                         <svg fill="currentColor" viewBox="0 0 20 20" className="w-6 h-6">

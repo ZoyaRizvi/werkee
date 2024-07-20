@@ -94,7 +94,7 @@ export function Home() {
               </Typography>
               <Typography
                 variant="small"
-                className="flex items-center gap-1 font-normal text-blue-gray-600"
+                className="flex items-center gap-1 font-normal text-blue-gray-600" 
               >
                 <CheckCircleIcon strokeWidth={3} className="h-4 w-4 text-blue-gray-200" />
                 <strong>{usersData.length}</strong> registered
