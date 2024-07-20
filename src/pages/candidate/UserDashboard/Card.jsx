@@ -1,6 +1,9 @@
 import React from 'react'
 import { Link } from 'react-router-dom';
 import { FiCalendar, FiClock, FiDollarSign, FiMapPin } from 'react-icons/fi';
+import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
+import { IoIosArrowDroprightCircle } from "react-icons/io";
+
 
 // Todo - add recruiter field to Add Post page
 const Card = ({data}) => {
@@ -24,7 +27,15 @@ const Card = ({data}) => {
                 </div>
 
                 <p className=' text-base text-primary/70 pt-3'>{description}</p>
-                <Link to={'/dashboard/chat?reference='+encodeURI(recruiter)+'&'+'job='+encodeURI(jobTitle)}><p className=' text-base text-primary/70 pt-3'>Message recruiter</p></Link>
+                <div className="flex justify-between items-center p-4 mb-2">
+                  <Link to={'/dashboard/chat?reference=' + encodeURI(recruiter) + '&' + 'job=' + encodeURI(jobTitle)} className='text-black flex items-center'>
+                  <p className='text-white bg-cyan-500 py-2 px-4 mt-4 rounded flex items-center'><IoChatbubbleEllipsesOutline className='mr-2 items-end' />Message recruiter</p>
+                  </Link>
+                  <button className="bg-teal-500 text-white py-2 px-4 mt-4 rounded w-32 flex justify-center">
+                     <span className="mr-2">Apply</span><IoIosArrowDroprightCircle className=" text-xl ml-3" />
+                  </button>
+                </div>
+                <hr className="border-t border-gray-400 my-4 w-full mt-6" />
             </div>
         </div>
     </section>
@@ -32,4 +43,3 @@ const Card = ({data}) => {
 }
 
 export default Card;
-
