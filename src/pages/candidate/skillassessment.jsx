@@ -10,20 +10,14 @@ function SkillAssessment({ skill }) {
 
   useEffect(() => {
     const fetchQuestions = async () => {
+      setLoading(true);
+      setError(null);
+
       try {
-        setLoading(true);
-        setError(null);
-
-        // Call the API to generate and store quiz data in Firestore
         const post = { skill };
-        const response = await axios.post('https://werky-backend.onrender.com/api/assessment', post);
+        const { data } = await axios.post('https://werky-backend.onrender.com/api/assessment', post);
 
-        // Get the document ID of the newly created assessment
-        const { id } = response.data;
-
-        console.log('Generated assessment ID:', id);
-
-        // Fetch the stored quiz data from Firestore using the document ID
+        const { id } = data;
         const docRef = doc(db, 'assessment', id);
         const docSnap = await getDoc(docRef);
 
@@ -33,7 +27,6 @@ function SkillAssessment({ skill }) {
             text: q.question,
             options: q.options,
           }));
-
           setQuestions(quizData);
         } else {
           setError('No such document!');
