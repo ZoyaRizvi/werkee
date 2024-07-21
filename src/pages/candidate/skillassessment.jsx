@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import firebase from '../firebase';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { db } from "../../firebase/firebase";
 
 const db = getFirestore(firebase);
 
