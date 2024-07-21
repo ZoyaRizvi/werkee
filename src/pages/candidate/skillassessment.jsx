@@ -22,12 +22,18 @@ function SkillAssessment({ skill }) {
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-          const quizData = docSnap.data().quizData.map((q, index) => ({
-            id: index,
-            text: q.question,
-            options: q.options,
-          }));
-          setQuestions(quizData);
+          const quizData = docSnap.data().quizData;
+          if (Array.isArray(quizData)) {
+            const formattedQuestions = quizData.map((q, index) => ({
+              id: index,
+              text: q.question,
+              options: q.options,
+              correctAnswer: q.correctAnswer,
+            }));
+            setQuestions(formattedQuestions);
+          } else {
+            setError('Quiz data is not an array!');
+          }
         } else {
           setError('No such document!');
         }
