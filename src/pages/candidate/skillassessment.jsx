@@ -1,66 +1,36 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { useLocation } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-function SkillAssessment() {
-  const [questions, setQuestions] = useState([]);
-  const [error, setError] = useState(null);
+function SkillAssessment({ skill }) {
   const [loading, setLoading] = useState(true);
-  const location = useLocation();
-  const { skill } = location.state || {};
+  const [error, setError] = useState(null);
+  const [questions, setQuestions] = useState([]);
 
   useEffect(() => {
-    if (skill) {
-      generateQuestions(skill);
-    }
-  }, [skill]);
+    const fetchQuestions = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-  async function generateQuestions(skill) {
-    setLoading(true);
-    setError(null);
+        const post = { skill };
+        const response = await axios.post('http://localhost:3000/api/assessment', post);
 
-    try {
-      const response = await axios.post(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyBK9A3pPDR_lduTqoiBFFn4DUe-P9y8Kk4`,
-        {
-          contents: [
-            {
-              parts: [
-                { text: `Generate 10 MCQ questions related to ${skill}` },
-              ],
-            },
-          ],
-        }
-      );
+        const quizData = response.data.quizData.map((q, index) => ({
+          id: index,
+          text: q.question,
+          options: q.options,
+        }));
 
-      console.log('API response:', response.data);
-
-      if (response.data && response.data.candidates && response.data.candidates[0]) {
-        const contentParts = response.data.candidates[0].content.parts;
-        if (contentParts && contentParts[0] && typeof contentParts[0].text === 'string') {
-          const questionsText = contentParts[0].text;
-
-          // Split the text into individual questions based on newline characters
-          const questionsArray = questionsText.split('\n').filter(q => q.trim() !== '');
-          const formattedQuestions = questionsArray.map((q, index) => ({
-            id: index,
-            text: q,
-          }));
-
-          setQuestions(formattedQuestions);
-        } else {
-          throw new Error('The content parts do not contain a valid string');
-        }
-      } else {
-        throw new Error('Unexpected response structure');
+        setQuestions(quizData);
+      } catch (error) {
+        setError(error.message || 'Failed to load questions');
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Error generating questions:", error);
-      setError(error.message || "An error occurred while generating questions");
-    }
+    };
 
-    setLoading(false);
-  }
+    fetchQuestions();
+  }, [skill]);
 
   return (
     <div className="bg-gradient-to-r from-blue-50 to-blue-100 min-h-screen p-8 flex flex-col items-center">
@@ -85,6 +55,9 @@ function SkillAssessment() {
               {questions.map((question) => (
                 <div key={question.id} className="mb-4">
                   <p className="text-md font-medium">{question.text}</p>
+                  {question.options && question.options.map((option, index) => (
+                    <p key={index} className="text-md ml-4">{option}</p>
+                  ))}
                 </div>
               ))}
             </div>
