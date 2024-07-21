@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import firebase from '../firebase';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from "../../firebase/firebase";
-
-const db = getFirestore(firebase);
 
 function SkillAssessment({ skill }) {
   const [loading, setLoading] = useState(true);
@@ -27,7 +24,7 @@ function SkillAssessment({ skill }) {
         console.log('Generated assessment ID:', id);
 
         // Fetch the stored quiz data from Firestore using the document ID
-        const docRef = doc(db, 'assessments', id);
+        const docRef = doc(db, 'assessment', id);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
