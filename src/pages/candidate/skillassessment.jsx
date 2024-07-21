@@ -12,8 +12,12 @@ function SkillAssessment({ skill }) {
         setLoading(true);
         setError(null);
 
+        console.log('Fetching questions for skill:', skill);
+
         const post = { skill };
         const response = await axios.post('http://localhost:3000/api/assessment', post);
+
+        console.log('Response from API:', response.data);
 
         const quizData = response.data.quizData.map((q, index) => ({
           id: index,
@@ -23,6 +27,7 @@ function SkillAssessment({ skill }) {
 
         setQuestions(quizData);
       } catch (error) {
+        console.error('Error fetching questions:', error);
         setError(error.message || 'Failed to load questions');
       } finally {
         setLoading(false);
