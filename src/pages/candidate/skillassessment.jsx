@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import firebase from '../firebase';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
+
+const db = getFirestore(firebase);
 
 function SkillAssessment({ skill }) {
   const [loading, setLoading] = useState(true);
@@ -12,20 +16,30 @@ function SkillAssessment({ skill }) {
         setLoading(true);
         setError(null);
 
-        console.log('Fetching questions for skill:', skill);
-
+        // Call the API to generate and store quiz data in Firestore
         const post = { skill };
         const response = await axios.post('http://localhost:3000/api/assessment', post);
 
-        console.log('Response from API:', response.data);
+        // Get the document ID of the newly created assessment
+        const { id } = response.data;
 
-        const quizData = response.data.quizData.map((q, index) => ({
-          id: index,
-          text: q.question,
-          options: q.options,
-        }));
+        console.log('Generated assessment ID:', id);
 
-        setQuestions(quizData);
+        // Fetch the stored quiz data from Firestore using the document ID
+        const docRef = doc(db, 'assessments', id);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const quizData = docSnap.data().quizData.map((q, index) => ({
+            id: index,
+            text: q.question,
+            options: q.options,
+          }));
+
+          setQuestions(quizData);
+        } else {
+          setError('No such document!');
+        }
       } catch (error) {
         console.error('Error fetching questions:', error);
         setError(error.message || 'Failed to load questions');
