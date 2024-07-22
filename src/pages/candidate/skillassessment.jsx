@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { db } from "../../firebase/firebase";
 import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
 
@@ -66,9 +66,12 @@ async function generateQuestions(skill) {
 function SkillAssessment() {
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
+  const [score, setScore] = useState(null); // Track the user's score
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showScoreDialog, setShowScoreDialog] = useState(false); // Dialog visibility state
   const location = useLocation();
+  const navigate = useNavigate();
   const { skill } = location.state || {};
   const hasGeneratedQuestions = useRef(false);
   const [assessmentId, setAssessmentId] = useState(null); // Track the document ID for saving responses
@@ -107,17 +110,37 @@ function SkillAssessment() {
     return questions.length > 0 && questions.length === Object.keys(answers).length;
   }
 
+  function calculateScore() {
+    let correctCount = 0;
+
+    questions.forEach((question, index) => {
+      if (answers[index] === question.correctAnswer) {
+        correctCount += 1;
+      }
+    });
+
+    return correctCount;
+  }
+
   async function handleSubmit() {
     if (assessmentId) {
       try {
+        const userScore = calculateScore();
         await updateDoc(doc(db, 'assessment', assessmentId), {
-          response: answers // Save user responses under the 'response' field
+          response: answers, // Save user responses under the response field
+          score: userScore // Save the score
         });
-        console.log('Responses saved successfully');
+        setScore(userScore); // Update the state with the score
+        setShowScoreDialog(true); // Show the score dialog
+        console.log('Responses and score saved successfully');
       } catch (error) {
-        console.error("Error saving responses:", error);
+        console.error("Error saving responses and score:", error);
       }
     }
+  }
+
+  function handleDialogClose() {
+    navigate('/dashboard/profile'); // Redirect to the profile page
   }
 
   return (
@@ -162,7 +185,7 @@ function SkillAssessment() {
                 <button 
                   onClick={handleSubmit} 
                   disabled={!isAllAnswered()}
-                  className={`py-2 px-4 rounded-lg font-semibold text-white ${isAllAnswered() ? 'bg-blue-600' : 'bg-gray-400'}`}
+                  className={`py-2 px-4 rounded-lg font-semibold text-white ${isAllAnswered() ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}
                 >
                   Submit
                 </button>
@@ -171,6 +194,21 @@ function SkillAssessment() {
           )
         )}
       </div>
+
+      {showScoreDialog && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-sm w-full">
+            <h2 className="text-2xl font-bold text-green-800 mb-4">Your Score</h2>
+            <p className="text-4xl font-semibold text-green-800 mb-4">{score}/{questions.length}</p>
+            <button 
+              onClick={handleDialogClose} 
+              className="py-2 px-4 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
