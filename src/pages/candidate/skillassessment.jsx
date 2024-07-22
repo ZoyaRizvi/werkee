@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
 import { db } from "../../firebase/firebase";
@@ -26,6 +26,7 @@ function fixJsonText(jsonText) {
 
 async function generateQuestions(skill) {
   try {
+    console.log('Generating questions for skill:', skill);
     const response = await axios.post(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyBK9A3pPDR_lduTqoiBFFn4DUe-P9y8Kk4`,
       {
@@ -48,10 +49,12 @@ async function generateQuestions(skill) {
     const quizData = JSON.parse(fixedJsonText);
 
     // Save to Firestore
+    console.log('Saving to Firestore:', { skill, quizData });
     const docRef = await addDoc(collection(db, 'assessment'), {
       skill,
       quizData,
     });
+    console.log('Document saved with ID:', docRef.id);
 
     return { id: docRef.id, ...quizData };
   } catch (error) {
@@ -66,10 +69,12 @@ function SkillAssessment() {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
   const { skill } = location.state || {};
+  const hasGeneratedQuestions = useRef(false);
 
   useEffect(() => {
-    if (skill) {
+    if (skill && !hasGeneratedQuestions.current) {
       handleGenerateQuestions(skill);
+      hasGeneratedQuestions.current = true;
     }
   }, [skill]);
 
