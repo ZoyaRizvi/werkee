@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { db } from "../../firebase/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, addDoc, deleteDoc, doc, serverTimestamp } from "firebase/firestore";
 import {
   Typography,
   Card,
@@ -12,8 +12,6 @@ import {
   MenuList,
   MenuItem,
   Avatar,
-  Tooltip,
-  Progress,
   Button,
   Dialog,
   DialogHeader,
@@ -25,14 +23,16 @@ import {
   EllipsisVerticalIcon,
   ArrowUpIcon,
 } from "@heroicons/react/24/outline";
-import { StatisticsCard } from "@/widgets/cards";
-import { StatisticsChart } from "@/widgets/charts";
-import { CheckCircleIcon, ClockIcon, PencilSquareIcon, MinusCircleIcon } from "@heroicons/react/24/solid";
+import { CheckCircleIcon, MinusCircleIcon } from "@heroicons/react/24/solid";
 
 export function Home() {
   const [openDialog, setOpenDialog] = useState(false);
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+  const [openAddUserDialog, setOpenAddUserDialog] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [userToDelete, setUserToDelete] = useState(null);
   const [usersData, setUsersData] = useState([]);
+  const [newUser, setNewUser] = useState({ displayName: '', email: '', role: '' });
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -58,13 +58,52 @@ export function Home() {
     setCurrentUser(null);
   };
 
-  const handleEditUser = () => {
-    // Logic for editing user
-    handleCloseDialog();
+  const handleOpenConfirmDialog = (userId) => {
+    setUserToDelete(userId);
+    setOpenConfirmDialog(true);
   };
 
-  const handleRemoveUser = (userId) => {
-    // Logic for removing user
+  const handleCloseConfirmDialog = () => {
+    setOpenConfirmDialog(false);
+    setUserToDelete(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (userToDelete) {
+      try {
+        await deleteDoc(doc(db, "users", userToDelete));
+        setUsersData(usersData.filter(user => user.id !== userToDelete));
+        handleCloseConfirmDialog();
+      } catch (error) {
+        console.error("Error deleting user: ", error);
+      }
+    }
+  };
+
+  const handleOpenAddUserDialog = () => {
+    setOpenAddUserDialog(true);
+  };
+
+  const handleCloseAddUserDialog = () => {
+    setOpenAddUserDialog(false);
+    setNewUser({ displayName: '', email: '', role: '' });
+  };
+
+  const handleAddUser = async () => {
+    try {
+      await addDoc(collection(db, "users"), {
+        ...newUser,
+        img: '', // Optionally handle user avatar image
+        createdAt: serverTimestamp(), // Add creation timestamp
+      });
+      // Refresh users data
+      const querySnapshot = await getDocs(collection(db, "users"));
+      const users = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setUsersData(users);
+      handleCloseAddUserDialog();
+    } catch (error) {
+      console.error("Error adding user: ", error);
+    }
   };
 
   return (
@@ -102,7 +141,7 @@ export function Home() {
             </div>
             <Menu placement="left-start">
               <MenuHandler>
-                <IconButton size="sm" variant="text" color="blue-gray">
+                <IconButton size="sm" variant="text" color="blue-gray" onClick={handleOpenAddUserDialog}>
                   <EllipsisVerticalIcon
                     strokeWidth={3}
                     fill="currentColor"
@@ -111,9 +150,7 @@ export function Home() {
                 </IconButton>
               </MenuHandler>
               <MenuList>
-                <MenuItem>Action</MenuItem>
-                <MenuItem>Another Action</MenuItem>
-                <MenuItem>Something else here</MenuItem>
+                <MenuItem onClick={handleOpenAddUserDialog}>Create User</MenuItem>
               </MenuList>
             </Menu>
           </CardHeader>
@@ -121,7 +158,7 @@ export function Home() {
             <table className="w-full min-w-[640px] table-auto">
               <thead>
                 <tr>
-                  {["avatar", "name", "email", "actions"].map((el) => (
+                  {["avatar", "name", "email", "role", "actions"].map((el) => (
                     <th
                       key={el}
                       className="border-b border-blue-gray-50 py-3 px-6 text-left"
@@ -137,7 +174,7 @@ export function Home() {
                 </tr>
               </thead>
               <tbody>
-                {usersData.map(({ img, displayName, email, id }, key) => {
+                {usersData.map(({ img, displayName, email, role, id }, key) => {
                   const className = `py-3 px-5 ${
                     key === usersData.length - 1
                       ? ""
@@ -147,7 +184,7 @@ export function Home() {
                   return (
                     <tr key={id}>
                       <td className={className}>
-                        <Avatar src={img} alt={name} size="sm" />
+                        <Avatar src={img} alt={displayName} size="sm" />
                       </td>
                       <td className={className}>
                         <Typography
@@ -168,19 +205,20 @@ export function Home() {
                         </Typography>
                       </td>
                       <td className={className}>
-                        <Button
-                          size="sm"
-                          variant="text"
+                        <Typography
+                          variant="small"
                           color="blue-gray"
-                          onClick={() => handleOpenDialog({ id, displayName, email, img })}
+                          className="font-medium"
                         >
-                          <PencilSquareIcon className="w-5 h-5" />
-                        </Button>
+                          {role}
+                        </Typography>
+                      </td>
+                      <td className={className}>
                         <Button
                           size="sm"
                           variant="text"
                           color="blue-gray"
-                          onClick={() => handleRemoveUser(id)}
+                          onClick={() => handleOpenConfirmDialog(id)}
                         >
                           <MinusCircleIcon className="w-5 h-5" />
                         </Button>
@@ -221,6 +259,29 @@ export function Home() {
         </Card>
       </div>
 
+      {/* Confirm Delete Dialog */}
+      {userToDelete && (
+        <Dialog open={openConfirmDialog} handler={handleCloseConfirmDialog}>
+          <DialogHeader>Confirm Deletion</DialogHeader>
+          <DialogBody>
+            <Typography>Are you sure you want to delete this user?</Typography>
+          </DialogBody>
+          <DialogFooter>
+            <Button
+              variant="text"
+              color="red"
+              onClick={handleCloseConfirmDialog}
+              className="mr-2"
+            >
+              Cancel
+            </Button>
+            <Button variant="gradient" color="green" onClick={handleConfirmDelete}>
+              Confirm
+            </Button>
+          </DialogFooter>
+        </Dialog>
+      )}
+
       {/* Edit User Dialog */}
       {currentUser && (
         <Dialog open={openDialog} handler={handleCloseDialog}>
@@ -229,9 +290,9 @@ export function Home() {
             <div className="space-y-4">
               <Input
                 label="Name"
-                value={currentUser.name}
+                value={currentUser.displayName}
                 onChange={(e) =>
-                  setCurrentUser({ ...currentUser, name: e.target.value })
+                  setCurrentUser({ ...currentUser, displayName: e.target.value })
                 }
               />
               <Input
@@ -239,6 +300,13 @@ export function Home() {
                 value={currentUser.email}
                 onChange={(e) =>
                   setCurrentUser({ ...currentUser, email: e.target.value })
+                }
+              />
+              <Input
+                label="Role"
+                value={currentUser.role}
+                onChange={(e) =>
+                  setCurrentUser({ ...currentUser, role: e.target.value })
                 }
               />
             </div>
@@ -254,6 +322,51 @@ export function Home() {
             </Button>
             <Button variant="gradient" color="green" onClick={handleEditUser}>
               Save
+            </Button>
+          </DialogFooter>
+        </Dialog>
+      )}
+
+      {/* Add User Dialog */}
+      {openAddUserDialog && (
+        <Dialog open={openAddUserDialog} handler={handleCloseAddUserDialog}>
+          <DialogHeader>Create New User</DialogHeader>
+          <DialogBody>
+            <div className="space-y-4">
+              <Input
+                label="Name"
+                value={newUser.displayName}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, displayName: e.target.value })
+                }
+              />
+              <Input
+                label="Email"
+                value={newUser.email}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, email: e.target.value })
+                }
+              />
+              <Input
+                label="Role"
+                value={newUser.role}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, role: e.target.value })
+                }
+              />
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <Button
+              variant="text"
+              color="red"
+              onClick={handleCloseAddUserDialog}
+              className="mr-2"
+            >
+              Cancel
+            </Button>
+            <Button variant="gradient" color="green" onClick={handleAddUser}>
+              Add
             </Button>
           </DialogFooter>
         </Dialog>
