@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
 import { db } from "../../firebase/firebase";
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
 
 function fixJsonText(jsonText) {
   // Remove Markdown code block markers
@@ -65,11 +65,13 @@ async function generateQuestions(skill) {
 
 function SkillAssessment() {
   const [questions, setQuestions] = useState([]);
+  const [answers, setAnswers] = useState({});
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const location = useLocation();
   const { skill } = location.state || {};
   const hasGeneratedQuestions = useRef(false);
+  const [assessmentId, setAssessmentId] = useState(null); // Track the document ID for saving responses
 
   useEffect(() => {
     if (skill && !hasGeneratedQuestions.current) {
@@ -85,11 +87,37 @@ function SkillAssessment() {
     try {
       const quizData = await generateQuestions(skill);
       setQuestions(quizData.questions);
+      setAnswers({}); // Reset answers when new questions are generated
+      setAssessmentId(quizData.id); // Save the generated document ID
     } catch (error) {
       setError("An error occurred while generating questions");
     }
 
     setLoading(false);
+  }
+
+  function handleAnswerChange(questionIndex, option) {
+    setAnswers((prevAnswers) => ({
+      ...prevAnswers,
+      [questionIndex]: option
+    }));
+  }
+
+  function isAllAnswered() {
+    return questions.length > 0 && questions.length === Object.keys(answers).length;
+  }
+
+  async function handleSubmit() {
+    if (assessmentId) {
+      try {
+        await updateDoc(doc(db, 'assessment', assessmentId), {
+          response: answers // Save user responses under the 'response' field
+        });
+        console.log('Responses saved successfully');
+      } catch (error) {
+        console.error("Error saving responses:", error);
+      }
+    }
   }
 
   return (
@@ -117,12 +145,28 @@ function SkillAssessment() {
                   <p className="text-md font-medium">{question.question}</p>
                   {question.options.map((option, idx) => (
                     <div key={idx} className="ml-4">
-                      <input type="radio" id={`q${index}_o${idx}`} name={`question${index}`} value={option} />
+                      <input 
+                        type="radio" 
+                        id={`q${index}_o${idx}`} 
+                        name={`question${index}`} 
+                        value={option} 
+                        checked={answers[index] === option}
+                        onChange={() => handleAnswerChange(index, option)}
+                      />
                       <label htmlFor={`q${index}_o${idx}`} className="ml-2">{option}</label>
                     </div>
                   ))}
                 </div>
               ))}
+              <div className="mt-6 flex justify-center">
+                <button 
+                  onClick={handleSubmit} 
+                  disabled={!isAllAnswered()}
+                  className={`py-2 px-4 rounded-lg font-semibold text-white ${isAllAnswered() ? 'bg-blue-600' : 'bg-gray-400'}`}
+                >
+                  Submit
+                </button>
+              </div>
             </div>
           )
         )}
