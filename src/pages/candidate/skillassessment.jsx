@@ -1,52 +1,91 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { doc, getDoc } from 'firebase/firestore';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useLocation } from "react-router-dom";
 import { db } from "../../firebase/firebase";
+import { collection, addDoc } from 'firebase/firestore';
 
-function SkillAssessment({ skill }) {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+function fixJsonText(jsonText) {
+  // Remove Markdown code block markers
+  jsonText = jsonText.replace(/```json/, "");
+  jsonText = jsonText.replace(/```/, "");
+
+  // Replace escaped characters
+  jsonText = jsonText.replace(/\\n/g, "\n"); // Replace \n with actual newline
+  jsonText = jsonText.replace(/\\t/g, "\t"); // Replace \t with tab
+  jsonText = jsonText.replace(/\\"/g, '"');  // Replace \" with "
+
+  // Normalize line breaks
+  jsonText = jsonText.replace(/\r\n/g, "\n"); // Convert Windows line breaks to Unix
+  jsonText = jsonText.replace(/\r/g, "\n");   // Convert old Mac line breaks to Unix
+
+  // Ensure all property names and string values are in double quotes
+  jsonText = jsonText.replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2": '); // Fix property names
+
+  return jsonText;
+}
+
+async function generateQuestions(skill) {
+  try {
+    const response = await axios.post(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyBK9A3pPDR_lduTqoiBFFn4DUe-P9y8Kk4`,
+      {
+        contents: [
+          {
+            parts: [
+              { text: `Generate 10 multiple choice questions related to ${skill}. Ensure the result is in json format, with questions, options, and correct answers correctly nested` },
+            ],
+          },
+        ],
+      }
+    );
+
+    const rawText = response.data.candidates[0].content.parts[0].text;
+    console.log('Raw API response:', rawText); // Log raw response for debugging
+
+    const fixedJsonText = fixJsonText(rawText);
+    console.log('Fixed JSON text:', fixedJsonText); // Log fixed JSON text for debugging
+
+    const quizData = JSON.parse(fixedJsonText);
+
+    // Save to Firestore
+    const docRef = await addDoc(collection(db, 'assessment'), {
+      skill,
+      quizData,
+    });
+
+    return { id: docRef.id, ...quizData };
+  } catch (error) {
+    console.error("Error generating questions:", error);
+    throw error;
+  }
+}
+
+function SkillAssessment() {
   const [questions, setQuestions] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  const { skill } = location.state || {};
 
   useEffect(() => {
-    const fetchQuestions = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const post = { skill };
-        const { data } = await axios.post('https://werky-backend.onrender.com/api/assessment', post);
-
-        const { id } = data;
-        const docRef = doc(db, 'assessment', id);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-          const quizData = docSnap.data().quizData;
-          if (Array.isArray(quizData)) {
-            const formattedQuestions = quizData.map((q, index) => ({
-              id: index,
-              text: q.question,
-              options: q.options,
-              correctAnswer: q.correctAnswer,
-            }));
-            setQuestions(formattedQuestions);
-          } else {
-            setError('Quiz data is not an array!');
-          }
-        } else {
-          setError('No such document!');
-        }
-      } catch (error) {
-        console.error('Error fetching questions:', error);
-        setError(error.message || 'Failed to load questions');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchQuestions();
+    if (skill) {
+      handleGenerateQuestions(skill);
+    }
   }, [skill]);
+
+  async function handleGenerateQuestions(skill) {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const quizData = await generateQuestions(skill);
+      setQuestions(quizData.questions);
+    } catch (error) {
+      setError("An error occurred while generating questions");
+    }
+
+    setLoading(false);
+  }
 
   return (
     <div className="bg-gradient-to-r from-blue-50 to-blue-100 min-h-screen p-8 flex flex-col items-center">
@@ -68,11 +107,14 @@ function SkillAssessment({ skill }) {
           questions.length > 0 && (
             <div className="bg-white border border-blue-200 rounded-md p-4 shadow-md">
               <h2 className="text-lg font-semibold mb-4">Questions:</h2>
-              {questions.map((question) => (
-                <div key={question.id} className="mb-4">
-                  <p className="text-md font-medium">{question.text}</p>
-                  {question.options && question.options.map((option, index) => (
-                    <p key={index} className="text-md ml-4">{option}</p>
+              {questions.map((question, index) => (
+                <div key={index} className="mb-4">
+                  <p className="text-md font-medium">{question.question}</p>
+                  {question.options.map((option, idx) => (
+                    <div key={idx} className="ml-4">
+                      <input type="radio" id={`q${index}_o${idx}`} name={`question${index}`} value={option} />
+                      <label htmlFor={`q${index}_o${idx}`} className="ml-2">{option}</label>
+                    </div>
                   ))}
                 </div>
               ))}
