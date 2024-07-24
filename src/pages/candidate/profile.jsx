@@ -30,15 +30,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 const skills = [
-  'JavaScript',
-  'React',
-  'Node.js',
-  'Python',
-  'Java',
-  'C++',
-  'Ruby',
-  'Go',
-];
   'Prject Management',
   'DevOps',
   'Content Writing',
