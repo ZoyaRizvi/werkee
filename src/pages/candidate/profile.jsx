@@ -39,6 +39,14 @@ const skills = [
   'Ruby',
   'Go',
 ];
+  'Prject Management',
+  'DevOps',
+  'Content Writing',
+  'Video Editing',
+  'Marketing',
+  'Technical Writing',
+  'SQA',
+];
 
 export function Profile() {
   const { userLoggedIn } = useAuth();
