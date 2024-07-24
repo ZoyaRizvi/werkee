@@ -29,7 +29,7 @@ function SkillAssessment() {
     setError(null);
 
     try {
-      const response = await axios.post('http://localhost:3000/api/assessment', { skill });
+      const response = await axios.post('https://werky-backend.onrender.com/api/assessment', { skill });
       const quizData = response.data;
       setQuestions(quizData.questions);
       setAnswers({});
