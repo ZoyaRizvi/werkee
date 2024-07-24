@@ -4,77 +4,18 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { db } from "../../firebase/firebase";
 import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
 
-function fixJsonText(jsonText) {
-  // Remove Markdown code block markers
-  jsonText = jsonText.replace(/```json/, "");
-  jsonText = jsonText.replace(/```/, "");
-
-  // Replace escaped characters
-  jsonText = jsonText.replace(/\\n/g, "\n"); // Replace \n with actual newline
-  jsonText = jsonText.replace(/\\t/g, "\t"); // Replace \t with tab
-  jsonText = jsonText.replace(/\\"/g, '"');  // Replace \" with "
-
-  // Normalize line breaks
-  jsonText = jsonText.replace(/\r\n/g, "\n"); // Convert Windows line breaks to Unix
-  jsonText = jsonText.replace(/\r/g, "\n");   // Convert old Mac line breaks to Unix
-
-  // Ensure all property names and string values are in double quotes
-  jsonText = jsonText.replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2": '); // Fix property names
-
-  return jsonText;
-}
-
-async function generateQuestions(skill) {
-  try {
-    console.log('Generating questions for skill:', skill);
-    const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyBK9A3pPDR_lduTqoiBFFn4DUe-P9y8Kk4`,
-      {
-        contents: [
-          {
-            parts: [
-              { text: `Generate 10 multiple choice questions related to ${skill}. Ensure the result is in json format, with questions, options, and correct answers correctly nested` },
-            ],
-          },
-        ],
-      }
-    );
-
-    const rawText = response.data.candidates[0].content.parts[0].text;
-    console.log('Raw API response:', rawText); // Log raw response for debugging
-
-    const fixedJsonText = fixJsonText(rawText);
-    console.log('Fixed JSON text:', fixedJsonText); // Log fixed JSON text for debugging
-
-    const quizData = JSON.parse(fixedJsonText);
-
-    // Save to Firestore
-    console.log('Saving to Firestore:', { skill, quizData });
-    const docRef = await addDoc(collection(db, 'assessment'), {
-      skill,
-      quizData,
-    });
-    console.log('Document saved with ID:', docRef.id);
-
-    return { id: docRef.id, ...quizData };
-  } catch (error) {
-    console.error("Error generating questions:", error);
-    throw error;
-  }
-}
-
 function SkillAssessment() {
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
-  const [score, setScore] = useState(null); // Track the user's score
+  const [score, setScore] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showScoreDialog, setShowScoreDialog] = useState(false); // Dialog visibility state
+  const [showScoreDialog, setShowScoreDialog] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { skill } = location.state || {};
   const hasGeneratedQuestions = useRef(false);
-  const [assessmentId, setAssessmentId] = useState(null); // Track the document ID for saving responses
+  const [assessmentId, setAssessmentId] = useState(null);
 
   useEffect(() => {
     if (skill && !hasGeneratedQuestions.current) {
@@ -88,10 +29,11 @@ function SkillAssessment() {
     setError(null);
 
     try {
-      const quizData = await generateQuestions(skill);
+      const response = await axios.post('http://localhost:3000/api/assessment', { skill });
+      const quizData = response.data;
       setQuestions(quizData.questions);
-      setAnswers({}); // Reset answers when new questions are generated
-      setAssessmentId(quizData.id); // Save the generated document ID
+      setAnswers({});
+      setAssessmentId(quizData.id);
     } catch (error) {
       setError("An error occurred while generating questions");
     }
@@ -112,13 +54,11 @@ function SkillAssessment() {
 
   function calculateScore() {
     let correctCount = 0;
-
     questions.forEach((question, index) => {
       if (answers[index] === question.correctAnswer) {
         correctCount += 1;
       }
     });
-
     return correctCount;
   }
 
@@ -127,12 +67,11 @@ function SkillAssessment() {
       try {
         const userScore = calculateScore();
         await updateDoc(doc(db, 'assessment', assessmentId), {
-          response: answers, // Save user responses under the response field
-          score: userScore // Save the score
+          response: answers,
+          score: userScore
         });
-        setScore(userScore); // Update the state with the score
-        setShowScoreDialog(true); // Show the score dialog
-        console.log('Responses and score saved successfully');
+        setScore(userScore);
+        setShowScoreDialog(true);
       } catch (error) {
         console.error("Error saving responses and score:", error);
       }
@@ -140,7 +79,7 @@ function SkillAssessment() {
   }
 
   function handleDialogClose() {
-    navigate('/dashboard/profile'); // Redirect to the profile page
+    navigate('/dashboard/profile');
   }
 
   return (
