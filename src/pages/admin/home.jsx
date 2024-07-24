@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { db } from "../../firebase/firebase";
-import { collection, getDocs, addDoc, deleteDoc, doc, serverTimestamp } from "firebase/firestore";
+import { collection, getDocs, addDoc, deleteDoc, doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import {
   Typography,
   Card,
@@ -21,18 +21,24 @@ import {
 } from "@material-tailwind/react";
 import {
   EllipsisVerticalIcon,
-  ArrowUpIcon,
+  PencilIcon,
+  TrashIcon
 } from "@heroicons/react/24/outline";
 import { CheckCircleIcon, MinusCircleIcon } from "@heroicons/react/24/solid";
 
 export function Home() {
-  const [openDialog, setOpenDialog] = useState(false);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [openAddUserDialog, setOpenAddUserDialog] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [openAddPostDialog, setOpenAddPostDialog] = useState(false);
+  const [openPostEditDialog, setOpenPostEditDialog] = useState(false);
+  const [openPostConfirmDialog, setOpenPostConfirmDialog] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
+  const [postToDelete, setPostToDelete] = useState(null);
   const [usersData, setUsersData] = useState([]);
+  const [postsData, setPostsData] = useState([]);
   const [newUser, setNewUser] = useState({ displayName: '', email: '', role: '' });
+  const [newPost, setNewPost] = useState({ jobTitle: '', companyName: '', jobLocation: '', postingDate: '' });
+  const [currentPost, setCurrentPost] = useState(null);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -48,15 +54,19 @@ export function Home() {
     fetchUsers();
   }, []);
 
-  const handleOpenDialog = (user) => {
-    setCurrentUser(user);
-    setOpenDialog(true);
-  };
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "projects"));
+        const posts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setPostsData(posts);
+      } catch (error) {
+        console.error("Error fetching posts: ", error);
+      }
+    };
 
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-    setCurrentUser(null);
-  };
+    fetchPosts();
+  }, []);
 
   const handleOpenConfirmDialog = (userId) => {
     setUserToDelete(userId);
@@ -96,13 +106,82 @@ export function Home() {
         img: '', // Optionally handle user avatar image
         createdAt: serverTimestamp(), // Add creation timestamp
       });
-      // Refresh users data
       const querySnapshot = await getDocs(collection(db, "users"));
       const users = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setUsersData(users);
       handleCloseAddUserDialog();
     } catch (error) {
       console.error("Error adding user: ", error);
+    }
+  };
+
+  const handleOpenPostEditDialog = (post) => {
+    setCurrentPost(post);
+    setOpenPostEditDialog(true);
+  };
+
+  const handleClosePostEditDialog = () => {
+    setOpenPostEditDialog(false);
+    setCurrentPost(null);
+  };
+
+  const handleUpdatePost = async () => {
+    if (currentPost) {
+      try {
+        await updateDoc(doc(db, "projects", currentPost.id), currentPost);
+        const querySnapshot = await getDocs(collection(db, "projects"));
+        const posts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setPostsData(posts);
+        handleClosePostEditDialog();
+      } catch (error) {
+        console.error("Error updating post: ", error);
+      }
+    }
+  };
+
+  const handleOpenPostConfirmDialog = (postId) => {
+    setPostToDelete(postId);
+    setOpenPostConfirmDialog(true);
+  };
+
+  const handleClosePostConfirmDialog = () => {
+    setOpenPostConfirmDialog(false);
+    setPostToDelete(null);
+  };
+
+  const handleConfirmPostDelete = async () => {
+    if (postToDelete) {
+      try {
+        await deleteDoc(doc(db, "projects", postToDelete));
+        setPostsData(postsData.filter(post => post.id !== postToDelete));
+        handleClosePostConfirmDialog();
+      } catch (error) {
+        console.error("Error deleting post: ", error);
+      }
+    }
+  };
+
+  const handleOpenAddPostDialog = () => {
+    setOpenAddPostDialog(true);
+  };
+
+  const handleCloseAddPostDialog = () => {
+    setOpenAddPostDialog(false);
+    // setNewPost({ jobTitle: '', companyName: '', jobLocation: '', postingDate: '' });
+  };
+
+  const handleAddPost = async () => {
+    try {
+      await addDoc(collection(db, "projects"), {
+        ...newPost,
+        createdAt: serverTimestamp(), // Add creation timestamp
+      });
+      const querySnapshot = await getDocs(collection(db, "projects"));
+      const posts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setPostsData(posts);
+      handleCloseAddPostDialog();
+    } catch (error) {
+      console.error("Error adding post: ", error);
     }
   };
 
@@ -119,7 +198,7 @@ export function Home() {
       </div>
 
       {/* Users Table */}
-      <div className="mb-4 grid grid-cols-1 gap-6 xl:grid-cols-3">
+      <div className="mb-4 grid grid-cols-1 gap-6 xl:grid-cols-2">
         <Card className="overflow-hidden xl:col-span-2 border border-blue-gray-100 shadow-sm">
           <CardHeader
             floated={false}
@@ -158,221 +237,347 @@ export function Home() {
             <table className="w-full min-w-[640px] table-auto">
               <thead>
                 <tr>
-                  {["avatar", "name", "email", "role", "actions"].map((el) => (
-                    <th
-                      key={el}
-                      className="border-b border-blue-gray-50 py-3 px-6 text-left"
-                    >
+                  {["avatar", "name", "email", "role", ""].map((header, index) => (
+                    <th key={index} className="border-b border-blue-gray-100 py-3 px-5 text-left">
                       <Typography
                         variant="small"
-                        className="text-[11px] font-medium uppercase text-blue-gray-400"
+                        color="blue-gray"
+                        className="font-normal leading-none opacity-70"
                       >
-                        {el}
+                        {header}
                       </Typography>
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {usersData.map(({ img, displayName, email, role, id }, key) => {
-                  const className = `py-3 px-5 ${
-                    key === usersData.length - 1
-                      ? ""
-                      : "border-b border-blue-gray-50"
-                  }`;
-
-                  return (
-                    <tr key={id}>
-                      <td className={className}>
-                        <Avatar src={img} alt={displayName} size="sm" />
-                      </td>
-                      <td className={className}>
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-bold"
-                        >
-                          {displayName}
-                        </Typography>
-                      </td>
-                      <td className={className}>
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-medium"
-                        >
-                          {email}
-                        </Typography>
-                      </td>
-                      <td className={className}>
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-medium"
-                        >
-                          {role}
-                        </Typography>
-                      </td>
-                      <td className={className}>
-                        <Button
-                          size="sm"
-                          variant="text"
-                          color="blue-gray"
-                          onClick={() => handleOpenConfirmDialog(id)}
-                        >
-                          <MinusCircleIcon className="w-5 h-5" />
-                        </Button>
-                      </td>
-                    </tr>
-                  );
-                })}
+                {usersData.map((user) => (
+                  <tr key={user.id}>
+                    <td className="py-3 px-5">
+                      <Avatar
+                        src={user.img || ""}
+                        alt={user.displayName}
+                        size="sm"
+                        variant="circular"
+                      />
+                    </td>
+                    <td className="py-3 px-5">
+                      <Typography variant="small" color="blue-gray" className="font-bold">
+                        {user.displayName}
+                      </Typography>
+                    </td>
+                    <td className="py-3 px-5">
+                      <Typography variant="small" color="blue-gray">
+                        {user.email}
+                      </Typography>
+                    </td>
+                    <td className="py-3 px-5">
+                      <Typography variant="small" color="blue-gray">
+                        {user.role}
+                      </Typography>
+                    </td>
+                    <td className="py-3 px-5">
+                      <IconButton
+                        variant="text"
+                        color="red"
+                        onClick={() => handleOpenConfirmDialog(user.id)}
+                      >
+                        <TrashIcon strokeWidth={2} className="h-5 w-5" />
+                      </IconButton>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </CardBody>
         </Card>
+      </div>
 
-        {/* Payments Overview */}
-        <Card className="border border-blue-gray-100 shadow-sm">
+      {/* Posts Table */}
+      <div className="mb-4 grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <Card className="overflow-hidden xl:col-span-2 border border-blue-gray-100 shadow-sm">
           <CardHeader
             floated={false}
             shadow={false}
             color="transparent"
-            className="m-0 p-6"
+            className="m-0 flex items-center justify-between p-6"
           >
-            <Typography variant="h6" color="blue-gray" className="mb-2">
-              Payments Overview
-            </Typography>
-            <Typography
-              variant="small"
-              className="flex items-center gap-1 font-normal text-blue-gray-600"
-            >
-              <ArrowUpIcon
-                strokeWidth={3}
-                className="h-3.5 w-3.5 text-green-500"
-              />
-              <strong>24%</strong> this month
-            </Typography>
+            <div>
+              <Typography variant="h6" color="blue-gray" className="mb-1">
+                Posts
+              </Typography>
+              <Typography
+                variant="small"
+                className="flex items-center gap-1 font-normal text-blue-gray-600"
+              >
+                <CheckCircleIcon strokeWidth={3} className="h-4 w-4 text-blue-gray-200" />
+                <strong>{postsData.length}</strong> published
+              </Typography>
+            </div>
+            <Menu placement="left-start">
+              <MenuHandler>
+                <IconButton size="sm" variant="text" color="blue-gray" onClick={handleOpenAddPostDialog}>
+                  <EllipsisVerticalIcon
+                    strokeWidth={3}
+                    fill="currentColor"
+                    className="h-6 w-6"
+                  />
+                </IconButton>
+              </MenuHandler>
+              <MenuList>
+                <MenuItem onClick={handleOpenAddPostDialog}>Create Post</MenuItem>
+              </MenuList>
+            </Menu>
           </CardHeader>
-          <CardBody className="pt-0">
-            {/* Your payments data rendering */}
+          <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
+            <table className="w-full min-w-[640px] table-auto">
+              <thead>
+                <tr>
+                  {["job title", "description", "company", "location", "recruiter", ""].map((header, index) => (
+                    <th key={index} className="border-b border-blue-gray-100 py-3 px-5 text-left">
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal leading-none opacity-70"
+                      >
+                        {header}
+                      </Typography>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {postsData.map((post) => (
+                  <tr key={post.id}>
+                    <td className="py-3 px-5">
+                      <Typography variant="small" color="blue-gray" className="font-bold">
+                        {post.jobTitle}
+                      </Typography>
+                    </td>
+                    <td className="py-3 px-5">
+                      <Typography variant="small" color="blue-gray">
+                        {post.description}
+                      </Typography>
+                    </td>
+                    <td className="py-3 px-5">
+                      <Typography variant="small" color="blue-gray">
+                        {post.companyName}
+                      </Typography>
+                    </td>
+                    <td className="py-3 px-5">
+                      <Typography variant="small" color="blue-gray">
+                        {post.jobLocation}
+                      </Typography>
+                    </td>
+                    <td className="py-3 px-5">
+                      <Typography variant="small" color="blue-gray">
+                        {post.recruiter}
+                      </Typography>
+                    </td>
+                    <td className="py-3 px-5">
+                      <IconButton
+                        variant="text"
+                        color="red"
+                        onClick={() => handleOpenPostConfirmDialog(post.id)}
+                      >
+                        <TrashIcon strokeWidth={2} className="h-5 w-5" />
+                      </IconButton>
+                      <IconButton
+                        variant="text"
+                        color="blue"
+                        onClick={() => handleOpenPostEditDialog(post)}
+                      >
+                        <PencilIcon strokeWidth={2} className="h-5 w-5" />
+                      </IconButton>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </CardBody>
         </Card>
       </div>
 
-      {/* Confirm Delete Dialog */}
-      {userToDelete && (
-        <Dialog open={openConfirmDialog} handler={handleCloseConfirmDialog}>
-          <DialogHeader>Confirm Deletion</DialogHeader>
-          <DialogBody>
-            <Typography>Are you sure you want to delete this user?</Typography>
-          </DialogBody>
-          <DialogFooter>
-            <Button
-              variant="text"
-              color="red"
-              onClick={handleCloseConfirmDialog}
-              className="mr-2"
-            >
-              Cancel
-            </Button>
-            <Button variant="gradient" color="green" onClick={handleConfirmDelete}>
-              Confirm
-            </Button>
-          </DialogFooter>
-        </Dialog>
-      )}
+      {/* Dialogs */}
+      <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
+        <DialogHeader>Confirm Deletion</DialogHeader>
+        <DialogBody>
+          Are you sure you want to delete this user? This action cannot be undone.
+        </DialogBody>
+        <DialogFooter>
+          <Button
+            variant="text"
+            color="red"
+            onClick={handleConfirmDelete}
+          >
+            Confirm
+          </Button>
+          <Button
+            variant="text"
+            color="blue"
+            onClick={handleCloseConfirmDialog}
+          >
+            Cancel
+          </Button>
+        </DialogFooter>
+      </Dialog>
 
-      {/* Edit User Dialog */}
-      {currentUser && (
-        <Dialog open={openDialog} handler={handleCloseDialog}>
-          <DialogHeader>Edit User</DialogHeader>
-          <DialogBody>
-            <div className="space-y-4">
-              <Input
-                label="Name"
-                value={currentUser.displayName}
-                onChange={(e) =>
-                  setCurrentUser({ ...currentUser, displayName: e.target.value })
-                }
-              />
-              <Input
-                label="Email"
-                value={currentUser.email}
-                onChange={(e) =>
-                  setCurrentUser({ ...currentUser, email: e.target.value })
-                }
-              />
-              <Input
-                label="Role"
-                value={currentUser.role}
-                onChange={(e) =>
-                  setCurrentUser({ ...currentUser, role: e.target.value })
-                }
-              />
-            </div>
-          </DialogBody>
-          <DialogFooter>
-            <Button
-              variant="text"
-              color="red"
-              onClick={handleCloseDialog}
-              className="mr-2"
-            >
-              Cancel
-            </Button>
-            <Button variant="gradient" color="green" onClick={handleEditUser}>
-              Save
-            </Button>
-          </DialogFooter>
-        </Dialog>
-      )}
+      <Dialog open={openAddUserDialog} onClose={handleCloseAddUserDialog}>
+        <DialogHeader>Add New User</DialogHeader>
+        <DialogBody>
+          <Input
+            label="Display Name"
+            value={newUser.displayName}
+            onChange={(e) => setNewUser({ ...newUser, displayName: e.target.value })}
+          />
+          <Input
+            label="Email"
+            type="email"
+            value={newUser.email}
+            onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+          />
+          <Input
+            label="Role"
+            value={newUser.role}
+            onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+          />
+        </DialogBody>
+        <DialogFooter>
+          <Button
+            variant="text"
+            color="blue"
+            onClick={handleAddUser}
+          >
+            Add User
+          </Button>
+          <Button
+            variant="text"
+            color="red"
+            onClick={handleCloseAddUserDialog}
+          >
+            Cancel
+          </Button>
+        </DialogFooter>
+      </Dialog>
 
-      {/* Add User Dialog */}
-      {openAddUserDialog && (
-        <Dialog open={openAddUserDialog} handler={handleCloseAddUserDialog}>
-          <DialogHeader>Create New User</DialogHeader>
-          <DialogBody>
-            <div className="space-y-4">
-              <Input
-                label="Name"
-                value={newUser.displayName}
-                onChange={(e) =>
-                  setNewUser({ ...newUser, displayName: e.target.value })
-                }
-              />
-              <Input
-                label="Email"
-                value={newUser.email}
-                onChange={(e) =>
-                  setNewUser({ ...newUser, email: e.target.value })
-                }
-              />
-              <Input
-                label="Role"
-                value={newUser.role}
-                onChange={(e) =>
-                  setNewUser({ ...newUser, role: e.target.value })
-                }
-              />
-            </div>
-          </DialogBody>
-          <DialogFooter>
-            <Button
-              variant="text"
-              color="red"
-              onClick={handleCloseAddUserDialog}
-              className="mr-2"
-            >
-              Cancel
-            </Button>
-            <Button variant="gradient" color="green" onClick={handleAddUser}>
-              Add
-            </Button>
-          </DialogFooter>
-        </Dialog>
-      )}
+      <Dialog open={openPostEditDialog} onClose={handleClosePostEditDialog}>
+        <DialogHeader>Edit Post</DialogHeader>
+        <DialogBody>
+          <Input
+            label="Job Title"
+            value={currentPost?.jobTitle || ''}
+            onChange={(e) => setCurrentPost({ ...currentPost, jobTitle: e.target.value })}
+          />
+          <Input
+            label="Description"
+            value={currentPost?.description || ''}
+            onChange={(e) => setCurrentPost({ ...currentPost, description: e.target.value })}
+          />
+          <Input
+            label="Company Name"
+            value={currentPost?.companyName || ''}
+            onChange={(e) => setCurrentPost({ ...currentPost, companyName: e.target.value })}
+          />
+          <Input
+            label="Job Location"
+            value={currentPost?.jobLocation || ''}
+            onChange={(e) => setCurrentPost({ ...currentPost, jobLocation: e.target.value })}
+          />
+          <Input
+            label="Recruiter"
+            value={currentPost?.recruiter || ''}
+            onChange={(e) => setCurrentPost({ ...currentPost, recruiter: e.target.value })}
+          />
+        </DialogBody>
+        <DialogFooter>
+          <Button
+            variant="text"
+            color="blue"
+            onClick={handleUpdatePost}
+          >
+            Update Post
+          </Button>
+          <Button
+            variant="text"
+            color="red"
+            onClick={handleClosePostEditDialog}
+          >
+            Cancel
+          </Button>
+        </DialogFooter>
+      </Dialog>
+
+      <Dialog open={openPostConfirmDialog} onClose={handleClosePostConfirmDialog}>
+        <DialogHeader>Confirm Post Deletion</DialogHeader>
+        <DialogBody>
+          Are you sure you want to delete this post? This action cannot be undone.
+        </DialogBody>
+        <DialogFooter>
+          <Button
+            variant="text"
+            color="red"
+            onClick={handleConfirmPostDelete}
+          >
+            Confirm
+          </Button>
+          <Button
+            variant="text"
+            color="blue"
+            onClick={handleClosePostConfirmDialog}
+          >
+            Cancel
+          </Button>
+        </DialogFooter>
+      </Dialog>
+
+      <Dialog open={openAddPostDialog} onClose={handleCloseAddPostDialog}>
+        <DialogHeader>Add New Post</DialogHeader>
+        <DialogBody>
+          <Input
+            label="Job Title"
+            value={newPost.jobTitle}
+            onChange={(e) => setNewPost({ ...newPost, jobTitle: e.target.value })}
+          />
+          <Input
+            label="Description"
+            value={newPost.description}
+            onChange={(e) => setNewPost({ ...newPost, description: e.target.value })}
+          />
+          <Input
+            label="Company Name"
+            value={newPost.companyName}
+            onChange={(e) => setNewPost({ ...newPost, companyName: e.target.value })}
+          />
+          <Input
+            label="Job Location"
+            value={newPost.jobLocation}
+            onChange={(e) => setNewPost({ ...newPost, jobLocation: e.target.value })}
+          />
+          <Input
+            label="Recruiter"
+            value={newPost.recruiter}
+            onChange={(e) => setNewPost({ ...newPost, recruiter: e.target.value })}
+          />
+        </DialogBody>
+        <DialogFooter>
+          <Button
+            variant="text"
+            color="blue"
+            onClick={handleAddPost}
+          >
+            Add Post
+          </Button>
+          <Button
+            variant="text"
+            color="red"
+            onClick={handleCloseAddPostDialog}
+          >
+            Cancel
+          </Button>
+        </DialogFooter>
+      </Dialog>
     </div>
   );
-}
+};
 
 export default Home;
