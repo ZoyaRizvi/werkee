@@ -17,8 +17,7 @@ import {
   LightBulbIcon,
   PencilIcon,
 } from '@heroicons/react/24/solid';
-import { ProfileInfoCard, MessageCard } from '@/widgets/cards';
-import { conversationsData } from '@/data';
+import { ProfileInfoCard } from '@/widgets/cards';
 import { useAuth } from '../../context/authContext/index';
 import {
   Dialog,
@@ -37,16 +36,22 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { db } from "@/firebase/firebase";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
+import Projects from './Projects';
 
-// Retrieve the 'user' object from localStorage
-const user = JSON.parse(localStorage.getItem('user'));
-
-// Check if the 'skills' property exists and is an array
-// If it's not an array, convert it to an array (e.g., if it's a string or single value)
-const skillsArray = Array.isArray(user.skills) ? user.skills : [user.skills];
-
-console.log(skillsArray); // Now skillsArray is guaranteed to be an array
-
+// Default values
+const defaultProfile = {
+  name: 'Default Name',
+  title: 'Default Title',
+  info: 'Default information...',
+  location: 'Default Location',
+  facebook: '',
+  twitter: '',
+  instagram: '',
+  skills: [],
+  coverPhoto: 'https://via.placeholder.com/150',
+};
+const DEFAULT_PROFILE_IMAGE = 'https://i.pinimg.com/736x/cf/ea/30/cfea305ef815385ef069b123625ee2c0.jpg';
+const avatarSrc = JSON.parse(localStorage.getItem('user')).profilePhoto ? JSON.parse(localStorage.getItem('user')).profilePhoto : DEFAULT_PROFILE_IMAGE;
 
 const skills = [
   'Project Management',
@@ -65,19 +70,8 @@ export function Profile() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(!open);
-  const userid = JSON.parse(localStorage.getItem('user')).uid;
-  const [profile, setProfile] = useState({
-    name: '',
-    title: '',
-    info: '',
-    location: '',
-    facebook: '',
-    twitter: '',
-    instagram: '',
-    skills: [''],
-    coverPhoto: null,
-    profilePhoto: null,
-  });
+  const userid = JSON.parse(localStorage.getItem('user'))?.uid || 'default-user-id';
+  const [profile, setProfile] = useState(defaultProfile);
 
   const SkillButton = ({ skill }) => (
     <button className="button">{skill}</button>
@@ -85,7 +79,7 @@ export function Profile() {
 
   const SkillsContainer = () => (
     <div id="skills-container">
-      {skillsArray.map((skill, index) => (
+      {(profile.skills.length > 0 ? profile.skills : defaultProfile.skills).map((skill, index) => (
         <SkillButton key={index} skill={skill} />
       ))}
     </div>
@@ -93,10 +87,20 @@ export function Profile() {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const docRef = doc(db, 'users', userid);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setProfile(docSnap.data());
+      try {
+        const docRef = doc(db, 'users', userid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const fetchedData = docSnap.data();
+          setProfile({
+            ...defaultProfile,
+            ...fetchedData,
+            skills: fetchedData.skills || defaultProfile.skills, // Ensure skills fallback to default if not present
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        setProfile(defaultProfile);
       }
     };
 
@@ -123,13 +127,17 @@ export function Profile() {
 
   const handlePhotoChange = (e) => {
     if (e.target.files[0]) {
-      setProfile((prevProfile) => ({ ...prevProfile, coverPhoto: URL.createObjectURL(e.target.files[0]) }));
+      // For previewing
+      const newCoverPhoto = URL.createObjectURL(e.target.files[0]);
+      setProfile((prevProfile) => ({ ...prevProfile, coverPhoto: newCoverPhoto }));
     }
   };
 
   const handlePhotoChange2 = (e) => {
     if (e.target.files[0]) {
-      setProfile((prevProfile) => ({ ...prevProfile, profilePhoto: URL.createObjectURL(e.target.files[0]) }));
+      // For previewing
+      const newProfilePhoto = URL.createObjectURL(e.target.files[0]);
+      setProfile((prevProfile) => ({ ...prevProfile, profilePhoto: newProfilePhoto }));
     }
   };
 
@@ -141,6 +149,8 @@ export function Profile() {
     } catch (error) {
       console.error('Error updating document: ', error);
     }
+
+    window.location.reload();
   };
 
   const handleTabChange = (value) => {
@@ -155,10 +165,10 @@ export function Profile() {
 
   const validateForm = () => {
     const errors = {};
-    if (!formData.name) {
+    if (!profile.name) {
       errors.name = 'Name is required';
     }
-    if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) {
+    if (!profile.email || !/\S+@\S+\.\S+/.test(profile.email)) {
       errors.email = 'Valid email is required';
     }
     setErrors(errors);
@@ -167,7 +177,9 @@ export function Profile() {
 
   return (
     <>
-      <div className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-[url('/img/background-image.png')] bg-cover bg-center">
+      <div className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-cover bg-center">
+        <img src={profile.coverPhoto} alt="Cover" />
+
         <div className="absolute inset-0 h-full w-full bg-gray-900/75" />
       </div>
       <Card className="mx-3 -mt-16 mb-6 lg:mx-4 border border-blue-gray-100">
@@ -175,21 +187,21 @@ export function Profile() {
           <div className="mb-10 flex items-center justify-between flex-wrap gap-6">
             <div className="flex items-center gap-6">
               <Avatar
-                src="/img/bruce-mars.jpeg"
-                alt="bruce-mars"
+                src={avatarSrc}
+                alt="Profile"
                 size="xl"
                 variant="rounded"
                 className="rounded-lg shadow-lg shadow-blue-gray-500/40"
               />
               <div>
                 <Typography variant="h5" color="blue-gray" className="mb-1">
-             {JSON.parse(localStorage.getItem('user')).displayName ?? JSON.parse(localStorage.getItem('user')).email}
+                  {profile.name}
                 </Typography>
                 <Typography
                   variant="small"
                   className="font-normal text-blue-gray-600"
                 >
-                  {JSON.parse(localStorage.getItem('user')).title}
+                  {profile.title}
                 </Typography>
               </div>
             </div>
@@ -212,22 +224,35 @@ export function Profile() {
               </Tabs>
             </div>
           </div>
-          <div className="grid-cols-1 mb-12 grid gap-12 px-4 lg:grid-cols-2 xl:grid-cols-3">
+          <div className="grid-cols-1 mb-12 grid gap-12 px-4 lg:grid-cols-2 xl:grid-cols-2">
             <ProfileInfoCard
               title="Profile Information"
-              description={JSON.parse(localStorage.getItem('user')).info}
-              
+              description={profile.info}
+            />
+            <ProfileInfoCard
               details={{
                 location: (
                   <div className="flex items-center gap-4">
-                  {JSON.parse(localStorage.getItem('user')).location}
-                  </div>),
+                    {profile.location}
+                  </div>
+                ),
                 social: (
                   <div className="flex items-center gap-4">
-                    <a href={JSON.parse(localStorage.getItem('user')).facebook} target="_blank"><i className="fa-brands fa-facebook text-blue-700" /></a>
-                    <a href={JSON.parse(localStorage.getItem('user')).twitter} target="_blank"><i className="fa-brands fa-twitter text-blue-400" /></a>
-                    <a href={JSON.parse(localStorage.getItem('user')).instagram} target="_blank"><i className="fa-brands fa-instagram text-purple-500" /></a>
-                    
+                    {profile.facebook && (
+                      <a href={profile.facebook} target="_blank" rel="noopener noreferrer">
+                        <i className="fa-brands fa-facebook text-blue-700" />
+                      </a>
+                    )}
+                    {profile.twitter && (
+                      <a href={profile.twitter} target="_blank" rel="noopener noreferrer">
+                        <i className="fa-brands fa-twitter text-blue-400" />
+                      </a>
+                    )}
+                    {profile.instagram && (
+                      <a href={profile.instagram} target="_blank" rel="noopener noreferrer">
+                        <i className="fa-brands fa-instagram text-purple-500" />
+                      </a>
+                    )}
                   </div>
                 ),
                 skills: <SkillsContainer />
@@ -238,6 +263,9 @@ export function Profile() {
                 </Tooltip>
               }
             />
+          </div>
+          <div>
+            <Projects/>
           </div>
         </CardBody>
       </Card>
@@ -256,52 +284,115 @@ export function Profile() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenSkillTest(false)}>Cancel</Button>
-          <Button onClick={() => { handleStartTest(selectedSkill); setOpenSkillTest(false); }} disabled={!selectedSkill}>
+          <Button
+            onClick={() => { handleStartTest(selectedSkill); setOpenSkillTest(false); }}
+            disabled={!selectedSkill}
+          >
             Start Test
           </Button>
         </DialogActions>
       </MuiDialog>
 
       <Dialog open={open} handler={handleOpen}>
-        <DialogHeader>    <h1>Edit Profile</h1></DialogHeader>
+        <DialogHeader><h1>Edit Profile</h1></DialogHeader>
         <DialogBody className="h-[42rem] overflow-scroll">
           <div className="form-container">
             <form onSubmit={handleSubmit}>
               <div>
                 <label>Name:</label>
-                <input type="text" name="name" value={profile.name} onChange={handleChange} required />
+                <input
+                  type="text"
+                  name="name"
+                  value={profile.name}
+                  onChange={handleChange}
+                  required
+                />
                 <label>Title:</label>
-                <input type="text" name="title" value={profile.title} onChange={handleChange} required />
+                <input
+                  type="text"
+                  name="title"
+                  value={profile.title}
+                  onChange={handleChange}
+                  required
+                />
               </div>
               <div>
                 <label>Profile Photo:</label>
-                <input type="file" accept="image/*" onChange={handlePhotoChange2} />
-                {profile.profilePhoto && <img src={profile.profilePhoto} alt="Profile Preview" className="profile-preview" />}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoChange2}
+                />
+                {profile.profilePhoto && (
+                  <img
+                    src={profile.profilePhoto}
+                    alt="Profile Preview"
+                    className="profile-preview"
+                  />
+                )}
               </div>
               <div>
                 <label>Info:</label>
-                <input maxLength={250} type="text" name="info" value={profile.info} onChange={handleChange} required />
+                <input
+                  maxLength={250}
+                  type="text"
+                  name="info"
+                  value={profile.info}
+                  onChange={handleChange}
+                  required
+                />
               </div>
               <div>
                 <label>Location:</label>
-                <input type="text" name="location" value={profile.location} onChange={handleChange} required />
+                <input
+                  type="text"
+                  name="location"
+                  value={profile.location}
+                  onChange={handleChange}
+                  required
+                />
               </div>
               <div>
                 <label>Facebook URL:</label>
-                <input type="url" name="facebook" value={profile.facebook} onChange={handleChange} />
+                <input
+                  type="url"
+                  name="facebook"
+                  value={profile.facebook}
+                  onChange={handleChange}
+                />
               </div>
               <div>
                 <label>Twitter URL:</label>
-                <input type="url" name="twitter" value={profile.twitter} onChange={handleChange} />
+                <input
+                  type="url"
+                  name="twitter"
+                  value={profile.twitter}
+                  onChange={handleChange}
+                />
               </div>
               <div>
                 <label>Instagram URL:</label>
-                <input type="url" name="instagram" value={profile.instagram} onChange={handleChange} />
+                <input
+                  type="url"
+                  name="instagram"
+                  value={profile.instagram}
+                  onChange={handleChange}
+                />
               </div>
               <div>
                 <label>Cover Photo:</label>
-                <input type="file" accept="image/*" onChange={handlePhotoChange} />
-                {profile.coverPhoto && <img src={profile.coverPhoto} alt="Cover Preview" className="cover-preview" />}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoChange}
+                />
+                {profile.coverPhoto && (
+                  <img
+                    src={profile.coverPhoto}
+                    alt="Cover Preview"
+                    className="cover-preview"
+                  />
+                )}
               </div>
               <div className="skills-container">
                 <label>Skills:</label>
@@ -321,11 +412,17 @@ export function Profile() {
                     </button>
                   </div>
                 ))}
-                <button type="button" className="add-skill-btn" onClick={handleAddSkill}>
+                <button
+                  type="button"
+                  className="add-skill-btn"
+                  onClick={handleAddSkill}
+                >
                   Add Skill
                 </button>
               </div>
-              <button variant="gradient" color="green" onClick={() => validateForm() && handleOpen()} type="submit">Submit</button>
+              <button variant="gradient" color="green" type="submit">
+                Submit
+              </button>
             </form>
           </div>
         </DialogBody>
