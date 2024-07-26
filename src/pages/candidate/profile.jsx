@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import './profile.css';
 import {
   Card,
   CardBody,
@@ -21,6 +22,12 @@ import { conversationsData } from '@/data';
 import { useAuth } from '../../context/authContext/index';
 import {
   Dialog,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
+} from '@material-tailwind/react';
+import {
+  Dialog as MuiDialog,
   DialogTitle,
   DialogContent,
   DialogActions,
@@ -28,9 +35,11 @@ import {
   Autocomplete,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { db } from "@/firebase/firebase";
+import { doc, updateDoc, getDoc } from "firebase/firestore";
 
 const skills = [
-  'Prject Management',
+  'Project Management',
   'DevOps',
   'Content Writing',
   'Video Editing',
@@ -44,6 +53,85 @@ export function Profile() {
   const [openSkillTest, setOpenSkillTest] = useState(false);
   const [selectedSkill, setSelectedSkill] = useState('');
   const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(!open);
+  const userid = JSON.parse(localStorage.getItem('user')).uid;
+  const [profile, setProfile] = useState({
+    name: '',
+    title: '',
+    info: '',
+    location: '',
+    facebook: '',
+    twitter: '',
+    instagram: '',
+    skills: [''],
+    coverPhoto: null,
+    profilePhoto: null,
+  });
+
+  const SkillButton = ({ skill }) => (
+    <button className="button">{skill}</button>
+  );
+
+  const SkillsContainer = () => (
+    <div id="skills-container">
+      {skills.map((skill, index) => (
+        <SkillButton key={index} skill={skill} />
+      ))}
+    </div>
+  );
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const docRef = doc(db, 'users', userid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setProfile(docSnap.data());
+      }
+    };
+
+    fetchProfile();
+  }, [userid]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setProfile((prevProfile) => ({ ...prevProfile, [name]: value }));
+  };
+
+  const handleSkillChange = (index, event) => {
+    const newSkills = profile.skills.map((skill, skillIndex) => (index !== skillIndex ? skill : event.target.value));
+    setProfile((prevProfile) => ({ ...prevProfile, skills: newSkills }));
+  };
+
+  const handleAddSkill = () => {
+    setProfile((prevProfile) => ({ ...prevProfile, skills: [...prevProfile.skills, ''] }));
+  };
+
+  const handleRemoveSkill = (index) => {
+    setProfile((prevProfile) => ({ ...prevProfile, skills: prevProfile.skills.filter((_, skillIndex) => index !== skillIndex) }));
+  };
+
+  const handlePhotoChange = (e) => {
+    if (e.target.files[0]) {
+      setProfile((prevProfile) => ({ ...prevProfile, coverPhoto: URL.createObjectURL(e.target.files[0]) }));
+    }
+  };
+
+  const handlePhotoChange2 = (e) => {
+    if (e.target.files[0]) {
+      setProfile((prevProfile) => ({ ...prevProfile, profilePhoto: URL.createObjectURL(e.target.files[0]) }));
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await updateDoc(doc(db, 'users', userid), profile);
+      setOpen(false);
+    } catch (error) {
+      console.error('Error updating document: ', error);
+    }
+  };
 
   const handleTabChange = (value) => {
     if (value === 'skillassessment') {
@@ -52,8 +140,6 @@ export function Profile() {
   };
 
   const handleStartTest = (skill) => {
-    console.log('Starting test for skill:', skill);
-    // Add logic to start the skill test with the selected skill
     navigate('/skillassessment', { state: { skill } });
   };
 
@@ -75,7 +161,7 @@ export function Profile() {
               />
               <div>
                 <Typography variant="h5" color="blue-gray" className="mb-1">
-                  {(JSON.parse(localStorage.getItem('user')).displayName != null) ? JSON.parse(localStorage.getItem('user')).displayName : JSON.parse(localStorage.getItem('user')).email}
+                  {JSON.parse(localStorage.getItem('user')).displayName ?? JSON.parse(localStorage.getItem('user')).email}
                 </Typography>
                 <Typography
                   variant="small"
@@ -107,49 +193,32 @@ export function Profile() {
           <div className="grid-cols-1 mb-12 grid gap-12 px-4 lg:grid-cols-2 xl:grid-cols-3">
             <ProfileInfoCard
               title="Profile Information"
-              description="Hi, I'm Alec Thompson, Decisions: If you can't decide, the answer is no. If two equally difficult paths, choose the one more painful in the short term (pain avoidance is creating an illusion of equality)."
+              description="Hi, I'm Alec Thompson, Decisions: If you can't decide, the answer is no. If two equally difficult paths,
+              choose the one more painful in the short term (pain avoidance is creating an illusion of 
+              equality)."
               details={{
-                'first name': 'Alec M. Thompson',
-                mobile: '(44) 123 1234 123',
-                email: 'alecthompson@mail.com',
-                location: 'USA',
+                location: "USA",
                 social: (
                   <div className="flex items-center gap-4">
-                    <i className="fa-brands fa-facebook text-blue-700" />
-                    <i className="fa-brands fa-twitter text-blue-400" />
-                    <i className="fa-brands fa-instagram text-purple-500" />
+                    <a href='#'><i className="fa-brands fa-facebook text-blue-700" /></a>
+                    <a href='#'><i className="fa-brands fa-twitter text-blue-400" /></a>
+                    <a href='#'><i className="fa-brands fa-instagram text-purple-500" /></a>
+                    
                   </div>
                 ),
+                skills: <SkillsContainer />
               }}
               action={
                 <Tooltip content="Edit Profile">
-                  <PencilIcon className="h-4 w-4 cursor-pointer text-blue-gray-500" />
+                  <PencilIcon onClick={handleOpen} variant="gradient" className="h-4 cursor-pointer text-blue-gray-500" />
                 </Tooltip>
               }
             />
-            <div>
-              <Typography variant="h6" color="blue-gray" className="mb-3">
-                Messages
-              </Typography>
-              <ul className="flex flex-col gap-6">
-                {conversationsData.map((props) => (
-                  <MessageCard
-                    key={props.name}
-                    {...props}
-                    action={
-                      <Button variant="text" size="sm">
-                        reply
-                      </Button>
-                    }
-                  />
-                ))}
-              </ul>
-            </div>
           </div>
         </CardBody>
       </Card>
 
-      <Dialog open={openSkillTest} onClose={() => setOpenSkillTest(false)}>
+      <MuiDialog open={openSkillTest} onClose={() => setOpenSkillTest(false)}>
         <DialogTitle>Select a Skill</DialogTitle>
         <DialogContent>
           <Autocomplete
@@ -167,6 +236,85 @@ export function Profile() {
             Start Test
           </Button>
         </DialogActions>
+      </MuiDialog>
+
+      <Dialog open={open} handler={handleOpen}>
+        <DialogHeader>    <h1>Edit Profile</h1></DialogHeader>
+        <DialogBody className="h-[42rem] overflow-scroll">
+          <div className="form-container">
+            <form onSubmit={handleSubmit}>
+              <div>
+                <label>Name:</label>
+                <input type="text" name="name" value={profile.name} onChange={handleChange} required />
+                <label>Title:</label>
+                <input type="text" name="title" value={profile.title} onChange={handleChange} required />
+              </div>
+              <div>
+                <label>Profile Photo:</label>
+                <input type="file" accept="image/*" onChange={handlePhotoChange2} />
+                {profile.profilePhoto && <img src={profile.profilePhoto} alt="Profile Preview" className="profile-preview" />}
+              </div>
+              <div>
+                <label>Info:</label>
+                <input type="text" name="info" value={profile.info} onChange={handleChange} required />
+              </div>
+              <div>
+                <label>Location:</label>
+                <input type="text" name="location" value={profile.location} onChange={handleChange} required />
+              </div>
+              <div>
+                <label>Facebook URL:</label>
+                <input type="url" name="facebook" value={profile.facebook} onChange={handleChange} />
+              </div>
+              <div>
+                <label>Twitter URL:</label>
+                <input type="url" name="twitter" value={profile.twitter} onChange={handleChange} />
+              </div>
+              <div>
+                <label>Instagram URL:</label>
+                <input type="url" name="instagram" value={profile.instagram} onChange={handleChange} />
+              </div>
+              <div>
+                <label>Cover Photo:</label>
+                <input type="file" accept="image/*" onChange={handlePhotoChange} />
+                {profile.coverPhoto && <img src={profile.coverPhoto} alt="Cover Preview" className="cover-preview" />}
+              </div>
+              <div className="skills-container">
+                <label>Skills:</label>
+                {profile.skills.map((skill, index) => (
+                  <div key={index} className="skill-input">
+                    <input
+                      type="text"
+                      value={skill}
+                      onChange={(e) => handleSkillChange(index, e)}
+                    />
+                    <button
+                      type="button"
+                      className="remove-skill-btn"
+                      onClick={() => handleRemoveSkill(index)}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+                <button type="button" className="add-skill-btn" onClick={handleAddSkill}>
+                  Add Skill
+                </button>
+              </div>
+              <button variant="gradient" color="green" onClick={handleOpen} type="submit">Submit</button>
+            </form>
+          </div>
+        </DialogBody>
+        <DialogFooter>
+          <Button
+            variant="text"
+            color="red"
+            onClick={handleOpen}
+            className="mr-1"
+          >
+            <span>Cancel</span>
+          </Button>
+        </DialogFooter>
       </Dialog>
     </>
   );
