@@ -38,6 +38,16 @@ import { useNavigate } from 'react-router-dom';
 import { db } from "@/firebase/firebase";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
 
+// Retrieve the 'user' object from localStorage
+const user = JSON.parse(localStorage.getItem('user'));
+
+// Check if the 'skills' property exists and is an array
+// If it's not an array, convert it to an array (e.g., if it's a string or single value)
+const skillsArray = Array.isArray(user.skills) ? user.skills : [user.skills];
+
+console.log(skillsArray); // Now skillsArray is guaranteed to be an array
+
+
 const skills = [
   'Project Management',
   'DevOps',
@@ -75,7 +85,7 @@ export function Profile() {
 
   const SkillsContainer = () => (
     <div id="skills-container">
-      {skills.map((skill, index) => (
+      {skillsArray.map((skill, index) => (
         <SkillButton key={index} skill={skill} />
       ))}
     </div>
@@ -143,6 +153,18 @@ export function Profile() {
     navigate('/skillassessment', { state: { skill } });
   };
 
+  const validateForm = () => {
+    const errors = {};
+    if (!formData.name) {
+      errors.name = 'Name is required';
+    }
+    if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) {
+      errors.email = 'Valid email is required';
+    }
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   return (
     <>
       <div className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-[url('/img/background-image.png')] bg-cover bg-center">
@@ -161,13 +183,13 @@ export function Profile() {
               />
               <div>
                 <Typography variant="h5" color="blue-gray" className="mb-1">
-                  {JSON.parse(localStorage.getItem('user')).displayName ?? JSON.parse(localStorage.getItem('user')).email}
+             {JSON.parse(localStorage.getItem('user')).displayName ?? JSON.parse(localStorage.getItem('user')).email}
                 </Typography>
                 <Typography
                   variant="small"
                   className="font-normal text-blue-gray-600"
                 >
-                  Developer
+                  {JSON.parse(localStorage.getItem('user')).title}
                 </Typography>
               </div>
             </div>
@@ -193,16 +215,18 @@ export function Profile() {
           <div className="grid-cols-1 mb-12 grid gap-12 px-4 lg:grid-cols-2 xl:grid-cols-3">
             <ProfileInfoCard
               title="Profile Information"
-              description="Hi, I'm Alec Thompson, Decisions: If you can't decide, the answer is no. If two equally difficult paths,
-              choose the one more painful in the short term (pain avoidance is creating an illusion of 
-              equality)."
+              description={JSON.parse(localStorage.getItem('user')).info}
+              
               details={{
-                location: "USA",
+                location: (
+                  <div className="flex items-center gap-4">
+                  {JSON.parse(localStorage.getItem('user')).location}
+                  </div>),
                 social: (
                   <div className="flex items-center gap-4">
-                    <a href='#'><i className="fa-brands fa-facebook text-blue-700" /></a>
-                    <a href='#'><i className="fa-brands fa-twitter text-blue-400" /></a>
-                    <a href='#'><i className="fa-brands fa-instagram text-purple-500" /></a>
+                    <a href={JSON.parse(localStorage.getItem('user')).facebook} target="_blank"><i className="fa-brands fa-facebook text-blue-700" /></a>
+                    <a href={JSON.parse(localStorage.getItem('user')).twitter} target="_blank"><i className="fa-brands fa-twitter text-blue-400" /></a>
+                    <a href={JSON.parse(localStorage.getItem('user')).instagram} target="_blank"><i className="fa-brands fa-instagram text-purple-500" /></a>
                     
                   </div>
                 ),
@@ -256,7 +280,7 @@ export function Profile() {
               </div>
               <div>
                 <label>Info:</label>
-                <input type="text" name="info" value={profile.info} onChange={handleChange} required />
+                <input maxLength={250} type="text" name="info" value={profile.info} onChange={handleChange} required />
               </div>
               <div>
                 <label>Location:</label>
@@ -301,7 +325,7 @@ export function Profile() {
                   Add Skill
                 </button>
               </div>
-              <button variant="gradient" color="green" onClick={handleOpen} type="submit">Submit</button>
+              <button variant="gradient" color="green" onClick={() => validateForm() && handleOpen()} type="submit">Submit</button>
             </form>
           </div>
         </DialogBody>
