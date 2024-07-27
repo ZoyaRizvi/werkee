@@ -95,6 +95,8 @@ export function Profile() {
     </div>
   );
 
+  const handleOpenSkillTest = () => setOpenSkillTest(!openSkillTest);
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -333,9 +335,9 @@ export function Profile() {
                   accept="image/*"
                   onChange={handlePhotoChange2}
                 />
-                {profile.profilePhoto && (
+                {profile.img && (
                   <img
-                    src={profile.profilePhoto}
+                    src={profile.img}
                     alt="Profile Preview"
                     className="profile-preview"
                   />
