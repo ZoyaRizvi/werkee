@@ -37,6 +37,7 @@ import { useNavigate } from 'react-router-dom';
 import { db } from "@/firebase/firebase";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
 import Projects from './Projects';
+import Projects from './projects';
 
 // Default values
 const defaultProfile = {
@@ -52,6 +53,12 @@ const defaultProfile = {
 };
 const DEFAULT_PROFILE_IMAGE = 'https://i.pinimg.com/736x/cf/ea/30/cfea305ef815385ef069b123625ee2c0.jpg';
 const avatarSrc = JSON.parse(localStorage.getItem('user')).profilePhoto ? JSON.parse(localStorage.getItem('user')).profilePhoto : DEFAULT_PROFILE_IMAGE;
+    return parsedUser.img ? parsedUser.img : DEFAULT_PROFILE_IMAGE;
+  }
+  return DEFAULT_PROFILE_IMAGE;
+};
+
+const avatarSrc = getUserProfilePhoto();
 
 const skills = [
   'Project Management',
@@ -84,6 +91,8 @@ export function Profile() {
       ))}
     </div>
   );
+
+  const handleOpenSkillTest = () => setOpenSkillTest(!openSkillTest);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -137,7 +146,7 @@ export function Profile() {
     if (e.target.files[0]) {
       // For previewing
       const newProfilePhoto = URL.createObjectURL(e.target.files[0]);
-      setProfile((prevProfile) => ({ ...prevProfile, profilePhoto: newProfilePhoto }));
+      setProfile((prevProfile) => ({ ...prevProfile, img: newProfilePhoto }));
     }
   };
 
@@ -323,9 +332,9 @@ export function Profile() {
                   accept="image/*"
                   onChange={handlePhotoChange2}
                 />
-                {profile.profilePhoto && (
+                {profile.img && (
                   <img
-                    src={profile.profilePhoto}
+                    src={profile.img}
                     alt="Profile Preview"
                     className="profile-preview"
                   />
