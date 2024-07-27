@@ -44,6 +44,7 @@ export function Home() {
         .then((querySnapshot)=>{
             const newData = querySnapshot.docs
                 .map((doc) => ({...doc.data(), id:doc.id }))
+                // .forEach((doc) => {console.log(doc.data())})
             setJobs(newData)
             // console.log(jobs, newData)
         }).catch(function(error) {
@@ -59,7 +60,7 @@ export function Home() {
         setJobs(data);
         setIsLoading(false)
     }).catch(function(error) {
-      console.log(error);
+      // console.log(error);
     });
   },[])
 

@@ -19,6 +19,10 @@ import {
 
 import Posting from './pages/dashboard/posting';
 
+import {
+  Home as AdminHome,
+ } from '@/pages/admin';
+
 const icon = {
   className: 'w-5 h-5 text-inherit',
 };
@@ -47,12 +51,12 @@ const sideNavRoutes = (userRole) => {
             path: '/chat',
             element: <CandidateChat />,
           },
-          {
-            icon: <InformationCircleIcon {...icon} />,
-            name: 'Notifications',
-            path: '/notifications',
-            element: <CandidateNotifications />,
-          },
+          // {
+          //   icon: <InformationCircleIcon {...icon} />,
+          //   name: 'Notifications',
+          //   path: '/notifications',
+          //   element: <CandidateNotifications />,
+          // },
         ],
       },
     ];
@@ -79,17 +83,31 @@ const sideNavRoutes = (userRole) => {
             path: '/chat',
             element: <DashboardChat />,
           },
-          {
-            icon: <InformationCircleIcon {...icon} />,
-            name: 'Notifications',
-            path: '/notifications',
-            element: <DashboardNotifications />,
-          },
+          // {
+          //   icon: <InformationCircleIcon {...icon} />,
+          //   name: 'Notifications',
+          //   path: '/notifications',
+          //   element: <DashboardNotifications />,
+          // },
           {
             icon: <InformationCircleIcon {...icon} />,
             name: 'Posting',
             path: '/posting',
             element: <Posting />,
+          },
+        ],
+      },
+    ];
+  } else if (userRole === 'admin') {
+    return [
+      {
+        layout: 'admin',
+        pages: [
+          {
+            icon: <HomeIcon {...icon} />,
+            name: 'Home',
+            path: '/home',
+            element: <AdminHome />,
           },
         ],
       },

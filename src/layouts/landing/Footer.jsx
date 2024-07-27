@@ -10,7 +10,7 @@ const Footer = () => {
           <div className="space-y-8">
             <img
               className="h-20"
-              src="./img/logo-removebg-preview (1).png"
+              src="./img/logo.png"
               alt="Company name"
             />
             <p className="text-sm leading-6 text-gray-600">
@@ -96,26 +96,26 @@ const Footer = () => {
           <div className="mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
             <div className="md:grid md:grid-cols-2 md:gap-8">
               <div>
-                <h3 className="text-sm font-semibold leading-6 text-gray-900">Solutions</h3>
+                <h3 className="text-sm font-semibold leading-6 text-gray-900">Categories</h3>
                 <ul role="list" className="mt-6 space-y-4">
                   <li>
                     <a href="#" className="text-sm leading-6 text-gray-600 hover:text-gray-900">
-                      Marketing
+                    Digital Marketing
                     </a>
                   </li>
                   <li>
                     <a href="#" className="text-sm leading-6 text-gray-600 hover:text-gray-900">
-                      Analytics
+                    Writing & Translation
                     </a>
                   </li>
                   <li>
                     <a href="#" className="text-sm leading-6 text-gray-600 hover:text-gray-900">
-                      Commerce
+                    Video & Animation
                     </a>
                   </li>
                   <li>
                     <a href="#" className="text-sm leading-6 text-gray-600 hover:text-gray-900">
-                      Insights
+                    Graphics & Design
                     </a>
                   </li>
                 </ul>
@@ -125,22 +125,22 @@ const Footer = () => {
                 <ul role="list" className="mt-6 space-y-4">
                   <li>
                     <a href="#" className="text-sm leading-6 text-gray-600 hover:text-gray-900">
-                      Pricing
+                    Help & Support
                     </a>
                   </li>
                   <li>
                     <a href="#" className="text-sm leading-6 text-gray-600 hover:text-gray-900">
-                      Documentation
+                      Hiring on Werky
                     </a>
                   </li>
                   <li>
                     <a href="#" className="text-sm leading-6 text-gray-600 hover=text-gray-900">
-                      Guides
+                      Councelling on Werky
                     </a>
                   </li>
                   <li>
                     <a href="#" className="text-sm leading-6 text-gray-600 hover=text-gray-900">
-                      API Status
+                      Projects on Werky
                     </a>
                   </li>
                 </ul>
@@ -191,7 +191,7 @@ const Footer = () => {
                     </a>
                   </li>
                   <li>
-                    <a href="#" className="text-sm leading-6 text-gray-600 hover=text-gray-900">
+                    <a href="#" class="text-sm leading-6 text-gray-600 hover=text-gray-900">
                       Terms
                     </a>
                   </li>
