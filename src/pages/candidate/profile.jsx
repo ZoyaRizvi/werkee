@@ -36,7 +36,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { db } from "@/firebase/firebase";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
-import Projects from './Projects';
 import Projects from './projects';
 
 // Default values
@@ -52,7 +51,11 @@ const defaultProfile = {
   coverPhoto: 'https://via.placeholder.com/150',
 };
 const DEFAULT_PROFILE_IMAGE = 'https://i.pinimg.com/736x/cf/ea/30/cfea305ef815385ef069b123625ee2c0.jpg';
-const avatarSrc = JSON.parse(localStorage.getItem('user')).profilePhoto ? JSON.parse(localStorage.getItem('user')).profilePhoto : DEFAULT_PROFILE_IMAGE;
+
+const getUserProfilePhoto = () => {
+  const user = localStorage.getItem('user');
+  if (user) {
+    const parsedUser = JSON.parse(user);
     return parsedUser.img ? parsedUser.img : DEFAULT_PROFILE_IMAGE;
   }
   return DEFAULT_PROFILE_IMAGE;
