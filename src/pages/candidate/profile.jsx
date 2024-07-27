@@ -95,8 +95,6 @@ export function Profile() {
     </div>
   );
 
-  const handleOpenSkillTest = () => setOpenSkillTest(!openSkillTest);
-
   useEffect(() => {
     const fetchProfile = async () => {
       try {
