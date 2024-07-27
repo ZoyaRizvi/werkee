@@ -1,42 +1,88 @@
 import React, { useEffect, useState, createContext, useContext } from "react";
 import { authorsTableData } from "@/data";
+import { useNavigate } from "react-router-dom";
 import {
   Avatar,
   Button,
   Input,
   Typography,
   select,
+  Dialog,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from "@material-tailwind/react";
 import { PlusIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import { db } from "../../firebase/firebase";
-import { collection, addDoc, query, orderBy, onSnapshot, Timestamp, where, getDocs } from "firebase/firestore";
+import { collection, addDoc, query, orderBy, onSnapshot, Timestamp, where, or, getDocs } from "firebase/firestore";
 import { useAuth } from '../../context/authContext/';
+// import { NewChat } from './newChat';
 
 export function Chat() {
   const { userLoggedIn, dbUser } = useAuth(); // Assuming useAuth provides user role
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [userEmail, setUserEmail] = useState("");
 
   // selected chat based off context provider
   const selectedChatContext = createContext(null);
   const [selectedChat, setSelectedChat] = useState(null); // todo set an initial value
+  // the "from" list
   const [uniqueChatList, setUniqueChatList] = useState([]);
   const [uniqueUsersList, setUniqueUsersList] = useState([]);
   const [initalized, setInitialized] = useState(false);
   const [finalInit, setFinalInit] = useState(false);
+  // new chat recipient email
+  const [recruiter, setRecruiter] = useState(null)
+  const [jobTitle, setJobTitle] = useState(null)
+  const [newMessagePost, setNewMessagePost] = useState("")
 
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (user) {
-      setUserEmail(user.email);
+  const navigate = useNavigate();
+
+  const handleNewSendMessage = async () => {
+    if (newMessagePost.trim()) {
+      await addDoc(collection(db, 'messages'), {
+        from: dbUser.email,
+        to: recruiter,
+        text: 'New message for job: '+jobTitle+' from '+dbUser.email,
+        timestamp: Timestamp.now(),
+      });
+      await addDoc(collection(db, 'messages'), {
+        from: dbUser.email,
+        to: recruiter,
+        text: newMessagePost,
+        timestamp: Timestamp.now(),
+      });
+      setNewMessagePost("");
+      handleOpen()
+      // show some kind of confirmation before returning to home
+      window.location.href ='/dashboard/chat'
     }
-  }, []);
+  };
+
+  const handleNewKeyPress = (event) => {
+    if (event.key === "Enter") {
+      handleSendMessage();
+      // handleOpen()
+    }
+  };
+
+  // New Chat dialog
+  const [open, setOpen] = React.useState(false);
+  const handleOpen = () => {
+    setOpen(!open);
+  };
 
   useEffect(() => {
     if (finalInit) {
-      setSelectedChat(uniqueUsersList[0])
+      // User has come through postings page
+      // e.g. url param = recruiter
+      if (recruiter) {
+        // Open newChat dialog
+        handleOpen()
+      } else {
+        setSelectedChat(uniqueUsersList[0])
+      }
     }
   }, [finalInit])
   
@@ -44,15 +90,25 @@ export function Chat() {
 
   useEffect(() => {
     if (initalized) {
-      // Get users based off associated chats, filter from:userEmail
-      const q = query(collection(db, "users"), where("email", "in", uniqueChatList), orderBy("createdAt"))
-      const unsubscribe2 = onSnapshot(q, snapshot => {
-        // Get only unique chats (since there are multiple messages from the same user)
-        setUniqueUsersList(snapshot.docs.map(doc => (doc.data())))
-        setFinalInit(true)
-      });
-      console.log(uniqueUsersList)
-      return () => unsubscribe2();
+        // Get users based off associated chats, filter from:userEmail
+        // need to handle use case where there is only messages available one way. e.g. candidate has messaged recruiter and recruiter hasn't replied
+        // Firestore throws error when given empty arrow for "in" filter
+        try {
+          const q = query(collection(db, "users"), where("email", "in", uniqueChatList), orderBy("createdAt"))
+          const unsubscribe2 = onSnapshot(q, snapshot => {
+            console.log(snapshot.docs)
+            // Get only unique chats (since there are multiple messages from the same user)
+            setUniqueUsersList(snapshot.docs.map(doc => (doc.data())))
+            setFinalInit(true)
+          });
+          return () => unsubscribe2();
+        } catch (err) {
+          console.log(err)
+          // uniqueChatList showing empty edge case
+          
+          setFinalInit(true)
+          return
+        }
     }
   }, [initalized])
 
@@ -61,15 +117,20 @@ export function Chat() {
   useEffect(() => {
     if (!dbUser) return;
     // Get users based off associated chats, filter from:userEmail
-    const q = query(collection(db, "messages"), where("from", "==", dbUser.email), orderBy("timestamp"))
+    const q = query(collection(db, "messages"), or(where("from", "==", dbUser.email),where("to", "==", dbUser.email)), orderBy("timestamp"))
     const unsubscribe = onSnapshot(q, snapshot => {
+      console.log(snapshot.docs)
       // Get only unique chats (since there are multiple messages from the same user)
       setUniqueChatList(
         [ ...new Set(snapshot.docs.map(doc => (doc.data().to))) ]
       )
+      // Make sure we initialize in the same block as the snapshot
       setInitialized(true)
+      // set the recipient of newChat object if user has been directed from postings page
+      const urlParams = new URLSearchParams(window.location.search)
+      setRecruiter(urlParams.get('reference'))
+      setJobTitle(decodeURI(urlParams.get('job')))
     });
-    console.log(uniqueChatList)
     return () => unsubscribe();
   }, [dbUser]);
 
@@ -94,28 +155,13 @@ export function Chat() {
   const handleSendMessage = async () => {
     if (newMessage.trim()) {
       await addDoc(collection(db, 'messages'), {
-        from: userEmail,
+        from: dbUser.email,
         to: selectedChat.email, // to the selectedChat (uses context provider to re-render)
         text: newMessage,
         timestamp: Timestamp.now(),
       });
       setNewMessage("");
     }
-  };
-
-  const handleAddChat = async () => {
-
-    // Popup with the fields: users email, a message
-
-    // if (newTextBoxYouCreate.trim()) {
-    //   await addDoc(collection(db, 'messages'), {
-    //     from: userEmail,
-    //     to: tofieldOnThePopup, // to the selectedChat (uses context provider to re-render)
-    //     text: newTextBoxYouCreate,
-    //     timestamp: Timestamp.now(),
-    //   });
-    //   setnewTextBoxYouCreate("");
-    // }
   };
 
   const handleKeyPress = (event) => {
@@ -134,6 +180,56 @@ export function Chat() {
 
   return (
       <div className="flex" style={{height: 'calc(100vh - 100px'}}>
+        <Dialog open={open} handler={handleOpen}>
+          <DialogBody>
+            {/* passing logged in user as prop for testing */}
+              {/* <NewChat recruiter={queryParameters} handleOpen={handleOpen}/> */}
+                  <form onSubmit={handleNewSendMessage} className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
+                      {/* Select User to send message to */}
+                      <div className="mb-4">
+                          {recruiter ?
+                          <Typography variant="regular" color="blue-gray" className="font-medium">Applying for {jobTitle ? jobTitle : null}</Typography>
+                          :
+                          <></>}
+                          <Input
+                              size="lg"
+                              placeholder="name@mail.com"
+                              className="border border-gray-300 rounded-md mt-2"
+                              value={recruiter}
+                              onChange={e => setRecruiter(e.target.value)}
+                          />
+                      </div>
+
+                      {/* Chat Window */}
+                      <div className="mb-4">
+                      <Typography variant="small" color="blue-gray" className="font-medium">Add a message</Typography>
+                          <div className="flex items-center">
+                              <Input
+                              type="text"
+                              value={newMessagePost}
+                              onChange={(e) => setNewMessagePost(e.target.value)}
+                              onKeyPress={handleNewKeyPress}
+                              placeholder="Type your message here..."
+                              className="flex-1 p-2 rounded-lg mr-4"
+                              />
+                              <Button color="blue" onClick={handleNewSendMessage}>
+                              Send
+                              </Button>
+                          </div>
+                      </div>
+                  </form>
+          </DialogBody>
+          <DialogFooter>
+              <Button
+              variant="text"
+              color="red"
+              onClick={handleOpen}
+              className="mr-1"
+              >
+              <span>Cancel</span>
+              </Button>
+          </DialogFooter>
+        </Dialog>
         {/* Sidebar */}
         <div className="w-1/4 bg-white border-r border-gray-200 p-4 overflow-y-auto" style={{height: 'calc(100vh - 120px'}}>
           <div className="flex items-center justify-between mb-4">
@@ -145,7 +241,10 @@ export function Chat() {
               icon={<MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />}
               className="w-full"
             />
-            <PlusIcon className="h-4 w-8" />
+            {/* <PlusIcon className="h-4 w-8" /> */}
+            <Button onClick={handleOpen} variant="gradient">
+              <PlusIcon className="h-4 w-8" />
+            </Button>
           </div>
           {filteredChats && filteredChats.map((chat) => (
             <div key={chat.displayName}
@@ -171,15 +270,15 @@ export function Chat() {
               <div className="border-b border-gray-200 p-4 flex items-center">
                 <Avatar src={selectedChat.img} alt={selectedChat.displayName} size="sm" variant="rounded" />
                 <Typography variant="h6" color="blue-gray" className="ml-4">
-                  {selectedChat.displayName}
+                  <p>{selectedChat.displayName} <span>{selectedChat.email}</span></p>
                 </Typography>
               </div>
             )}
             <selectedChatContext.Provider value={selectedChat}>
               <div className="flex-1 overflow-y-auto p-4">
                 {messages.map((message) => (
-                  <div key={message.data.timestamp} className={`flex ${message.data.from === userEmail ? "justify-end" : ""} mb-4`}>
-                    <div className={`flex flex-col ${message.data.from === userEmail ? "items-end" : "items-start"}`}>
+                  <div key={message.data.timestamp} className={`flex ${message.data.from === dbUser.email ? "justify-end" : ""} mb-4`}>
+                    <div className={`flex flex-col ${message.data.from === dbUser.email ? "items-end" : "items-start"}`}>
                       <Typography variant="small" color="blue-gray" className='font-semibold'>
                         {message.data.from}
                       </Typography>
