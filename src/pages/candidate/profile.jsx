@@ -56,7 +56,7 @@ const getUserProfilePhoto = () => {
   const user = localStorage.getItem('user');
   if (user) {
     const parsedUser = JSON.parse(user);
-    return parsedUser.profilePhoto ? parsedUser.profilePhoto : DEFAULT_PROFILE_IMAGE;
+    return parsedUser.img ? parsedUser.img : DEFAULT_PROFILE_IMAGE;
   }
   return DEFAULT_PROFILE_IMAGE;
 };
@@ -94,6 +94,8 @@ export function Profile() {
       ))}
     </div>
   );
+
+  const handleOpenSkillTest = () => setOpenSkillTest(!openSkillTest);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -147,7 +149,7 @@ export function Profile() {
     if (e.target.files[0]) {
       // For previewing
       const newProfilePhoto = URL.createObjectURL(e.target.files[0]);
-      setProfile((prevProfile) => ({ ...prevProfile, profilePhoto: newProfilePhoto }));
+      setProfile((prevProfile) => ({ ...prevProfile, img: newProfilePhoto }));
     }
   };
 
