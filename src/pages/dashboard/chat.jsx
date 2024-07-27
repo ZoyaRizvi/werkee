@@ -56,7 +56,7 @@ export function Chat() {
       setNewMessagePost("");
       handleOpen()
       // show some kind of confirmation before returning to home
-      window.location.href ='/dashboard/home'
+      window.location.href ='/dashboard/chat'
     }
   };
 

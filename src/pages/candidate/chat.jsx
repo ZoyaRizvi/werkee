@@ -58,7 +58,7 @@ export function Chat() {
       });
       setNewMessagePost("");
       handleOpen();
-      window.location.href = '/dashboard/home';
+      window.location.href = '/dashboard/chat';
     }
   };
 
