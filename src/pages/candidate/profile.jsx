@@ -42,7 +42,7 @@ import Projects from './projects';
 const defaultProfile = {
   name: 'Default Name',
   title: 'Default Title',
-  info: 'Default information...',
+  info: 'No Bio yet...',
   location: 'Default Location',
   facebook: '',
   twitter: '',
@@ -61,7 +61,9 @@ const getUserProfilePhoto = () => {
   return DEFAULT_PROFILE_IMAGE;
 };
 
+
 const avatarSrc = getUserProfilePhoto();
+
 
 const skills = [
   'Project Management',
@@ -80,7 +82,7 @@ export function Profile() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(!open);
-  const userid = JSON.parse(localStorage.getItem('user'))?.uid || 'default-user-id';
+  const userid = JSON.parse(localStorage.getItem('users'))?.uid || 'default-user-id';
   const [profile, setProfile] = useState(defaultProfile);
 
   const SkillButton = ({ skill }) => (
@@ -137,7 +139,6 @@ export function Profile() {
 
   const handlePhotoChange = (e) => {
     if (e.target.files[0]) {
-      // For previewing
       const newCoverPhoto = URL.createObjectURL(e.target.files[0]);
       setProfile((prevProfile) => ({ ...prevProfile, coverPhoto: newCoverPhoto }));
     }
@@ -145,7 +146,6 @@ export function Profile() {
 
   const handlePhotoChange2 = (e) => {
     if (e.target.files[0]) {
-      // For previewing
       const newProfilePhoto = URL.createObjectURL(e.target.files[0]);
       setProfile((prevProfile) => ({ ...prevProfile, profilePhoto: newProfilePhoto }));
     }
@@ -188,7 +188,7 @@ export function Profile() {
   return (
     <>
       <div className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-cover bg-center">
-        <img src={profile.coverPhoto} alt="Cover" />
+        <img src={profile.cover} alt="Cover" />
 
         <div className="absolute inset-0 h-full w-full bg-gray-900/75" />
       </div>
