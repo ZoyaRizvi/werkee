@@ -41,10 +41,10 @@ import Projects from './projects';
 
 // Default values
 const defaultProfile = {
-  name: 'Default Name',
-  title: 'Default Title',
-  info: 'Default information...',
-  location: 'Default Location',
+  name: '',
+  title: '',
+  info: '',
+  location: '',
   facebook: '',
   twitter: '',
   instagram: '',
@@ -156,10 +156,15 @@ export function Profile() {
     }
   };
 
+  const resetProfile = () => {
+    setProfile(defaultProfile);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await updateDoc(doc(db, 'users', userid), profile);
+      resetProfile();
       setOpen(false);
     } catch (error) {
       console.error('Error updating document: ', error);
@@ -339,7 +344,7 @@ export function Profile() {
               <div>
                 <label>Info:</label>
                 <input
-                  maxLength={250}
+                  maxLength={350}
                   type="text"
                   name="info"
                   value={profile.info}
