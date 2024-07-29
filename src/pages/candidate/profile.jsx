@@ -34,16 +34,17 @@ import {
   Autocomplete,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { db } from "@/firebase/firebase";
+import { db, storage } from "@/firebase/firebase";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Projects from './projects';
 
 // Default values
 const defaultProfile = {
-  name: 'Default Name',
-  title: 'Default Title',
-  info: 'Default information...',
-  location: 'Default Location',
+  name: '',
+  title: '',
+  info: '',
+  location: '',
   facebook: '',
   twitter: '',
   instagram: '',
@@ -105,7 +106,7 @@ export function Profile() {
           setProfile({
             ...defaultProfile,
             ...fetchedData,
-            skills: fetchedData.skills || defaultProfile.skills, // Ensure skills fallback to default if not present
+            skills: fetchedData.skills || defaultProfile.skills,
           });
         }
       } catch (error) {
@@ -135,32 +136,40 @@ export function Profile() {
     setProfile((prevProfile) => ({ ...prevProfile, skills: prevProfile.skills.filter((_, skillIndex) => index !== skillIndex) }));
   };
 
-  const handlePhotoChange = (e) => {
+  const handlePhotoUpload = async (file) => {
+    const storageRef = ref(storage, `images/${userid}/${file.name}`);
+    await uploadBytes(storageRef, file);
+    return getDownloadURL(storageRef);
+  };
+
+  const handlePhotoChange = async (e) => {
     if (e.target.files[0]) {
-      // For previewing
-      const newCoverPhoto = URL.createObjectURL(e.target.files[0]);
-      setProfile((prevProfile) => ({ ...prevProfile, coverPhoto: newCoverPhoto }));
+      const newCoverPhotoURL = await handlePhotoUpload(e.target.files[0]);
+      setProfile((prevProfile) => ({ ...prevProfile, coverPhoto: newCoverPhotoURL }));
     }
   };
 
-  const handlePhotoChange2 = (e) => {
+  const handlePhotoChange2 = async (e) => {
     if (e.target.files[0]) {
-      // For previewing
-      const newProfilePhoto = URL.createObjectURL(e.target.files[0]);
-      setProfile((prevProfile) => ({ ...prevProfile, img: newProfilePhoto }));
+      const newProfilePhotoURL = await handlePhotoUpload(e.target.files[0]);
+      setProfile((prevProfile) => ({ ...prevProfile, profilePhoto: newProfilePhotoURL }));
     }
+  };
+
+  const resetProfile = () => {
+    setProfile(defaultProfile);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await updateDoc(doc(db, 'users', userid), profile);
+      resetProfile();
       setOpen(false);
     } catch (error) {
       console.error('Error updating document: ', error);
     }
 
-    window.location.reload();
   };
 
   const handleTabChange = (value) => {
@@ -173,23 +182,15 @@ export function Profile() {
     navigate('/skillassessment', { state: { skill } });
   };
 
-  const validateForm = () => {
-    const errors = {};
-    if (!profile.name) {
-      errors.name = 'Name is required';
-    }
-    if (!profile.email || !/\S+@\S+\.\S+/.test(profile.email)) {
-      errors.email = 'Valid email is required';
-    }
-    setErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
   return (
     <>
-      <div className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-cover bg-center">
+      <div style={{backgroundImage:{...profile.coverPhoto},
+      backgroundSize:'cover',
+      backgroundRepeat: 'no-repeat',
+    backgroundSize:"100%"}
+      }
+       className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-cover bg-center">
         <img src={profile.coverPhoto} alt="Cover" />
-
         <div className="absolute inset-0 h-full w-full bg-gray-900/75" />
       </div>
       <Card className="mx-3 -mt-16 mb-6 lg:mx-4 border border-blue-gray-100">
@@ -197,7 +198,7 @@ export function Profile() {
           <div className="mb-10 flex items-center justify-between flex-wrap gap-6">
             <div className="flex items-center gap-6">
               <Avatar
-                src={avatarSrc}
+                src={profile.profilePhoto || avatarSrc}
                 alt="Profile"
                 size="xl"
                 variant="rounded"
@@ -275,7 +276,7 @@ export function Profile() {
             />
           </div>
           <div>
-            <Projects/>
+            <Projects />
           </div>
         </CardBody>
       </Card>
@@ -333,9 +334,9 @@ export function Profile() {
                   accept="image/*"
                   onChange={handlePhotoChange2}
                 />
-                {profile.img && (
+                {profile.profilePhoto && (
                   <img
-                    src={profile.img}
+                    src={profile.profilePhoto}
                     alt="Profile Preview"
                     className="profile-preview"
                   />
@@ -344,7 +345,7 @@ export function Profile() {
               <div>
                 <label>Info:</label>
                 <input
-                  maxLength={250}
+                  maxLength={350}
                   type="text"
                   name="info"
                   value={profile.info}
