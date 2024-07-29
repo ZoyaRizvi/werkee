@@ -37,6 +37,7 @@ import { useNavigate } from 'react-router-dom';
 import { db, storage } from "@/firebase/firebase";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import Jobs from './Jobs';
 
 
 // Default values
@@ -242,7 +243,8 @@ export function Profile() {
             />
           </div>
           <div>
-            {/* <Projects /> */}
+            <Jobs/>
+          
           </div>
         </CardBody>
       </Card>
