@@ -21,6 +21,7 @@ const Jobs = () => {
   });
   const [image, setImage] = useState(null);
   const [companyLogo, setCompanyLogo] = useState(null);
+  const [editJobId, setEditJobId] = useState(null); // Track the job being edited
 
   useEffect(() => {
     fetchJobs();
@@ -71,7 +72,13 @@ const Jobs = () => {
 
       const postedDate = new Date().toISOString(); // Get the current date and time
 
-      await addDoc(collection(db, "projects", user.uid, "jobs"), { ...newJob, img: imageUrl, companyLogo: companyLogoUrl, postedDate });
+      await addDoc(collection(db, "projects", user.uid, "jobs"), {
+        ...newJob,
+        img: imageUrl,
+        companyLogo: companyLogoUrl,
+        postedDate,
+        recruiter_id: user.uid // Add recruiter_id field
+      });
       fetchJobs();
       setIsModalOpen(false);
       setImage(null); // Reset image state
@@ -93,13 +100,60 @@ const Jobs = () => {
     }
   };
 
-  const handleUpdateJob = async (id) => {
+  const handleEditJob = (job) => {
+    setNewJob({
+      img: job.img,
+      title: job.title,
+      tag: job.tag,
+      description: job.description,
+      route: job.route,
+      Requirements: job.Requirements,
+      experienceLevel: job.experienceLevel,
+      jobLocation: job.jobLocation,
+      employmentType: job.employmentType,
+      companyName: job.companyName,
+      companyLogo: job.companyLogo,
+      postedDate: job.postedDate
+    });
+    setEditJobId(job.id); // Set the job ID being edited
+    setIsModalOpen(true);
+  };
+
+  const handleUpdateJob = async () => {
     const user = auth.currentUser;
-    if (user) {
-      const jobRef = doc(db, "projects", user.uid, "jobs", id);
-      await updateDoc(jobRef, newJob);
+    if (user && editJobId) {
+      const jobRef = doc(db, "projects", user.uid, "jobs", editJobId);
+      console.log("Updating job with ID:", editJobId);
+      console.log("New job data:", newJob);
+
+      let imageUrl = newJob.img;
+      if (image) {
+        const storageRef = ref(storage, `projects/${user.uid}/${image.name}`);
+        await uploadBytes(storageRef, image);
+        imageUrl = await getDownloadURL(storageRef);
+      }
+
+      let companyLogoUrl = newJob.companyLogo;
+      if (companyLogo) {
+        const storageRef = ref(storage, `projects/${user.uid}/${companyLogo.name}`);
+        await uploadBytes(storageRef, companyLogo);
+        companyLogoUrl = await getDownloadURL(storageRef);
+      }
+
+      await updateDoc(jobRef, {
+        title: newJob.title,
+        description: newJob.description,
+        Requirements: newJob.Requirements,
+        experienceLevel: newJob.experienceLevel,
+        jobLocation: newJob.jobLocation,
+        employmentType: newJob.employmentType,
+        companyName: newJob.companyName,
+        img: imageUrl,
+        companyLogo: companyLogoUrl
+      });
       fetchJobs();
       setIsModalOpen(false);
+      setEditJobId(null); // Reset editJobId
     }
   };
 
@@ -132,7 +186,7 @@ const Jobs = () => {
           <Grid item xs={12} sm={6} md={6} lg={6} key={id}>
             <Card>
               <CardContent>
-              <img src={companyLogo} alt="Company Logo" style={{ width: '50px', height: '50px' }} />
+                <img src={companyLogo} alt="Company Logo" style={{ width: '50px', height: '50px' }} />
                 <Typography variant="h6">{title}</Typography>
                 <Typography variant="body2">
                   {description}
@@ -155,13 +209,12 @@ const Jobs = () => {
                 <Typography variant="body2">
                   Posted Date: {new Date(postedDate).toLocaleDateString()}
                 </Typography>
-               
               </CardContent>
               <CardActions>
                 <Button variant="outlined" size="small" href={route}>
                   View Job
                 </Button>
-                <Button variant="outlined" size="small" onClick={() => handleUpdateJob(id)}>
+                <Button variant="outlined" size="small" onClick={() => handleEditJob({ id, img, title, tag, description, route, Requirements, experienceLevel, jobLocation, employmentType, companyName, companyLogo, postedDate })}>
                   Edit
                 </Button>
                 <Button variant="outlined" size="small" onClick={() => handleDeleteJob(id)}>
@@ -191,7 +244,7 @@ const Jobs = () => {
           boxShadow: '0 4px 8px rgba(0,0,0,0.2)' 
         }}>
           <Typography id="upload-job-modal" variant="h6" component="h2">
-            Add New Job
+            {editJobId ? "Edit Job" : "Add New Job"}
           </Typography>
           <TextField
             name="title"
@@ -234,13 +287,20 @@ const Jobs = () => {
             style={{ marginBottom: '16px' }}
           />
           <div className="w-full md:w-3/12 mb-4 md:mb-0">
-            <label className="block text-gray-700 text-sm mb-2" htmlFor="employmentType">Employment Type</label>
+            <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="employmentType">
+              Employment Type
+            </label>
             <div className="relative">
-              <select className="block appearance-none w-full bg-white border border-gray-400 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-gray-500" id="employmentType" name="employmentType" value={newJob.employmentType} onChange={handleInputChange}>
-                <option>Full-time</option>
-                <option>Part-time</option>
-                <option>Freelance</option>
-                <option>Contract</option>
+              <select
+                name="employmentType"
+                value={newJob.employmentType}
+                onChange={handleInputChange}
+                className="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+              >
+                <option value="Full-time">Full-time</option>
+                <option value="Part-time">Part-time</option>
+                <option value="Freelance">Freelance</option>
+                <option value="Contract">Contract</option>
               </select>
             </div>
           </div>
@@ -252,9 +312,34 @@ const Jobs = () => {
             fullWidth
             style={{ marginBottom: '16px' }}
           />
-          <input type="file" onChange={handleLogoChange} style={{ marginBottom: '16px' }} />
-          <Button variant="contained" color="primary" onClick={handleAddJob}>
-            Add Job
+          <TextField
+            name="route"
+            label="Route"
+            value={newJob.route}
+            onChange={handleInputChange}
+            fullWidth
+            style={{ marginBottom: '16px' }}
+          />
+          <div className="w-full md:w-3/12 mb-4 md:mb-0">
+            <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="companyLogo">
+              Company Logo
+            </label>
+            <div className="relative">
+              <input
+                type="file"
+                onChange={handleLogoChange}
+                className="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+              />
+            </div>
+          </div>
+          <div className="w-full md:w-3/12 mb-4 md:mb-0">
+            <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="img">
+              Job Image
+            </label>
+
+          </div>
+          <Button variant="contained" color="primary" onClick={editJobId ? handleUpdateJob : handleAddJob}>
+            {editJobId ? "Update Job" : "Add Job"}
           </Button>
         </div>
       </Modal>
@@ -263,3 +348,4 @@ const Jobs = () => {
 };
 
 export default Jobs;
+

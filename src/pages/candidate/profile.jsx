@@ -186,8 +186,7 @@ export function Profile() {
     <>
       <div style={{backgroundImage:{...profile.coverPhoto},
       backgroundSize:'cover',
-      backgroundRepeat: 'no-repeat',
-    backgroundSize:"100%"}
+      backgroundRepeat: 'no-repeat'}
       }
        className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-cover bg-center">
         <img src={profile.coverPhoto} alt="Cover" />
