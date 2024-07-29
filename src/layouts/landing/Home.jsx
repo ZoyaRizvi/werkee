@@ -16,9 +16,9 @@ export default function Home() {
       <Navbar/>
       <Banner/>
       <TrustedBy/>
-      <Whyteens/>
-      <AboutWerky/>
-      <Counselling/>
+      <Whyteens />
+      <AboutWerky />
+      <Counselling />
       <Talent/>
        <SkillAssessment/>
        <Messaging/>
