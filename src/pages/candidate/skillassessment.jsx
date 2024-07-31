@@ -2,7 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import { db } from "../../firebase/firebase";
-import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, doc, getDoc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth'; // Import this to get the current user
+import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa'; // Add icons for pass/fail
 
 function SkillAssessment() {
   const [questions, setQuestions] = useState([]);
@@ -11,6 +13,7 @@ function SkillAssessment() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showScoreDialog, setShowScoreDialog] = useState(false);
+  const [passStatus, setPassStatus] = useState(''); // Pass/Fail status
   const location = useLocation();
   const navigate = useNavigate();
   const { skill } = location.state || {};
@@ -70,6 +73,34 @@ function SkillAssessment() {
           response: answers,
           score: userScore
         });
+
+        // Determine pass/fail based on the score
+        const status = userScore >= 8 ? 'Passed' : 'Failed';
+        setPassStatus(status);
+
+        // Update user document if passed
+        if (status === 'Passed') {
+          const auth = getAuth(); // Get authentication instance
+          const user = auth.currentUser; // Get current user
+
+          if (user) {
+            const userDocRef = doc(db, 'users', user.uid); // Get user document reference
+
+            // Fetch the existing user document
+            const userDoc = await getDoc(userDocRef);
+            const userData = userDoc.data();
+
+            // Append the new badge to the existing badges field
+            const existingBadges = userData.badges ? userData.badges.split(',') : [];
+            if (!existingBadges.includes(skill)) {
+              existingBadges.push(skill);
+              await updateDoc(userDocRef, {
+                badges: existingBadges.join(',')
+              });
+            }
+          }
+        }
+
         setScore(userScore);
         setShowScoreDialog(true);
       } catch (error) {
@@ -81,6 +112,41 @@ function SkillAssessment() {
   function handleDialogClose() {
     navigate('/dashboard/profile');
   }
+
+  const dialogStyle = {
+    backgroundColor: 'white',
+    padding: '2rem',
+    borderRadius: '8px',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    maxWidth: '400px',
+    width: '100%',
+    textAlign: 'center',
+  };
+
+  const passStyle = {
+    color: 'green',
+    fontSize: '2rem',
+  };
+
+  const failStyle = {
+    color: 'red',
+    fontSize: '2rem',
+  };
+
+  const progressBarStyle = {
+    height: '10px',
+    borderRadius: '5px',
+    backgroundColor: '#e0e0e0',
+    overflow: 'hidden',
+    margin: '1rem 0',
+  };
+
+  const progressStyle = {
+    height: '100%',
+    width: `${(score / questions.length) * 100}%`,
+    backgroundColor: score >= 8 ? 'green' : 'red',
+    transition: 'width 0.3s ease',
+  };
 
   return (
     <div className="bg-gradient-to-r from-blue-50 to-blue-100 min-h-screen p-8 flex flex-col items-center">
@@ -136,9 +202,17 @@ function SkillAssessment() {
 
       {showScoreDialog && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-sm w-full">
-            <h2 className="text-2xl font-bold text-green-800 mb-4">Your Score</h2>
-            <p className="text-4xl font-semibold text-green-800 mb-4">{score}/{questions.length}</p>
+          <div style={dialogStyle}>
+            <h2 className="text-2xl font-bold mb-4" style={{ color: passStatus === 'Passed' ? 'green' : 'red' }}>
+              <span className="mr-2">
+                {passStatus === 'Passed' ? <FaCheckCircle style={passStyle} /> : <FaTimesCircle style={failStyle} />}
+              </span>
+              {passStatus === 'Passed' ? 'Congratulations!' : 'Sorry!'}
+            </h2>
+            <p className="text-xl mb-4">You scored <span className="font-bold">{score}</span> out of <span className="font-bold">{questions.length}</span></p>
+            <div style={progressBarStyle}>
+              <div style={progressStyle}></div>
+            </div>
             <button 
               onClick={handleDialogClose} 
               className="py-2 px-4 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700"
