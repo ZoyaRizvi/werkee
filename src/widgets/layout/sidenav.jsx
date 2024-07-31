@@ -1,12 +1,7 @@
 import PropTypes from "prop-types";
 import { Link, NavLink } from "react-router-dom";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import {
-  Avatar,
-  Button,
-  IconButton,
-  Typography,
-} from "@material-tailwind/react";
+import { Avatar, Button, IconButton, Typography } from "@material-tailwind/react";
 import { useMaterialTailwindController, setOpenSidenav } from "@/context";
 
 export function Sidenav({ brandImg, brandName, routes }) {
@@ -24,16 +19,12 @@ export function Sidenav({ brandImg, brandName, routes }) {
         openSidenav ? "translate-x-0" : "-translate-x-80"
       } fixed inset-0 z-50 my-4 ml-4 h-[calc(100vh-32px)] w-72 rounded-xl transition-transform duration-300 xl:translate-x-0 border border-blue-gray-100`}
     >
-      <div
-        className={`relative`}
-      >
+      <div className="relative">
         <Link to="/" className="py-6 px-8 text-center">
-          <Typography
-            variant="h6"
-            color={sidenavTypes === "dark" ? "white" : "blue-gray"}
-          >
-            {brandName}
-          </Typography>
+          <div className="navbar-brand" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100px' }}>
+          <img src={brandImg} style={{ width: '200px', height: '70px', marginTop: '10px' }}
+          />
+          </div>
         </Link>
         <IconButton
           variant="text"
@@ -53,7 +44,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
               <li className="mx-3.5 mt-4 mb-2">
                 <Typography
                   variant="small"
-                  color={sidenavTypes === "dark" ? "white" : "blue-gray"}
+                  color={sidenavType === "dark" ? "white" : "blue-gray"}
                   className="font-black uppercase opacity-75"
                 >
                   {title}
@@ -66,13 +57,6 @@ export function Sidenav({ brandImg, brandName, routes }) {
                   {({ isActive }) => (
                     <Button
                       variant={isActive ? "gradient" : "text"}
-                      // color={
-                      //   isActive
-                      //     ? sidenavColor
-                      //     : sidenavTypes === "dark"
-                      //     ? "white"
-                      //     : "blue-gray"
-                      // }
                       className="flex items-center gap-4 px-4 capitalize"
                       fullWidth
                     >
@@ -96,16 +80,14 @@ export function Sidenav({ brandImg, brandName, routes }) {
 }
 
 Sidenav.defaultProps = {
-  brandImg: "/img/logo.png",
-  brandName: "Werky",
+  brandImg: "/img/logo.png", 
 };
 
 Sidenav.propTypes = {
   brandImg: PropTypes.string,
-  brandName: PropTypes.string,
   routes: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
-Sidenav.displayName = "/src/widgets/layout/sidnave.jsx";
+Sidenav.displayName = "/src/widgets/layout/sidenav.jsx";
 
 export default Sidenav;

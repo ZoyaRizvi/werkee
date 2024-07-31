@@ -44,12 +44,6 @@ export function Chat() {
       await addDoc(collection(db, 'messages'), {
         from: dbUser.email,
         to: recruiter,
-        text: 'New message for job: '+jobTitle+' from '+dbUser.email,
-        timestamp: Timestamp.now(),
-      });
-      await addDoc(collection(db, 'messages'), {
-        from: dbUser.email,
-        to: recruiter,
         text: newMessagePost,
         timestamp: Timestamp.now(),
       });

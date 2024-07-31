@@ -32,7 +32,7 @@ const Dashboard = () => {
     (    <div className="bg-blue-gray-50/50" style={{height: 'calc(100vh - 100px'}}>
         <Sidenav
           routes={sideNavRoutes(dbUser.role)} // Assuming routes[0].pages is correct based on sideNavRoutes structure
-          brandImg={sidenavType === 'dark' ? '/img/logo.png' : '/img/logo-ct-dark.png'}
+          brandImg={sidenavType === 'dark' ? '/img/logo.png' : '/img/logo.png'}
         />
         <div className="p-4 xl:ml-80">
           <DashboardNavbar />
