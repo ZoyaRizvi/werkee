@@ -1,77 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import './profile.css';
-import {
-  Card,
-  CardBody,
-  Avatar,
-  Typography,
-  Tabs,
-  TabsHeader,
-  Tab,
-  Tooltip,
-  Button,
-} from '@material-tailwind/react';
-import {
-  HomeIcon,
-  ChatBubbleLeftEllipsisIcon,
-  LightBulbIcon,
-  PencilIcon,
-} from '@heroicons/react/24/solid';
+import { Card, CardBody, Avatar, Typography, Tabs, TabsHeader, Tab, Tooltip, Button } from '@material-tailwind/react';
+import { HomeIcon, ChatBubbleLeftEllipsisIcon, LightBulbIcon, PencilIcon } from '@heroicons/react/24/solid';
 import { ProfileInfoCard } from '@/widgets/cards';
 import { useAuth } from '../../context/authContext/index';
-import {
-  Dialog,
-  DialogHeader,
-  DialogBody,
-  DialogFooter,
-} from '@material-tailwind/react';
-import {
-  Dialog as MuiDialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Autocomplete,
-} from '@mui/material';
+import { Dialog as MuiDialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { db, storage } from "@/firebase/firebase";
+import { db } from "@/firebase/firebase";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import Projects from './Projects';
+import Projects from './projects';
 
 // Default values
 const defaultProfile = {
-  name: '',
-  title: '',
-  info: '',
-  location: '',
+  name: 'Default Name',
+  title: 'Default Title',
+  info: 'Default information...',
+  location: 'Default Location',
   facebook: '',
   twitter: '',
   instagram: '',
   skills: [],
   coverPhoto: 'https://via.placeholder.com/150',
+  profilePhoto: 'https://i.pinimg.com/736x/cf/ea/30/cfea305ef815385ef069b123625ee2c0.jpg',
 };
-const DEFAULT_PROFILE_IMAGE = 'https://i.pinimg.com/736x/cf/ea/30/cfea305ef815385ef069b123625ee2c0.jpg';
-
-const getUserProfilePhoto = () => {
-  const user = localStorage.getItem('user');
-  if (user) {
-    const parsedUser = JSON.parse(user);
-    return parsedUser.img ? parsedUser.img : DEFAULT_PROFILE_IMAGE;
-  }
-  return DEFAULT_PROFILE_IMAGE;
-};
-
-const avatarSrc = getUserProfilePhoto();
 
 const skills = [
-  'Project Management',
-  'DevOps',
-  'Content Writing',
-  'Video Editing',
-  'Marketing',
-  'Technical Writing',
-  'SQA',
+  { name: 'Project Management', description: 'Manage projects effectively.' },
+  { name: 'DevOps', description: 'DevOps practices and tools.' },
+  { name: 'Content Writing', description: 'Creating and managing content.' },
+  { name: 'Video Editing', description: 'Editing video content.' },
+  { name: 'Marketing', description: 'Marketing strategies and implementation.' },
+  { name: 'Technical Writing', description: 'Writing technical documentation.' },
+  { name: 'SQA', description: 'Software Quality Assurance.' },
 ];
 
 export function Profile() {
@@ -83,18 +43,13 @@ export function Profile() {
   const handleOpen = () => setOpen(!open);
   const userid = JSON.parse(localStorage.getItem('user'))?.uid || 'default-user-id';
   const [profile, setProfile] = useState(defaultProfile);
+  const [errors, setErrors] = useState({});
 
-  const SkillButton = ({ skill }) => (
-    <button className="button">{skill}</button>
-  );
+  const handleStartTest = (skill) => {
+    navigate('/skillassessment', { state: { skill } });
+  };
 
-  const SkillsContainer = () => (
-    <div id="skills-container">
-      {(profile.skills.length > 0 ? profile.skills : defaultProfile.skills).map((skill, index) => (
-        <SkillButton key={index} skill={skill} />
-      ))}
-    </div>
-  );
+  const handleOpenSkillTest = () => setOpenSkillTest(!openSkillTest);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -124,7 +79,9 @@ export function Profile() {
   };
 
   const handleSkillChange = (index, event) => {
-    const newSkills = profile.skills.map((skill, skillIndex) => (index !== skillIndex ? skill : event.target.value));
+    const newSkills = profile.skills.map((skill, skillIndex) => (
+      index !== skillIndex ? skill : event.target.value
+    ));
     setProfile((prevProfile) => ({ ...prevProfile, skills: newSkills }));
   };
 
@@ -133,63 +90,85 @@ export function Profile() {
   };
 
   const handleRemoveSkill = (index) => {
-    setProfile((prevProfile) => ({ ...prevProfile, skills: prevProfile.skills.filter((_, skillIndex) => index !== skillIndex) }));
+    setProfile((prevProfile) => ({
+      ...prevProfile,
+      skills: prevProfile.skills.filter((_, skillIndex) => index !== skillIndex)
+    }));
   };
 
-  const handlePhotoUpload = async (file) => {
-    const storageRef = ref(storage, `images/${userid}/${file.name}`);
-    await uploadBytes(storageRef, file);
-    return getDownloadURL(storageRef);
-  };
-
-  const handlePhotoChange = async (e) => {
+  const handlePhotoChange = (e) => {
     if (e.target.files[0]) {
-      const newCoverPhotoURL = await handlePhotoUpload(e.target.files[0]);
-      setProfile((prevProfile) => ({ ...prevProfile, coverPhoto: newCoverPhotoURL }));
+      // For previewing
+      const newCoverPhoto = URL.createObjectURL(e.target.files[0]);
+      setProfile((prevProfile) => ({ ...prevProfile, coverPhoto: newCoverPhoto }));
     }
   };
 
-  const handlePhotoChange2 = async (e) => {
+  const handleProfilePhotoChange = (e) => {
     if (e.target.files[0]) {
-      const newProfilePhotoURL = await handlePhotoUpload(e.target.files[0]);
-      setProfile((prevProfile) => ({ ...prevProfile, profilePhoto: newProfilePhotoURL }));
+      // For previewing
+      const newProfilePhoto = URL.createObjectURL(e.target.files[0]);
+      setProfile((prevProfile) => ({ ...prevProfile, profilePhoto: newProfilePhoto }));
     }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    try {
+      await updateDoc(doc(db, 'users', userid), {
+        name: profile.name,
+        title: profile.title,
+        info: profile.info,
+        location: profile.location,
+        facebook: profile.facebook,
+        twitter: profile.twitter,
+        instagram: profile.instagram,
+        coverPhoto: profile.coverPhoto,
+        profilePhoto: profile.profilePhoto,
+        skills: profile.skills
+      });
+      setOpen(false);
+    } catch (error) {
+      console.error('Error updating document: ', error);
+    }
+  };
+
+  const handleSkillSelect = (skillName) => {
+    setSelectedSkill(skillName);
+    handleStartTest(skillName);
+    setOpenSkillTest(false);
+  };
+
+  const validateForm = () => {
+    const errors = {};
+    if (!profile.name) {
+      errors.name = 'Name is required';
+    }
+    if (!profile.email || !/\S+@\S+\.\S+/.test(profile.email)) {
+      errors.email = 'Valid email is required';
+    }
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const resetProfile = () => {
     setProfile(defaultProfile);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await updateDoc(doc(db, 'users', userid), profile);
-      resetProfile();
-      setOpen(false);
-    } catch (error) {
-      console.error('Error updating document: ', error);
-    }
-
-  };
-
-  const handleTabChange = (value) => {
-    if (value === 'skillassessment') {
-      setOpenSkillTest(true);
-    }
-  };
-
-  const handleStartTest = (skill) => {
-    navigate('/skillassessment', { state: { skill } });
-  };
-
   return (
     <>
-      <div style={{backgroundImage:{...profile.coverPhoto},
-      backgroundSize:'cover',
-      backgroundRepeat: 'no-repeat'}
-      }
-       className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-cover bg-center">
+      <div
+        style={{
+          backgroundImage: `url(${profile.coverPhoto})`,
+          backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat'
+        }}
+        className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-cover bg-center"
+      >
         <img src={profile.coverPhoto} alt="Cover" />
+
         <div className="absolute inset-0 h-full w-full bg-gray-900/75" />
       </div>
       <Card className="mx-3 -mt-16 mb-6 lg:mx-4 border border-blue-gray-100">
@@ -197,7 +176,7 @@ export function Profile() {
           <div className="mb-10 flex items-center justify-between flex-wrap gap-6">
             <div className="flex items-center gap-6">
               <Avatar
-                src={profile.profilePhoto || avatarSrc}
+                src={profile.profilePhoto}
                 alt="Profile"
                 size="xl"
                 variant="rounded"
@@ -207,16 +186,13 @@ export function Profile() {
                 <Typography variant="h5" color="blue-gray" className="mb-1">
                   {profile.name}
                 </Typography>
-                <Typography
-                  variant="small"
-                  className="font-normal text-blue-gray-600"
-                >
+                <Typography variant="small" className="font-normal text-blue-gray-600">
                   {profile.title}
                 </Typography>
               </div>
             </div>
             <div className="w-96">
-              <Tabs value="app" onChange={(e, value) => handleTabChange(value)}>
+              <Tabs value="app">
                 <TabsHeader>
                   <Tab value="app">
                     <HomeIcon className="-mt-1 mr-2 inline-block h-5 w-5" />
@@ -235,17 +211,10 @@ export function Profile() {
             </div>
           </div>
           <div className="grid-cols-1 mb-12 grid gap-12 px-4 lg:grid-cols-2 xl:grid-cols-2">
-            <ProfileInfoCard
-              title="Profile Information"
-              description={profile.info}
-            />
+            <ProfileInfoCard title="Profile Information" description={profile.info} />
             <ProfileInfoCard
               details={{
-                location: (
-                  <div className="flex items-center gap-4">
-                    {profile.location}
-                  </div>
-                ),
+                location: <div className="flex items-center gap-4">{profile.location}</div>,
                 social: (
                   <div className="flex items-center gap-4">
                     {profile.facebook && (
@@ -265,7 +234,15 @@ export function Profile() {
                     )}
                   </div>
                 ),
-                skills: <SkillsContainer />
+                skills: (
+                  <div id="skills-container">
+                    {profile.skills.length > 0 ? profile.skills.map((skill, index) => (
+                      <button key={index} className="button">{skill}</button>
+                    )) : defaultProfile.skills.map((skill, index) => (
+                      <button key={index} className="button">{skill}</button>
+                    ))}
+                  </div>
+                )
               }}
               action={
                 <Tooltip content="Edit Profile">
@@ -280,173 +257,177 @@ export function Profile() {
         </CardBody>
       </Card>
 
-      <MuiDialog open={openSkillTest} onClose={() => setOpenSkillTest(false)}>
-        <DialogTitle>Select a Skill</DialogTitle>
+      {/* Skill Dialog */}
+      <MuiDialog open={openSkillTest} onClose={() => setOpenSkillTest(false)} fullWidth maxWidth="sm">
+        <DialogTitle className="flex items-center gap-2 text-blue-600">
+          <LightBulbIcon className="h-6 w-6" />
+          Select a Skill
+        </DialogTitle>
         <DialogContent>
-          <Autocomplete
-            options={skills}
-            freeSolo
-            onInputChange={(event, newValue) => setSelectedSkill(newValue)}
-            renderInput={(params) => (
-              <TextField {...params} label="Skill" variant="outlined" />
-            )}
-          />
+          <div className="grid grid-cols-2 gap-4 p-4">
+            {skills.map((skill) => (
+              <Tooltip key={skill.name} title={skill.description} placement="top">
+                <Button
+                  variant={selectedSkill === skill.name ? 'contained' : 'outlined'}
+                  color="primary"
+                  onClick={() => handleSkillSelect(skill.name)}
+                  className={`transition-transform duration-300 transform ${
+                    selectedSkill === skill.name ? 'scale-105' : 'scale-100'
+                  }`}
+                >
+                  {skill.name}
+                </Button>
+              </Tooltip>
+            ))}
+          </div>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenSkillTest(false)}>Cancel</Button>
-          <Button
-            onClick={() => { handleStartTest(selectedSkill); setOpenSkillTest(false); }}
-            disabled={!selectedSkill}
-          >
-            Start Test
+          <Button onClick={() => setOpenSkillTest(false)} color="gray">
+            Close
           </Button>
         </DialogActions>
       </MuiDialog>
 
-      <Dialog open={open} handler={handleOpen}>
-        <DialogHeader><h1>Edit Profile</h1></DialogHeader>
-        <DialogBody className="h-[42rem] overflow-scroll">
-          <div className="form-container">
-            <form onSubmit={handleSubmit}>
-              <div>
-                <label>Name:</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={profile.name}
-                  onChange={handleChange}
-                  required
+      {/* Edit Profile Dialog */}
+      <MuiDialog open={open} onClose={handleOpen} fullWidth maxWidth="sm">
+        <DialogTitle>Edit Profile</DialogTitle>
+        <DialogContent>
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label className="block text-gray-700">Name</label>
+              <input
+                type="text"
+                name="name"
+                value={profile.name}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+              {errors.name && <p className="text-red-500">{errors.name}</p>}
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Title</label>
+              <input
+                type="text"
+                name="title"
+                value={profile.title}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Info</label>
+              <textarea
+                name="info"
+                value={profile.info}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Location</label>
+              <input
+                type="text"
+                name="location"
+                value={profile.location}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Facebook</label>
+              <input
+                type="text"
+                name="facebook"
+                value={profile.facebook}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Twitter</label>
+              <input
+                type="text"
+                name="twitter"
+                value={profile.twitter}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Instagram</label>
+              <input
+                type="text"
+                name="instagram"
+                value={profile.instagram}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Profile Photo:</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleProfilePhotoChange}
+              />
+              {profile.profilePhoto && (
+                <img
+                  src={profile.profilePhoto}
+                  alt="Profile Preview"
+                  className="profile-preview"
                 />
-                <label>Title:</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={profile.title}
-                  onChange={handleChange}
-                  required
+              )}
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Cover Photo:</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoChange}
+              />
+              {profile.coverPhoto && (
+                <img
+                  src={profile.coverPhoto}
+                  alt="Cover Preview"
+                  className="cover-preview"
                 />
-              </div>
-              <div>
-                <label>Profile Photo:</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoChange2}
-                />
-                {profile.profilePhoto && (
-                  <img
-                    src={profile.profilePhoto}
-                    alt="Profile Preview"
-                    className="profile-preview"
+              )}
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Skills:</label>
+              {profile.skills.map((skill, index) => (
+                <div key={index} className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={skill}
+                    onChange={(e) => handleSkillChange(index, e)}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
                   />
-                )}
-              </div>
-              <div>
-                <label>Info:</label>
-                <input
-                  maxLength={350}
-                  type="text"
-                  name="info"
-                  value={profile.info}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div>
-                <label>Location:</label>
-                <input
-                  type="text"
-                  name="location"
-                  value={profile.location}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div>
-                <label>Facebook URL:</label>
-                <input
-                  type="url"
-                  name="facebook"
-                  value={profile.facebook}
-                  onChange={handleChange}
-                />
-              </div>
-              <div>
-                <label>Twitter URL:</label>
-                <input
-                  type="url"
-                  name="twitter"
-                  value={profile.twitter}
-                  onChange={handleChange}
-                />
-              </div>
-              <div>
-                <label>Instagram URL:</label>
-                <input
-                  type="url"
-                  name="instagram"
-                  value={profile.instagram}
-                  onChange={handleChange}
-                />
-              </div>
-              <div>
-                <label>Cover Photo:</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoChange}
-                />
-                {profile.coverPhoto && (
-                  <img
-                    src={profile.coverPhoto}
-                    alt="Cover Preview"
-                    className="cover-preview"
-                  />
-                )}
-              </div>
-              <div className="skills-container">
-                <label>Skills:</label>
-                {profile.skills.map((skill, index) => (
-                  <div key={index} className="skill-input">
-                    <input
-                      type="text"
-                      value={skill}
-                      onChange={(e) => handleSkillChange(index, e)}
-                    />
-                    <button
-                      type="button"
-                      className="remove-skill-btn"
-                      onClick={() => handleRemoveSkill(index)}
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  className="add-skill-btn"
-                  onClick={handleAddSkill}
-                >
-                  Add Skill
-                </button>
-              </div>
-              <button variant="gradient" color="green" type="submit">
-                Submit
-              </button>
-            </form>
-          </div>
-        </DialogBody>
-        <DialogFooter>
-          <Button
-            variant="text"
-            color="red"
-            onClick={handleOpen}
-            className="mr-1"
-          >
-            <span>Cancel</span>
+                  <Button type="button" onClick={() => handleRemoveSkill(index)} color="red">
+                    Remove
+                  </Button>
+                </div>
+              ))}
+              <Button type="button" onClick={handleAddSkill}>
+                Add Skill
+              </Button>
+            </div>
+            <div className="flex justify-end gap-4">
+              <Button type="button" onClick={resetProfile} color="gray">
+                Reset
+              </Button>
+              <Button type="submit" color="blue">
+                Save Changes
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleOpen} color="gray">
+            Close
           </Button>
-        </DialogFooter>
-      </Dialog>
+        </DialogActions>
+      </MuiDialog>
     </>
   );
 }
