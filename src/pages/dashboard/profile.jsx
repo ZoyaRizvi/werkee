@@ -147,6 +147,7 @@ export function Profile() {
     } catch (error) {
       console.error('Error updating document: ', error);
     }
+    window.location.reload();
 
   };
 

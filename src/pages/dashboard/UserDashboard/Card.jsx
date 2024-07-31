@@ -19,8 +19,8 @@ const CustomCard = ({ data }) => {
 
   return (
     <section className="card" style={{ paddingTop: '20px' }}>
-      <div className="flex gap-4 flex-col sm:flex-row items-start">
-        <img src={companyLogo} alt="" className="w-16 h-16 object-cover" />
+      <div className="flex  flex-col sm:flex-row items-start">
+        <img src={companyLogo} alt="" className="w-20 h-16 object-cover" />
         <div>
           <h3 className="text-lg mb-2 font-semibold">{title}</h3>
           <h4 className="text-primary mb-1">Company Name: {companyName}</h4>
@@ -42,7 +42,7 @@ const CustomCard = ({ data }) => {
           </div>
           <p className="text-base text-primary/70 pt-3">{description}</p>
           <div className="flex justify-between items-center p-4 mb-2 pl-44">
-            <Link
+            {/* <Link
               to={
                 '/dashboard/chat?reference=' +
                 encodeURI(recruiter_id) +
@@ -56,7 +56,7 @@ const CustomCard = ({ data }) => {
                 <IoChatbubbleEllipsesOutline className="mr-2 items-end" />
                 Message recruiter
               </p>
-            </Link>
+            </Link> */}
           </div>
           <hr className="border-t border-gray-400 my-4 w-full mt-6" />
         </div>
