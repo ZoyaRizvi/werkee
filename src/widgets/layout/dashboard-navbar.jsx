@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { doSignInWithEmailAndPassword, doSignInWithGoogle, doSignOut } from '../../firebase/auth';
+import { doSignOut } from '../../firebase/auth';
 import { useAuth } from '../../context/authContext/index';
-import { useLocation, Link, useNavigate } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import {
   Navbar,
   Typography,
@@ -16,7 +16,7 @@ import {
 } from "@material-tailwind/react";
 import {
   UserCircleIcon,
-  ArrowLeftStartOnRectangleIcon,
+  ArrowLeftOnRectangleIcon,
   Cog6ToothIcon,
   BellIcon,
   ClockIcon,
@@ -38,7 +38,6 @@ export function DashboardNavbar() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // Fetch the user data from localStorage
     const userData = JSON.parse(localStorage.getItem('user'));
     setUser(userData);
   }, []);
@@ -98,34 +97,26 @@ export function DashboardNavbar() {
           </IconButton>
 
           {!userLoggedIn ? (
-            <>
-              <Link to="/auth/sign-in">
-                <Button
-                  variant="text"
-                  color="blue-gray"
-                  className="hidden items-center gap-1 px-4 xl:flex normal-case"
-                >
-                  <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-                </Button>
-                <IconButton
-                  variant="text"
-                  color="blue-gray"
-                  className="grid xl:hidden"
-                >
-                  <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-                </IconButton>
-              </Link>
-            </>
+            <Link to="/auth/sign-in">
+              <Button
+                variant="text"
+                color="blue-gray"
+                className="items-center gap-1 px-4 normal-case"
+              >
+                <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
+              </Button>
+            </Link>
           ) : (
             <>
               {user && user.img ? (
                 <Avatar
                   src={user.img}
                   alt={user.displayName || user.email}
-                  className="h-5 w-5"
+                  className="h-8 w-8"
                 />
               ) : (
-                <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
+                <>
+                </>
               )}
               <Typography
                 style={{ fontSize: '13px', paddingTop: '4px' }}
@@ -145,16 +136,22 @@ export function DashboardNavbar() {
                   }}
                   variant="text"
                   color="blue-gray"
-                  className="hidden items-center gap-1 px-4 xl:flex normal-case"
+                  className="items-center gap-1 px-4 normal-case hidden xl:flex"
                 >
-                  <ArrowLeftStartOnRectangleIcon className="h-5 w-5 text-blue-gray-500" />
+                  <ArrowLeftOnRectangleIcon className="h-5 w-5 text-blue-gray-500" />
                 </Button>
                 <IconButton
+                  onClick={(e) => {
+                    signOut(e).then(
+                      localStorage.removeItem("user"),
+                      window.location.href = "/auth/sign-in"
+                    );
+                  }}
                   variant="text"
                   color="blue-gray"
-                  className="grid xl:hidden"
+                  className="xl:hidden"
                 >
-                  <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
+                  <ArrowLeftOnRectangleIcon className="h-5 w-5 text-blue-gray-500" />
                 </IconButton>
               </Link>
             </>
