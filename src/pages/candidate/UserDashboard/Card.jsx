@@ -5,6 +5,7 @@ import { collection, addDoc, doc } from 'firebase/firestore';
 
 const CustomCard = ({ data }) => {
   const {
+    id, // Assuming this is the jobId
     companyName,
     title,
     companyLogo,
@@ -50,6 +51,8 @@ const CustomCard = ({ data }) => {
       await addDoc(applicationsCollectionRef, {
         ...formData,
         resume: formData.resume.name, // assuming you are storing the file name
+        jobId: id, // Add jobId to the application data
+        jobTitle: title, // Add jobTitle to the application data
         timestamp: new Date()
       });
       console.log("Application submitted successfully");

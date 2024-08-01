@@ -7,6 +7,8 @@ import {
   Typography,
   Tabs,
   TabsHeader,
+  TabsBody,
+  TabPanel,
   Tab,
   Tooltip,
   Button,
@@ -38,7 +40,46 @@ import { db, storage } from "@/firebase/firebase";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Jobs from './Jobs';
+import Responses from './Responses';
+import NewChat from './newChat';
+import { Chat } from '../candidate';
+import Messages from './UserDashboard/Messages';
 
+const data = [
+  {
+    label: "HTML",
+    value: "html",
+    desc: `It really matters and then like it really doesn't matter.
+    What matters is the people who are sparked by it. And the people 
+    who are like offended by it, it doesn't matter.`,
+  },
+  {
+    label: "React",
+    value: "react",
+    desc: `Because it's about motivating the doers. Because I'm here
+    to follow my dreams and inspire other people to follow their dreams, too.`,
+  },
+  {
+    label: "Vue",
+    value: "vue",
+    desc: `We're not always in the position that we want to be at.
+    We're constantly growing. We're constantly making mistakes. We're
+    constantly trying to express ourselves and actualize our dreams.`,
+  },
+  {
+    label: "Angular",
+    value: "angular",
+    desc: `Because it's about motivating the doers. Because I'm here
+    to follow my dreams and inspire other people to follow their dreams, too.`,
+  },
+  {
+    label: "Svelte",
+    value: "svelte",
+    desc: `We're not always in the position that we want to be at.
+    We're constantly growing. We're constantly making mistakes. We're
+    constantly trying to express ourselves and actualize our dreams.`,
+  },
+];
 
 // Default values
 const defaultProfile = {
@@ -150,15 +191,22 @@ export function Profile() {
     window.location.reload();
 
   };
+  const data = [
+    { label: "JOBS", value: "JOBS", component: <Jobs /> },
+    { label: "Responses", value: "responses", component: <Responses userId={userid}/> },
+    { label: "Messages", value: "messages", component: <Messages/>}
+  ];
 
   return (
     <>
-      <div style={{backgroundImage:{...profile.coverPhoto},
-      backgroundSize:'cover',
-      backgroundRepeat: 'no-repeat',
-    backgroundSize:"100%"}
+      <div style={{
+        backgroundImage: { ...profile.coverPhoto },
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: "100%"
       }
-       className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-cover bg-center">
+      }
+        className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-cover bg-center">
         <img src={profile.coverPhoto} alt="Cover" />
         <div className="absolute inset-0 h-full w-full bg-gray-900/75" />
       </div>
@@ -186,22 +234,7 @@ export function Profile() {
               </div>
             </div>
             <div className="w-96">
-              <Tabs value="app" onChange={(e, value) => handleTabChange(value)}>
-                <TabsHeader>
-                  <Tab value="app">
-                    <HomeIcon className="-mt-1 mr-2 inline-block h-5 w-5" />
-                    App
-                  </Tab>
-                  <Tab value="message">
-                    <ChatBubbleLeftEllipsisIcon className="-mt-0.5 mr-2 inline-block h-5 w-5" />
-                    Message
-                  </Tab>
-                  <Tab value="skillassessment">
-                    <LightBulbIcon className="-mt-1 mr-2 inline-block h-5 w-5" />
-                    Responses
-                  </Tab>
-                </TabsHeader>
-              </Tabs>
+
             </div>
           </div>
           <div className="grid-cols-1 mb-12 grid gap-12 px-4 lg:grid-cols-2 xl:grid-cols-2">
@@ -244,13 +277,35 @@ export function Profile() {
             />
           </div>
           <div>
-            <Jobs/>
-          
+            <Tabs id="custom-animation" value="JOBS">
+              <TabsHeader>
+                {data.map(({ label, value }) => (
+                  <Tab key={value} value={value}>
+                    {label}
+                  </Tab>
+                ))}
+              </TabsHeader>
+              <TabsBody
+                animate={{
+                  initial: { y: 250 },
+                  mount: { y: 0 },
+                  unmount: { y: 250 },
+                }}
+              >
+                {data.map(({ value, component }) => (
+                  <TabPanel key={value} value={value}>
+                    {component}
+                  </TabPanel>
+                ))}
+              </TabsBody>
+            </Tabs>
+
+
           </div>
         </CardBody>
       </Card>
 
-  
+
 
       <Dialog open={open} handler={handleOpen}>
         <DialogHeader><h1>Edit Profile</h1></DialogHeader>
