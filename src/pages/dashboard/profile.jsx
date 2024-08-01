@@ -41,7 +41,6 @@ import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Jobs from './Jobs';
 import Responses from './Responses';
-import NewChat from './newChat';
 import { Chat } from '../candidate';
 import Messages from './UserDashboard/Messages';
 
