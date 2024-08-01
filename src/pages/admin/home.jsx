@@ -39,6 +39,9 @@ export function Home() {
   const [newUser, setNewUser] = useState({ displayName: '', email: '', role: '' });
   const [newPost, setNewPost] = useState({ jobTitle: '', companyName: '', jobLocation: '', postingDate: '' });
   const [currentPost, setCurrentPost] = useState(null);
+  const [jobsData, setJobsData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const projectId = "Yshu6K2j2CZzuu7CbAICFshK0gd2";
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -53,20 +56,25 @@ export function Home() {
 
     fetchUsers();
   }, []);
-
+  
   useEffect(() => {
-    const fetchPosts = async () => {
+    const fetchJobs = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "projects"));
-        const posts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setPostsData(posts);
+        const jobsCollection = collection(db, `projects/${projectId}/jobs`);
+        const jobsSnapshot = await getDocs(jobsCollection);
+        const jobs = jobsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setJobsData(jobs);
+        setLoading(false);
       } catch (error) {
-        console.error("Error fetching posts: ", error);
+        console.error("Error fetching jobs: ", error);
+        setLoading(false);
       }
     };
 
-    fetchPosts();
-  }, []);
+    fetchJobs();
+  }, [projectId]);
+    
+  
 
   const handleOpenConfirmDialog = (userId) => {
     setUserToDelete(userId);
@@ -187,16 +195,6 @@ export function Home() {
 
   return (
     <div className="mt-12">
-      {/* Statistics Cards */}
-      <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
-        {/* Your statistics cards rendering */}
-      </div>
-
-      {/* Statistics Charts */}
-      <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-3">
-        {/* Your statistics charts rendering */}
-      </div>
-
       {/* Users Table */}
       <div className="mb-4 grid grid-cols-1 gap-6 xl:grid-cols-2">
         <Card className="overflow-hidden xl:col-span-2 border border-blue-gray-100 shadow-sm">
@@ -310,90 +308,68 @@ export function Home() {
                 variant="small"
                 className="flex items-center gap-1 font-normal text-blue-gray-600"
               >
-                <CheckCircleIcon strokeWidth={3} className="h-4 w-4 text-blue-gray-200" />
-                <strong>{postsData.length}</strong> published
+                <strong>{jobsData.length}</strong> available
               </Typography>
             </div>
-            <Menu placement="left-start">
-              <MenuHandler>
-                <IconButton size="sm" variant="text" color="blue-gray" onClick={handleOpenAddPostDialog}>
-                  <EllipsisVerticalIcon
-                    strokeWidth={3}
-                    fill="currentColor"
-                    className="h-6 w-6"
-                  />
-                </IconButton>
-              </MenuHandler>
-              <MenuList>
-                <MenuItem onClick={handleOpenAddPostDialog}>Create Post</MenuItem>
-              </MenuList>
-            </Menu>
           </CardHeader>
           <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
-            <table className="w-full min-w-[640px] table-auto">
-              <thead>
-                <tr>
-                  {["job title", "description", "company", "location", "recruiter", ""].map((header, index) => (
-                    <th key={index} className="border-b border-blue-gray-100 py-3 px-5 text-left">
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-normal leading-none opacity-70"
-                      >
-                        {header}
-                      </Typography>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {postsData.map((post) => (
-                  <tr key={post.id}>
-                    <td className="py-3 px-5">
-                      <Typography variant="small" color="blue-gray" className="font-bold">
-                        {post.jobTitle}
-                      </Typography>
-                    </td>
-                    <td className="py-3 px-5">
-                      <Typography variant="small" color="blue-gray">
-                        {post.description}
-                      </Typography>
-                    </td>
-                    <td className="py-3 px-5">
-                      <Typography variant="small" color="blue-gray">
-                        {post.companyName}
-                      </Typography>
-                    </td>
-                    <td className="py-3 px-5">
-                      <Typography variant="small" color="blue-gray">
-                        {post.jobLocation}
-                      </Typography>
-                    </td>
-                    <td className="py-3 px-5">
-                      <Typography variant="small" color="blue-gray">
-                        {post.recruiter}
-                      </Typography>
-                    </td>
-                    <td className="py-3 px-5">
-                      <IconButton
-                        variant="text"
-                        color="red"
-                        onClick={() => handleOpenPostConfirmDialog(post.id)}
-                      >
-                        <TrashIcon strokeWidth={2} className="h-5 w-5" />
-                      </IconButton>
-                      <IconButton
-                        variant="text"
-                        color="blue"
-                        onClick={() => handleOpenPostEditDialog(post)}
-                      >
-                        <PencilIcon strokeWidth={2} className="h-5 w-5" />
-                      </IconButton>
-                    </td>
+            {loading ? (
+              <Typography variant="small" color="blue-gray" className="text-center">
+                Loading jobs...
+              </Typography>
+            ) : (
+              <table className="w-full min-w-[640px] table-auto">
+                <thead>
+                  <tr>
+                    {["Job Title", "Company Name", "Location", "Description", ""].map((header, index) => (
+                      <th key={index} className="border-b border-blue-gray-100 py-3 px-5 text-left">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="font-normal leading-none opacity-70"
+                        >
+                          {header}
+                        </Typography>
+                      </th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {jobsData.map((job) => (
+                    <tr key={job.id}>
+                      <td className="py-3 px-5">
+                        <Typography variant="small" color="blue-gray" className="font-bold">
+                          {job.title}
+                        </Typography>
+                      </td>
+                      <td className="py-3 px-5">
+                        <Typography variant="small" color="blue-gray">
+                          {job.companyName}
+                        </Typography>
+                      </td>
+                      <td className="py-3 px-5">
+                        <Typography variant="small" color="blue-gray">
+                          {job.jobLocation}
+                        </Typography>
+                      </td>
+                      <td className="py-3 px-5">
+                        <Typography variant="small" color="blue-gray">
+                          {job.description}
+                        </Typography>
+                      </td>
+                      <td className="py-3 px-5">
+                        <IconButton variant="text" color="red">
+                          <TrashIcon strokeWidth={2} className="h-5 w-5" />
+                        </IconButton>
+                        <IconButton variant="text" color="blue">
+                          <PencilIcon strokeWidth={2} className="h-5 w-5" />
+                        </IconButton>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </CardBody>
         </Card>
       </div>
