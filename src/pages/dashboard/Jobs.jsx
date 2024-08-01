@@ -8,9 +8,7 @@ const Jobs = () => {
   const [newJob, setNewJob] = useState({
     img: '',
     title: '',
-    tag: '',
     description: '',
-    route: '',
     Requirements: '',
     experienceLevel: '',
     jobLocation: '',
@@ -41,11 +39,11 @@ const Jobs = () => {
     setNewJob({ ...newJob, [name]: value });
   };
 
-  const handleImageChange = (e) => {
-    if (e.target.files[0]) {
-      setImage(e.target.files[0]);
-    }
-  };
+  // const handleImageChange = (e) => {
+  //   if (e.target.files[0]) {
+  //     setImage(e.target.files[0]);
+  //   }
+  // };
 
   const handleLogoChange = (e) => {
     if (e.target.files[0]) {
@@ -72,13 +70,18 @@ const Jobs = () => {
 
       const postedDate = new Date().toISOString(); // Get the current date and time
 
-      await addDoc(collection(db, "projects", user.uid, "jobs"), {
+      const jobDocRef = await addDoc(collection(db, "projects", user.uid, "jobs"), {
         ...newJob,
         img: imageUrl,
         companyLogo: companyLogoUrl,
         postedDate,
-        recruiter_id: user.uid // Add recruiter_id field
+        recruiter_id: user.uid, // Add recruiter_id field
+        jobId: '' // Initialize jobId field
       });
+
+      // Update the document to include the jobId
+      await updateDoc(jobDocRef, { jobId: jobDocRef.id });
+
       fetchJobs();
       setIsModalOpen(false);
       setImage(null); // Reset image state
@@ -86,9 +89,7 @@ const Jobs = () => {
       setNewJob({
         img: '',
         title: '',
-        tag: '',
         description: '',
-        route: '',
         Requirements: '',
         experienceLevel: '',
         jobLocation: '',
@@ -104,9 +105,7 @@ const Jobs = () => {
     setNewJob({
       img: job.img,
       title: job.title,
-      tag: job.tag,
       description: job.description,
-      route: job.route,
       Requirements: job.Requirements,
       experienceLevel: job.experienceLevel,
       jobLocation: job.jobLocation,
@@ -123,8 +122,6 @@ const Jobs = () => {
     const user = auth.currentUser;
     if (user && editJobId) {
       const jobRef = doc(db, "projects", user.uid, "jobs", editJobId);
-      console.log("Updating job with ID:", editJobId);
-      console.log("New job data:", newJob);
 
       let imageUrl = newJob.img;
       if (image) {
@@ -182,7 +179,7 @@ const Jobs = () => {
       </div>
       
       <Grid container spacing={3}>
-        {jobs.map(({ id, img, title, tag, description, route, Requirements, experienceLevel, jobLocation, employmentType, companyName, companyLogo, postedDate }) => (
+        {jobs.map(({ id, img, title, description, Requirements, experienceLevel, jobLocation, employmentType, companyName, companyLogo, postedDate }) => (
           <Grid item xs={12} sm={6} md={6} lg={6} key={id}>
             <Card>
               <CardContent>
@@ -211,10 +208,7 @@ const Jobs = () => {
                 </Typography>
               </CardContent>
               <CardActions>
-                <Button variant="outlined" size="small" href={route}>
-                  View Job
-                </Button>
-                <Button variant="outlined" size="small" onClick={() => handleEditJob({ id, img, title, tag, description, route, Requirements, experienceLevel, jobLocation, employmentType, companyName, companyLogo, postedDate })}>
+                <Button variant="outlined" size="small" onClick={() => handleEditJob({ id, img, title, description, Requirements, experienceLevel, jobLocation, employmentType, companyName, companyLogo, postedDate })}>
                   Edit
                 </Button>
                 <Button variant="outlined" size="small" onClick={() => handleDeleteJob(id)}>
@@ -312,14 +306,6 @@ const Jobs = () => {
             fullWidth
             style={{ marginBottom: '16px' }}
           />
-          <TextField
-            name="route"
-            label="Route"
-            value={newJob.route}
-            onChange={handleInputChange}
-            fullWidth
-            style={{ marginBottom: '16px' }}
-          />
           <div className="w-full md:w-3/12 mb-4 md:mb-0">
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="companyLogo">
               Company Logo
@@ -332,12 +318,18 @@ const Jobs = () => {
               />
             </div>
           </div>
-          <div className="w-full md:w-3/12 mb-4 md:mb-0">
+          {/* <div className="w-full md:w-3/12 mb-4 md:mb-0">
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="img">
               Job Image
             </label>
-
-          </div>
+            <div className="relative">
+              <input
+                type="file"
+                onChange={handleImageChange}
+                className="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+              />
+            </div>
+          </div> */}
           <Button variant="contained" color="primary" onClick={editJobId ? handleUpdateJob : handleAddJob}>
             {editJobId ? "Update Job" : "Add Job"}
           </Button>
