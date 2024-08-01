@@ -210,28 +210,19 @@ export function Chat() {
   );
 
   return (
-    <div className="flex" style={{ height: 'calc(100vh - 100px' }}>
+    <div className="flex" style={{ height: 'calc(100vh - 100px)' }}>
       <Dialog open={open} handler={handleOpen}>
         <DialogBody>
-          {/* passing logged in user as prop for testing */}
-          {/* <NewChat recruiter={queryParameters} handleOpen={handleOpen}/> */}
           <form onSubmit={handleNewSendMessage} className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
-            {/* Select User to send message to */}
-            <div className="mb-4">
-              {recruiter ?
-                <Typography variant="regular" color="blue-gray" className="font-medium">Applying for {jobTitle ? jobTitle : null}</Typography>
-                :
-                <></>}
-              <Input
-                size="lg"
-                placeholder="name@mail.com"
-                className="border border-gray-300 rounded-md mt-2"
-                value={recruiter}
-                onChange={e => setRecruiter(e.target.value)}
-              />
-            </div>
-
-            {/* Chat Window */}
+            {recruiter &&
+              <Typography variant="regular" color="blue-gray" className="font-medium">Applying for {jobTitle ? jobTitle : null}</Typography>}
+            <Input
+              size="lg"
+              placeholder="name@mail.com"
+              className="border border-gray-300 rounded-md mt-2"
+              value={recruiter}
+              onChange={e => setRecruiter(e.target.value)}
+            />
             <div className="mb-4">
               <Typography variant="small" color="blue-gray" className="font-medium">Add a message</Typography>
               <div className="flex items-center">
@@ -239,7 +230,7 @@ export function Chat() {
                   type="text"
                   value={newMessagePost}
                   onChange={(e) => setNewMessagePost(e.target.value)}
-                  onKeyPress={handleNewKeyPress}
+                  onKeyPress={(e) => e.key === "Enter" && handleNewSendMessage()}
                   placeholder="Type your message here..."
                   className="flex-1 p-2 rounded-lg mr-4"
                 />
@@ -261,8 +252,7 @@ export function Chat() {
           </Button>
         </DialogFooter>
       </Dialog>
-      {/* Sidebar */}
-      <div className="w-1/4 bg-white border-r border-gray-200 p-4 overflow-y-auto" style={{ height: 'calc(100vh - 120px' }}>
+      <div className="w-1/4 bg-white border-r border-gray-200 p-4 overflow-y-auto" style={{ height: 'calc(100vh - 120px)' }}>
         <div className="flex items-center justify-between mb-4">
           <Input
             type="text"
@@ -272,18 +262,16 @@ export function Chat() {
             icon={<MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />}
             className="w-full"
           />
-          {/* <PlusIcon className="h-4 w-8" /> */}
           <Button onClick={handleOpen} variant="gradient">
             <PlusIcon className="h-4 w-8" />
           </Button>
         </div>
-        {filteredChats && filteredChats.map((chat) => (
-          <div key={chat.displayName}
+        {filteredChats.map((chat) => (
+          <div key={chat.email}
             className={`flex items-center gap-4 p-4 cursor-pointer hover:bg-gray-100`}
             onClick={() => setSelectedChat(chat)}>
-            {/* <Avatar src={chat.img} alt={chat.name} size="sm" variant="rounded" /> */}
             <div>
-              <Typography variant="small" color="blue-gray" className={(selectedChat && selectedChat.email === chat.email) ? 'font-semibold' : 'body1'}>
+              <Typography variant="small" color="blue-gray" className={(selectedChat && selectedChat.email === chat.email) ? 'font-semibold' : ''}>
                 {chat.displayName}
               </Typography>
               <Typography className="text-xs font-normal text-blue-gray-500">
@@ -294,36 +282,38 @@ export function Chat() {
         ))}
       </div>
 
-      {/* Chat Window */}
       <div className="flex-1 p-4 bg-white">
         <div className="border border-gray-200 rounded-lg h-full flex flex-col overflow-hidden">
           {selectedChat && (
             <div className="border-b border-gray-200 p-4 flex items-center">
               <Avatar src={selectedChat.img} alt={selectedChat.displayName} size="sm" variant="rounded" />
-              <Typography variant="h6" color="blue-gray" className="ml-4">
-                <p>{selectedChat.displayName} <span>{selectedChat.email}</span></p>
-              </Typography>
+              <div className="ml-4">
+                <Typography variant="h6" color="blue-gray">
+                  {selectedChat.displayName}
+                </Typography>
+                <Typography variant="small" color="blue-gray">
+                  {selectedChat.email}
+                </Typography>
+              </div>
             </div>
           )}
-          <selectedChatContext.Provider value={selectedChat}>
-            <div className="flex-1 overflow-y-auto p-4">
-              {messages3.map((message) => (
-                <div key={message.timestamp} className={`flex ${message.from === dbUser.email ? "justify-end" : ""} mb-4`}>
-                  <div className={`flex flex-col ${message.from === dbUser.email ? "items-end" : "items-start"}`}>
-                    <Typography variant="small" color="blue-gray" className='font-semibold'>
-                      {message.from}
-                    </Typography>
-                    <Typography className="bg-blue-100 p-2 rounded-md text-blue-gray-800">
-                      {message.text}
-                    </Typography>
-                    <Typography variant="small" className="text-blue-gray-500">
-                      {message.timestamp.toDate().toUTCString()}
-                    </Typography>
-                  </div>
+          <div className="flex-1 overflow-y-auto p-4">
+            {messages3.map((message) => (
+              <div key={message.timestamp} className={`flex ${message.from === dbUser.email ? "justify-end" : ""} mb-4`}>
+                <div className={`flex flex-col ${message.from === dbUser.email ? "items-end" : "items-start"}`}>
+                  <Typography variant="small" color="blue-gray" className='font-semibold'>
+                    {message.from}
+                  </Typography>
+                  <Typography className="bg-blue-100 p-2 rounded-md text-blue-gray-800">
+                    {message.text}
+                  </Typography>
+                  <Typography variant="small" className="text-blue-gray-500">
+                    {message.timestamp.toDate().toUTCString()}
+                  </Typography>
                 </div>
-              ))}
-            </div>
-          </selectedChatContext.Provider>
+              </div>
+            ))}
+          </div>
           {selectedChat && (
             <div className="border-t border-gray-200 p-4">
               <div className="flex items-center">
