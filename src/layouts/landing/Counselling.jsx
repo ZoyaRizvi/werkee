@@ -2,7 +2,7 @@ import React from 'react'
 
 export default function () {
   return (
-    <div>
+    <div id='whatsnew'>
         <div className="sm:flex items-center sm:space-x-8 mt-36 max-w-screen-lg  container mx-auto flex justify-center items-center mt-24">
       <div data-aos="fade-right" className="sm:w-1/2 relative">
         <div className="bg-teal-500 rounded-full absolute w-12 h-12 z-0 -left-4 -top-3 animate-pulse"></div>
