@@ -1,4 +1,5 @@
-import React from 'react'
+import React from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Navbar from './Nav';
 import AboutWerky from './AboutWerky';
 import Banner from './Banner';
@@ -12,17 +13,32 @@ import Messaging from './Messaging';
 
 export default function Home() {
   return (
-    <div>
-      <Navbar/>
-      <Banner/>
-      <TrustedBy/>
-      <Whyteens />
-      <AboutWerky />
-      <Counselling />
-      <Talent/>
-       <SkillAssessment/>
-       <Messaging/>
-      <Footer/>
-    </div>
-  )
+    <Router>
+      <Navbar />
+      <Switch>
+        <Route exact path="/">
+          <Banner />
+          <TrustedBy />
+          <Whyteens />
+          <AboutWerky />
+          <Counselling />
+          <Talent />
+          <SkillAssessment />
+          <Messaging />
+        </Route>
+        <Route path="#about">
+          <AboutWerky />
+        </Route>
+        <Route path="#whyteens">
+          <Whyteens/>
+        </Route>
+        <Route path="#whatsnew">
+         <Counselling/>
+        </Route>
+        {/* Add more routes as needed */}
+      </Switch>
+      <Footer />
+    </Router>
+  );
 }
+

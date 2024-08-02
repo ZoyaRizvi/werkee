@@ -12,16 +12,16 @@ import Projects from './projects';
 
 // Default values
 const defaultProfile = {
-  name: 'Default Name',
-  title: 'Default Title',
-  info: 'Default information...',
-  location: 'Default Location',
+  displayName: '',
+  title: '',
+  info: '',
+  location: '',
   facebook: '',
   twitter: '',
   instagram: '',
   skills: [],
-  coverPhoto: 'https://via.placeholder.com/150',
-  profilePhoto: 'https://i.pinimg.com/736x/cf/ea/30/cfea305ef815385ef069b123625ee2c0.jpg',
+  coverPhoto: '',
+  profilePhoto: '',
 };
 
 const skills = [
@@ -118,7 +118,7 @@ export function Profile() {
 
     try {
       await updateDoc(doc(db, 'users', userid), {
-        name: profile.name,
+        displayName: profile.displayName,
         title: profile.title,
         info: profile.info,
         location: profile.location,
@@ -143,8 +143,8 @@ export function Profile() {
 
   const validateForm = () => {
     const errors = {};
-    if (!profile.name) {
-      errors.name = 'Name is required';
+    if (!profile.displayName) {
+      errors.displayName = 'Name is required';
     }
     if (!profile.email || !/\S+@\S+\.\S+/.test(profile.email)) {
       errors.email = 'Valid email is required';
@@ -184,7 +184,7 @@ export function Profile() {
               />
               <div>
                 <Typography variant="h5" color="blue-gray" className="mb-1">
-                  {profile.name}
+                  {profile.displayName}
                 </Typography>
                 <Typography variant="small" className="font-normal text-blue-gray-600">
                   {profile.title}
@@ -297,8 +297,8 @@ export function Profile() {
               <label className="block text-gray-700">Name</label>
               <input
                 type="text"
-                name="name"
-                value={profile.name}
+                name="displayName"
+                value={profile.displayName}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               />
@@ -433,3 +433,4 @@ export function Profile() {
 }
 
 export default Profile;
+

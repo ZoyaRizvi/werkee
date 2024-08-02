@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiCalendar, FiClock, FiMapPin } from 'react-icons/fi';
-import { db } from "@/firebase/firebase"; // Adjust the path as necessary
+import { db, storage } from "@/firebase/firebase"; // Adjust the path as necessary
 import { collection, addDoc, doc } from 'firebase/firestore';
-import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
-import { IoIosArrowDroprightCircle } from "react-icons/io";
 
 const CustomCard = ({ data }) => {
   const {
@@ -49,17 +47,24 @@ const CustomCard = ({ data }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Save the form data to Firestore under the specific recruiter
     try {
-      const recruiterDocRef = doc(db, 'recruiters', recruiter_id);
+      // Upload resume to Firebase Storage
+      const resumeRef = ref(storage, `resumes/${formData.resume.name}`);
+      const uploadResult = await uploadBytes(resumeRef, formData.resume);
+      const resumeUrl = await getDownloadURL(resumeRef);
+
+      // Save the form data to Firestore under the specific recruiter
+      const recruiterDocRef = doc(db, 'JobResponses', recruiter_id);
       const applicationsCollectionRef = collection(recruiterDocRef, 'applications');
+
       await addDoc(applicationsCollectionRef, {
         ...formData,
-        resume: formData.resume.name, // assuming you are storing the file name
+        resume: resumeUrl, // store the download URL of the resume
         jobId: id, // Add jobId to the application data
         jobTitle: title, // Add jobTitle to the application data
         timestamp: new Date()
       });
+
       console.log("Application submitted successfully");
     } catch (e) {
       console.error("Error adding document: ", e);
@@ -208,6 +213,7 @@ const CustomCard = ({ data }) => {
 };
 
 export default CustomCard;
+
 
 
 
