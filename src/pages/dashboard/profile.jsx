@@ -137,14 +137,16 @@ export function Profile() {
     await uploadBytes(storageRef, file);
     return getDownloadURL(storageRef);
   };
-
+  
+  // Function to handle the cover photo change
   const handlePhotoChange = async (e) => {
     if (e.target.files[0]) {
       const newCoverPhotoURL = await handlePhotoUpload(e.target.files[0]);
       setProfile((prevProfile) => ({ ...prevProfile, coverPhoto: newCoverPhotoURL }));
     }
   };
-
+  
+  // Function to handle the profile photo change
   const handlePhotoChange2 = async (e) => {
     if (e.target.files[0]) {
       const newProfilePhotoURL = await handlePhotoUpload(e.target.files[0]);

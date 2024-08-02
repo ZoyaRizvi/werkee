@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import './profile.css';
 import { Card, CardBody, Avatar, Typography, Tabs, TabsHeader, Tab, Tooltip, Button } from '@material-tailwind/react';
-import { HomeIcon, ChatBubbleLeftEllipsisIcon, LightBulbIcon, PencilIcon } from '@heroicons/react/24/solid';
+import { HomeIcon, ChatBubbleLeftEllipsisIcon, LightBulbIcon, PencilIcon, TrophyIcon } from '@heroicons/react/24/solid';
 import { ProfileInfoCard } from '@/widgets/cards';
 import { useAuth } from '../../context/authContext/index';
 import { Dialog as MuiDialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { db } from "@/firebase/firebase";
+import { db, storage } from "@/firebase/firebase";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Projects from './projects';
 
 // Default values
@@ -21,7 +22,7 @@ const defaultProfile = {
   instagram: '',
   skills: [],
   coverPhoto: '',
-  profilePhoto: '',
+  img: '',
 };
 
 const skills = [
@@ -44,6 +45,7 @@ export function Profile() {
   const userid = JSON.parse(localStorage.getItem('user'))?.uid || 'default-user-id';
   const [profile, setProfile] = useState(defaultProfile);
   const [errors, setErrors] = useState({});
+  const [badges, setBadges] = useState([]);
 
   const handleStartTest = (skill) => {
     navigate('/skillassessment', { state: { skill } });
@@ -63,6 +65,11 @@ export function Profile() {
             ...fetchedData,
             skills: fetchedData.skills || defaultProfile.skills,
           });
+
+          // Fetch badges
+          if (fetchedData.badges) {
+            setBadges(fetchedData.badges);
+          }
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
@@ -96,19 +103,23 @@ export function Profile() {
     }));
   };
 
-  const handlePhotoChange = (e) => {
+  const handlePhotoUpload = async (file) => {
+    const storageRef = ref(storage, `images/${userid}/${file.name}`);
+    await uploadBytes(storageRef, file);
+    return getDownloadURL(storageRef);
+  };
+
+  const handlePhotoChange = async (e) => {
     if (e.target.files[0]) {
-      // For previewing
-      const newCoverPhoto = URL.createObjectURL(e.target.files[0]);
-      setProfile((prevProfile) => ({ ...prevProfile, coverPhoto: newCoverPhoto }));
+      const newCoverPhotoURL = await handlePhotoUpload(e.target.files[0]);
+      setProfile((prevProfile) => ({ ...prevProfile, coverPhoto: newCoverPhotoURL }));
     }
   };
 
-  const handleProfilePhotoChange = (e) => {
+  const handlePhotoChange2 = async (e) => {
     if (e.target.files[0]) {
-      // For previewing
-      const newProfilePhoto = URL.createObjectURL(e.target.files[0]);
-      setProfile((prevProfile) => ({ ...prevProfile, profilePhoto: newProfilePhoto }));
+      const newProfilePhotoURL = await handlePhotoUpload(e.target.files[0]);
+      setProfile((prevProfile) => ({ ...prevProfile, img: newProfilePhotoURL }));
     }
   };
 
@@ -126,7 +137,7 @@ export function Profile() {
         twitter: profile.twitter,
         instagram: profile.instagram,
         coverPhoto: profile.coverPhoto,
-        profilePhoto: profile.profilePhoto,
+        img: profile.img,
         skills: profile.skills
       });
       setOpen(false);
@@ -146,9 +157,6 @@ export function Profile() {
     if (!profile.displayName) {
       errors.displayName = 'Name is required';
     }
-    if (!profile.email || !/\S+@\S+\.\S+/.test(profile.email)) {
-      errors.email = 'Valid email is required';
-    }
     setErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -167,7 +175,7 @@ export function Profile() {
         }}
         className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-cover bg-center"
       >
-        <img src={profile.coverPhoto} alt="Cover" />
+        <img src={profile.coverPhoto} alt="Cover" className="hidden" />
 
         <div className="absolute inset-0 h-full w-full bg-gray-900/75" />
       </div>
@@ -176,7 +184,7 @@ export function Profile() {
           <div className="mb-10 flex items-center justify-between flex-wrap gap-6">
             <div className="flex items-center gap-6">
               <Avatar
-                src={profile.profilePhoto}
+                src={profile.img}
                 alt="Profile"
                 size="xl"
                 variant="rounded"
@@ -212,6 +220,7 @@ export function Profile() {
           </div>
           <div className="grid-cols-1 mb-12 grid gap-12 px-4 lg:grid-cols-2 xl:grid-cols-2">
             <ProfileInfoCard title="Profile Information" description={profile.info} />
+ 
             <ProfileInfoCard
               details={{
                 location: <div className="flex items-center gap-4">{profile.location}</div>,
@@ -242,13 +251,24 @@ export function Profile() {
                       <button key={index} className="button">{skill}</button>
                     ))}
                   </div>
+                ),
+                badge:(
+                  <div className="badge-container">
+                  {badges.length > 0 && badges.map((badge, index) => (
+                    <Tooltip key={index} content={badge} placement="top">
+                      <TrophyIcon className="h-6 w-6 text-orange-500" />
+                    </Tooltip>
+                  ))}
+                </div>
                 )
               }}
               action={
                 <Tooltip content="Edit Profile">
                   <PencilIcon onClick={handleOpen} variant="gradient" className="h-4 cursor-pointer text-blue-gray-500" />
                 </Tooltip>
+                
               }
+              
             />
           </div>
           <div>
@@ -302,7 +322,7 @@ export function Profile() {
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               />
-              {errors.name && <p className="text-red-500">{errors.name}</p>}
+              {errors.displayName && <p className="text-red-500">{errors.displayName}</p>}
             </div>
             <div className="mb-4">
               <label className="block text-gray-700">Title</label>
@@ -368,13 +388,14 @@ export function Profile() {
               <input
                 type="file"
                 accept="image/*"
-                onChange={handleProfilePhotoChange}
+                onChange={handlePhotoChange2}
+                className="mt-2"
               />
-              {profile.profilePhoto && (
+              {profile.img && (
                 <img
-                  src={profile.profilePhoto}
+                  src={profile.img}
                   alt="Profile Preview"
-                  className="profile-preview"
+                  className="profile-preview mt-2 w-24 h-24 object-cover rounded"
                 />
               )}
             </div>
@@ -384,12 +405,13 @@ export function Profile() {
                 type="file"
                 accept="image/*"
                 onChange={handlePhotoChange}
+                className="mt-2"
               />
               {profile.coverPhoto && (
                 <img
                   src={profile.coverPhoto}
                   alt="Cover Preview"
-                  className="cover-preview"
+                  className="cover-preview mt-2 w-full h-24 object-cover rounded"
                 />
               )}
             </div>
@@ -433,4 +455,5 @@ export function Profile() {
 }
 
 export default Profile;
+
 

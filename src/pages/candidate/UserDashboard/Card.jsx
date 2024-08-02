@@ -5,7 +5,7 @@ import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 import { IoIosArrowDroprightCircle } from "react-icons/io";
 import { db, storage } from "@/firebase/firebase"; // Adjust the path as necessary
 import { collection, addDoc, doc } from 'firebase/firestore';
-
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'; // Add these imports
 
 const CustomCard = ({ data }) => {
   const {
@@ -19,7 +19,7 @@ const CustomCard = ({ data }) => {
     employmentType,
     experienceLevel,
     description,
-    recruiter,
+    recruiter, // Add recruiter here
     jobTitle,
     recruiter_id,
   } = data;
@@ -84,8 +84,7 @@ const CustomCard = ({ data }) => {
           <h3 className="text-lg mb-2 pl-3 font-semibold">{title}</h3>
           <h4 className="text-primary mb-1 pl-3">Company Name: {companyName}</h4>
           <h4 className="text-base text-primary/70 pb-2 pl-3">Requirements: {Requirements}</h4>
-          
-  
+
           <div className="text-primary/70 text-base flex flex-wrap gap-2 mb-2 pl-2">
             <span className="flex items-center gap-2">
               <FiMapPin />
@@ -100,19 +99,17 @@ const CustomCard = ({ data }) => {
               {new Date(postingDate).toLocaleDateString()}
             </span>
           </div>
-          <p className=' text-base text-primary/70 pt-3 pl-3'>{description}</p>
-                <div className="flex justify-between items-center p-4 mb-2">
-                  <Link to={'/dashboard/chat?reference=' + encodeURI(recruiter) + '&' + 'job=' + encodeURI(jobTitle)} className='text-black flex items-center'>
-                  <p className='text-white bg-cyan-500 py-2 px-4 mt-4 rounded flex items-center'><IoChatbubbleEllipsesOutline className='mr-2 items-end' />Message recruiter</p>
-                  </Link>
-            
-                  <button onClick={() => setIsModalOpen(true)} className="bg-teal-500 text-white py-2 px-4 mt-4 rounded w-32 flex justify-center">
-                   <span className="mr-2">Apply</span><IoIosArrowDroprightCircle className="text-xl ml-3" />
-                  </button>
-                </div>
-          
-            
-          
+          <p className='text-base text-primary/70 pt-3 pl-3'>{description}</p>
+          <div className="flex justify-between items-center p-4 mb-2">
+            <Link to={'/dashboard/chat?reference=' + encodeURIComponent(recruiter) + '&job=' + encodeURIComponent(jobTitle)} className='text-black flex items-center'>
+              <p className='text-white bg-cyan-500 py-2 px-4 mt-4 rounded flex items-center'><IoChatbubbleEllipsesOutline className='mr-2 items-end' />Message recruiter</p>
+            </Link>
+
+            <button onClick={() => setIsModalOpen(true)} className="bg-teal-500 text-white py-2 px-4 mt-4 rounded w-32 flex justify-center">
+              <span className="mr-2">Apply</span><IoIosArrowDroprightCircle className="text-xl ml-3" />
+            </button>
+          </div>
+
           <hr className="border-t border-gray-400 my-4 w-full mt-6" />
         </div>
       </div>

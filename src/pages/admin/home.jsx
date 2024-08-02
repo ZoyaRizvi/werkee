@@ -60,7 +60,7 @@ export function Home() {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const jobsCollection = collection(db, `projects/${projectId}/jobs`);
+        const jobsCollection = collection(db, `Jobsposted/${projectId}/jobs`);
         const jobsSnapshot = await getDocs(jobsCollection);
         const jobs = jobsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setJobsData(jobs);

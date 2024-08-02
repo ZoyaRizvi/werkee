@@ -15,7 +15,7 @@ import { ordersOverviewData } from "@/data";
 import Banner from "./UserDashboard/Banner";
 import { Jobs } from "./UserDashboard/Jobs";
 import CardCustom from "./UserDashboard/Card";
-import { db } from "../../firebase/firebase";
+import { db, storage } from "../../firebase/firebase";
 import { collectionGroup, getDocs } from "firebase/firestore";
 
 export function Home() {
