@@ -17,7 +17,7 @@ import {
   Notifications as CandidateNotifications,
 } from '@/pages/candidate';
 
-import Posting from './pages/dashboard/posting';
+
 
 import {
   Home as AdminHome,
@@ -89,12 +89,7 @@ const sideNavRoutes = (userRole) => {
           //   path: '/notifications',
           //   element: <DashboardNotifications />,
           // },
-          {
-            icon: <InformationCircleIcon {...icon} />,
-            name: 'Posting',
-            path: '/posting',
-            element: <Posting />,
-          },
+          
         ],
       },
     ];
