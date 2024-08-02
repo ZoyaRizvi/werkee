@@ -43,15 +43,7 @@ export default function Responses() {
           <Typography variant="h5" color="blue-gray">
             Latest Responses
           </Typography>
-          <Typography
-            as="a"
-            href="#"
-            variant="small"
-            color="blue"
-            className="font-bold"
-          >
-            View all
-          </Typography>
+         
         </div>
         <div className="divide-y divide-gray-200">
           {applications.map(({ id, name, email, jobTitle, resume, coverLetter }, index) => (
