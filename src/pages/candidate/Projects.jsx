@@ -9,10 +9,11 @@ const Projects = () => {
     img: '',
     title: '',
     tag: '',
-    description: '',
-    route: ''
+    description: ''
   });
   const [image, setImage] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingProjectId, setEditingProjectId] = useState(null);
 
   useEffect(() => {
     fetchProjects();
@@ -21,7 +22,7 @@ const Projects = () => {
   const fetchProjects = async () => {
     const user = auth.currentUser;
     if (user) {
-      const querySnapshot = await getDocs(collection(db, "mywork", user.uid, "projects"));
+      const querySnapshot = await getDocs(collection(db, "Candidate_Work", user.uid, "projects"));
       const projectsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setProjects(projectsData);
     }
@@ -47,37 +48,56 @@ const Projects = () => {
         await uploadBytes(storageRef, image);
         imageUrl = await getDownloadURL(storageRef);
       }
-      await addDoc(collection(db, "mywork", user.uid, "projects"), { ...newProject, img: imageUrl });
+      await addDoc(collection(db, "Candidate_Work", user.uid, "projects"), { ...newProject, img: imageUrl });
       fetchProjects();
       setIsModalOpen(false);
-      setImage(null); // Reset image state
-      setNewProject({
-        img: '',
-        title: '',
-        tag: '',
-        description: '',
-        route: ''
-      });
+      resetForm();
     }
   };
 
-  const handleUpdateProject = async (id) => {
+  const handleUpdateProject = async () => {
     const user = auth.currentUser;
-    if (user) {
-      const projectRef = doc(db, "mywork", user.uid, "projects", id);
-      await updateDoc(projectRef, newProject);
+    if (user && editingProjectId) {
+      const projectRef = doc(db, "Candidate_Work", user.uid, "projects", editingProjectId);
+      let imageUrl = newProject.img;
+      if (image) {
+        const storageRef = ref(storage, `mywork/${user.uid}/${image.name}`);
+        await uploadBytes(storageRef, image);
+        imageUrl = await getDownloadURL(storageRef);
+      }
+      await updateDoc(projectRef, { ...newProject, img: imageUrl });
       fetchProjects();
       setIsModalOpen(false);
+      resetForm();
     }
+  };
+
+  const handleEditClick = (project) => {
+    setNewProject(project);
+    setEditingProjectId(project.id);
+    setIsEditing(true);
+    setIsModalOpen(true);
   };
 
   const handleDeleteProject = async (id) => {
     const user = auth.currentUser;
     if (user) {
-      const projectRef = doc(db, "mywork", user.uid, "projects", id);
+      const projectRef = doc(db, "Candidate_Work", user.uid, "projects", id);
       await deleteDoc(projectRef);
       fetchProjects();
     }
+  };
+
+  const resetForm = () => {
+    setImage(null); // Reset image state
+    setNewProject({
+      img: '',
+      title: '',
+      tag: '',
+      description: ''
+    });
+    setIsEditing(false);
+    setEditingProjectId(null);
   };
 
   return (
@@ -96,7 +116,7 @@ const Projects = () => {
       </div>
       
       <Grid container spacing={3}>
-        {projects.map(({ id, img, title, tag, description, route }) => (
+        {projects.map(({ id, img, title, tag, description }) => (
           <Grid item xs={12} sm={6} md={6} lg={6} key={id}>
             <Card>
               <CardMedia
@@ -116,10 +136,7 @@ const Projects = () => {
                 </Typography>
               </CardContent>
               <CardActions>
-                <Button variant="outlined" size="small" href={route}>
-                  View Project
-                </Button>
-                <Button variant="outlined" size="small" onClick={() => handleUpdateProject(id)}>
+                <Button variant="outlined" size="small" onClick={() => handleEditClick({ id, img, title, tag, description })}>
                   Edit
                 </Button>
                 <Button variant="outlined" size="small" onClick={() => handleDeleteProject(id)}>
@@ -133,7 +150,7 @@ const Projects = () => {
 
       <Modal
         open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => { setIsModalOpen(false); resetForm(); }}
         aria-labelledby="upload-project-modal"
         aria-describedby="upload-project-description"
       >
@@ -149,7 +166,7 @@ const Projects = () => {
           boxShadow: '0 4px 8px rgba(0,0,0,0.2)' 
         }}>
           <Typography id="upload-project-modal" variant="h6" component="h2">
-            Add New Project
+            {isEditing ? 'Edit Project' : 'Add New Project'}
           </Typography>
           <TextField
             name="title"
@@ -175,17 +192,9 @@ const Projects = () => {
             fullWidth
             style={{ marginBottom: '16px' }}
           />
-          <TextField
-            name="route"
-            label="Route"
-            value={newProject.route}
-            onChange={handleInputChange}
-            fullWidth
-            style={{ marginBottom: '16px' }}
-          />
           <input type="file" onChange={handleImageChange} style={{ marginBottom: '16px' }} />
-          <Button variant="contained" color="primary" onClick={handleAddProject}>
-            Add Project
+          <Button variant="contained" color="primary" onClick={isEditing ? handleUpdateProject : handleAddProject}>
+            {isEditing ? 'Update Project' : 'Add Project'}
           </Button>
         </div>
       </Modal>

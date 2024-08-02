@@ -28,7 +28,7 @@ const Jobs = () => {
   const fetchJobs = async () => {
     const user = auth.currentUser;
     if (user) {
-      const querySnapshot = await getDocs(collection(db, "projects", user.uid, "jobs"));
+      const querySnapshot = await getDocs(collection(db, "Jobsposted", user.uid, "jobs"));
       const jobsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setJobs(jobsData);
     }
@@ -70,7 +70,7 @@ const Jobs = () => {
 
       const postedDate = new Date().toISOString(); // Get the current date and time
 
-      const jobDocRef = await addDoc(collection(db, "projects", user.uid, "jobs"), {
+      const jobDocRef = await addDoc(collection(db, "Jobsposted", user.uid, "jobs"), {
         ...newJob,
         img: imageUrl,
         companyLogo: companyLogoUrl,
@@ -121,7 +121,7 @@ const Jobs = () => {
   const handleUpdateJob = async () => {
     const user = auth.currentUser;
     if (user && editJobId) {
-      const jobRef = doc(db, "projects", user.uid, "jobs", editJobId);
+      const jobRef = doc(db, "Jobsposted", user.uid, "jobs", editJobId);
 
       let imageUrl = newJob.img;
       if (image) {
@@ -157,7 +157,7 @@ const Jobs = () => {
   const handleDeleteJob = async (id) => {
     const user = auth.currentUser;
     if (user) {
-      const jobRef = doc(db, "projects", user.uid, "jobs", id);
+      const jobRef = doc(db, "Jobsposted", user.uid, "jobs", id);
       await deleteDoc(jobRef);
       fetchJobs();
     }
