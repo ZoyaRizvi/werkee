@@ -39,12 +39,6 @@ const Jobs = () => {
     setNewJob({ ...newJob, [name]: value });
   };
 
-  // const handleImageChange = (e) => {
-  //   if (e.target.files[0]) {
-  //     setImage(e.target.files[0]);
-  //   }
-  // };
-
   const handleLogoChange = (e) => {
     if (e.target.files[0]) {
       setCompanyLogo(e.target.files[0]);
@@ -181,31 +175,48 @@ const Jobs = () => {
       <Grid container spacing={3}>
         {jobs.map(({ id, img, title, description, Requirements, experienceLevel, jobLocation, employmentType, companyName, companyLogo, postedDate }) => (
           <Grid item xs={12} sm={6} md={6} lg={6} key={id}>
-            <Card>
-              <CardContent>
+            <Card style={{
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100%', // Ensure card stretches to fill available height
+              boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+            }}>
+              <CardContent style={{ flex: 1 }}>
                 <img src={companyLogo} alt="Company Logo" style={{ width: '50px', height: '50px' }} />
                 <Typography variant="h6">{title}</Typography>
                 <Typography variant="body2">
                   {description}
                 </Typography>
-                <Typography variant="body2">
+                <div className=' mt-2'>
+                <Typography variant="body2" >
                   Requirements: {Requirements}
                 </Typography>
+                </div>
+                <div className=' mt-2'>
                 <Typography variant="body2">
                   Experience Level: {experienceLevel}
                 </Typography>
+                </div>
+                <div className=' mt-2'>
                 <Typography variant="body2">
                   Location: {jobLocation}
                 </Typography>
+                </div>
+                <div className=' mt-2'>
                 <Typography variant="body2">
                   Employment Type: {employmentType}
                 </Typography>
+                </div>
+                <div className=' mt-2'>
                 <Typography variant="body2">
                   Company: {companyName}
                 </Typography>
+                </div>
+                <div className=' mt-2'>
                 <Typography variant="body2">
                   Posted Date: {new Date(postedDate).toLocaleDateString()}
                 </Typography>
+                </div>
               </CardContent>
               <CardActions>
                 <Button variant="outlined" size="small" onClick={() => handleEditJob({ id, img, title, description, Requirements, experienceLevel, jobLocation, employmentType, companyName, companyLogo, postedDate })}>
@@ -340,4 +351,3 @@ const Jobs = () => {
 };
 
 export default Jobs;
-
