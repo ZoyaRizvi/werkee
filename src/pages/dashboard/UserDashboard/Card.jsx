@@ -22,11 +22,11 @@ const CustomCard = ({ data }) => {
       <div className="flex  flex-col sm:flex-row items-start">
         <img src={companyLogo} alt="" className="w-20 h-16 object-cover" />
         <div>
-          <h3 className="text-lg mb-2 font-semibold">{title}</h3>
-          <h4 className="text-primary mb-1">Company Name: {companyName}</h4>
-          <h4 className="text-base text-primary/70 pb-2"> Requirements: {Requirements}</h4>
+          <h3 className="text-lg mb-2 font-semibold pl-3">{title}</h3>
+          <h4 className="text-primary mb-1 pl-3">Company Name: {companyName}</h4>
+          <h4 className="text-base text-primary/70 pb-2 pl-3"> Requirements: {Requirements}</h4>
   
-          <div className="text-primary/70 text-base flex flex-wrap gap-2 mb-2">
+          <div className="text-primary/70 text-base flex flex-wrap gap-2 mb-2 pl-2">
             <span className="flex items-center gap-2">
               <FiMapPin />
               {jobLocation}
@@ -40,7 +40,7 @@ const CustomCard = ({ data }) => {
               {new Date(postingDate).toLocaleDateString()}
             </span>
           </div>
-          <p className="text-base text-primary/70 pt-3">{description}</p>
+          <p className="text-base text-primary/70 pt-3 pl-3">{description}</p>
           <div className="flex justify-between items-center p-4 mb-2 pl-44">
             {/* <Link
               to={
