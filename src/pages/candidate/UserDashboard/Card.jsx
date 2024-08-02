@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiCalendar, FiClock, FiMapPin } from 'react-icons/fi';
+import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
+import { IoIosArrowDroprightCircle } from "react-icons/io";
 import { db, storage } from "@/firebase/firebase"; // Adjust the path as necessary
 import { collection, addDoc, doc } from 'firebase/firestore';
+
 
 const CustomCard = ({ data }) => {
   const {
