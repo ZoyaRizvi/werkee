@@ -14,9 +14,6 @@ import {
   Button,
 } from '@material-tailwind/react';
 import {
-  HomeIcon,
-  ChatBubbleLeftEllipsisIcon,
-  LightBulbIcon,
   PencilIcon,
 } from '@heroicons/react/24/solid';
 import { ProfileInfoCard } from '@/widgets/cards';
@@ -27,27 +24,17 @@ import {
   DialogBody,
   DialogFooter,
 } from '@material-tailwind/react';
-import {
-  Dialog as MuiDialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Autocomplete,
-} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { db, storage } from "@/firebase/firebase";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Jobs from './Jobs';
 import Responses from './Responses';
-import { Chat } from '../candidate';
-import Messages from './UserDashboard/Messages';
 
 
 // Default values
 const defaultProfile = {
-  name: '',
+  displayName: '',
   title: '',
   info: '',
   location: '',
@@ -63,22 +50,14 @@ const getUserProfilePhoto = () => {
   const user = localStorage.getItem('user');
   if (user) {
     const parsedUser = JSON.parse(user);
-    return parsedUser.profilePhoto ? parsedUser.profilePhoto : DEFAULT_PROFILE_IMAGE;
+    return parsedUser.img ? parsedUser.img : DEFAULT_PROFILE_IMAGE;
   }
   return DEFAULT_PROFILE_IMAGE;
 };
 
 const avatarSrc = getUserProfilePhoto();
 
-const skills = [
-  'Project Management',
-  'DevOps',
-  'Content Writing',
-  'Video Editing',
-  'Marketing',
-  'Technical Writing',
-  'SQA',
-];
+
 
 export function Profile() {
   const { userLoggedIn } = useAuth();
@@ -87,8 +66,6 @@ export function Profile() {
   const handleOpen = () => setOpen(!open);
   const userid = JSON.parse(localStorage.getItem('user'))?.uid || 'default-user-id';
   const [profile, setProfile] = useState(defaultProfile);
-
-
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -117,8 +94,6 @@ export function Profile() {
     setProfile((prevProfile) => ({ ...prevProfile, [name]: value }));
   };
 
-
-
   const handlePhotoUpload = async (file) => {
     const storageRef = ref(storage, `images/${userid}/${file.name}`);
     await uploadBytes(storageRef, file);
@@ -135,7 +110,7 @@ export function Profile() {
   const handlePhotoChange2 = async (e) => {
     if (e.target.files[0]) {
       const newProfilePhotoURL = await handlePhotoUpload(e.target.files[0]);
-      setProfile((prevProfile) => ({ ...prevProfile, profilePhoto: newProfilePhotoURL }));
+      setProfile((prevProfile) => ({ ...prevProfile, img: newProfilePhotoURL }));
     }
   };
 
@@ -153,11 +128,11 @@ export function Profile() {
       console.error('Error updating document: ', error);
     }
     window.location.reload();
-
   };
+
   const data = [
     { label: "JOBS", value: "JOBS", component: <Jobs /> },
-    { label: "Responses", value: "responses", component: <Responses userId={userid}/> }
+    { label: "Responses", value: "responses", component: <Responses userId={userid} /> }
   ];
 
   return (
@@ -167,8 +142,7 @@ export function Profile() {
         backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',
         backgroundSize: "100%"
-      }
-      }
+      }}
         className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-cover bg-center">
         <img src={profile.coverPhoto} alt="Cover" />
         <div className="absolute inset-0 h-full w-full bg-gray-900/75" />
@@ -178,7 +152,7 @@ export function Profile() {
           <div className="mb-10 flex items-center justify-between flex-wrap gap-6">
             <div className="flex items-center gap-6">
               <Avatar
-                src={profile.profilePhoto || avatarSrc}
+                src={profile.img || avatarSrc}
                 alt="Profile"
                 size="xl"
                 variant="rounded"
@@ -186,7 +160,7 @@ export function Profile() {
               />
               <div>
                 <Typography variant="h5" color="blue-gray" className="mb-1">
-                  {profile.name}
+                  {profile.displayName}
                 </Typography>
                 <Typography
                   variant="small"
@@ -262,13 +236,9 @@ export function Profile() {
                 ))}
               </TabsBody>
             </Tabs>
-
-
           </div>
         </CardBody>
       </Card>
-
-
 
       <Dialog open={open} handler={handleOpen}>
         <DialogHeader><h1>Edit Profile</h1></DialogHeader>
@@ -279,8 +249,8 @@ export function Profile() {
                 <label>Name:</label>
                 <input
                   type="text"
-                  name="name"
-                  value={profile.name}
+                  name="displayName"
+                  value={profile.displayName}
                   onChange={handleChange}
                   required
                 />
@@ -300,9 +270,9 @@ export function Profile() {
                   accept="image/*"
                   onChange={handlePhotoChange2}
                 />
-                {profile.profilePhoto && (
+                {profile.img && (
                   <img
-                    src={profile.profilePhoto}
+                    src={profile.img}
                     alt="Profile Preview"
                     className="profile-preview"
                   />
@@ -394,3 +364,4 @@ export function Profile() {
 }
 
 export default Profile;
+
