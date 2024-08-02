@@ -18,7 +18,7 @@ export default function Responses() {
       }
 
       try {
-        const recruiterDocRef = collection(db, 'recruiters', currentUser.uid, 'applications');
+        const recruiterDocRef = collection(db, 'JobResponses', currentUser.uid, 'applications');
         const querySnapshot = await getDocs(recruiterDocRef);
         const apps = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setApplications(apps);
