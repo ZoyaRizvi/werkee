@@ -17,6 +17,9 @@ import { Jobs } from "./UserDashboard/Jobs";
 import CardCustom from "./UserDashboard/Card";
 import { db } from "../../firebase/firebase";
 import { collectionGroup, getDocs } from "firebase/firestore";
+import Jobpostingdate from "./Jobpostingdate";
+import Location from "./Location";
+import './style.css'
 
 export function Home() {
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -172,7 +175,10 @@ export function Home() {
               )}
             </CardBody>
           </Card>
-          <Card className="border border-blue-gray-100 shadow-sm">
+          <div className=" bg-white rounded-lg p-8">
+          <Location handleChange = {handleChange} handleClick= {handleClick}/>
+        <Jobpostingdate handleChange = {handleChange} handleClick= {handleClick}/></div>
+          {/* <Card className="border border-blue-gray-100 shadow-sm">
             <CardHeader
               floated={false}
               shadow={false}
@@ -228,8 +234,9 @@ export function Home() {
                 )
               )}
             </CardBody>
-          </Card>
+          </Card> */}
         </div>
+
       </div>
     </>
   );
