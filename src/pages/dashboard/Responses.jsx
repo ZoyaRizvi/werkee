@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Card, CardBody, Typography } from "@material-tailwind/react";
-import { collection, getDocs } from "firebase/firestore";
+import { Card, CardBody, Typography, Button } from "@material-tailwind/react";
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/firebase/firebase"; // Adjust the path as necessary
 import { getAuth } from "firebase/auth";
 
@@ -32,6 +32,15 @@ export default function Responses() {
     fetchApplications();
   }, [currentUser]);
 
+  const handleDelete = async (id) => {
+    try {
+      await deleteDoc(doc(db, 'JobResponses', currentUser.uid, 'applications', id));
+      setApplications(applications.filter(application => application.id !== id));
+    } catch (error) {
+      console.error("Error deleting application: ", error);
+    }
+  };
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -43,7 +52,6 @@ export default function Responses() {
           <Typography variant="h5" color="blue-gray">
             Latest Responses
           </Typography>
-         
         </div>
         <div className="divide-y divide-gray-200">
           {applications.map(({ id, name, email, jobTitle, resume, coverLetter }, index) => (
@@ -56,12 +64,12 @@ export default function Responses() {
                   <Typography color="blue-gray" variant="h6">
                     {name}
                   </Typography>
-                  <Typography variant="small" color="gray" >
+                  <Typography variant="small" color="gray">
                     {email}
                   </Typography>
                   <div className="flex flex-wrap gap-3 mt-1">
                     <Typography variant="small" color="blue-gray">
-                     Job Title: <b>{jobTitle}</b>
+                      Job Title: <b>{jobTitle}</b>
                     </Typography>
                   </div>
                   <div>
@@ -76,8 +84,18 @@ export default function Responses() {
                       </a>
                     </Typography>
                   </div>
-
                 </div>
+              </div>
+              <div className="flex flex-col gap-y-2">
+                <Button variant="outlined" size="sm">
+                  Accept
+                </Button>
+                <Button variant="outlined" size="sm" onClick={() => handleDelete(id)}>
+                  Delete
+                </Button>
+                <Button variant="outlined" size="sm">
+                  Message Recruiter
+                </Button>
               </div>
             </div>
           ))}
@@ -86,4 +104,3 @@ export default function Responses() {
     </Card>
   );
 }
-
