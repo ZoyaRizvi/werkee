@@ -1,12 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react';
 import { Typography, Grid, Card, CardContent, CardActions, Button, Modal, TextField } from '@mui/material';
 import { db, auth, storage, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, ref, uploadBytes, getDownloadURL } from "@/firebase/firebase";
 
-
-
-const Banner = () => {
-
-
+const Jobs = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [jobs, setJobs] = useState([]);
   const [newJob, setNewJob] = useState({
@@ -23,18 +19,32 @@ const Banner = () => {
   });
   const [image, setImage] = useState(null);
   const [companyLogo, setCompanyLogo] = useState(null);
+  const [editJobId, setEditJobId] = useState(null); // Track the job being edited
 
+  useEffect(() => {
+    fetchJobs();
+  }, []);
 
+  const fetchJobs = async () => {
+    const user = auth.currentUser;
+    if (user) {
+      const querySnapshot = await getDocs(collection(db, "Jobsposted", user.uid, "jobs"));
+      const jobsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setJobs(jobsData);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewJob({ ...newJob, [name]: value });
+  };
 
   const handleLogoChange = (e) => {
     if (e.target.files[0]) {
       setCompanyLogo(e.target.files[0]);
     }
   };
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewJob({ ...newJob, [name]: value });
-  };
+
   const handleAddJob = async () => {
     const user = auth.currentUser;
     if (user) {
@@ -84,20 +94,144 @@ const Banner = () => {
       });
     }
   };
+
+  const handleEditJob = (job) => {
+    setNewJob({
+      img: job.img,
+      title: job.title,
+      description: job.description,
+      Requirements: job.Requirements,
+      experienceLevel: job.experienceLevel,
+      jobLocation: job.jobLocation,
+      employmentType: job.employmentType,
+      companyName: job.companyName,
+      companyLogo: job.companyLogo,
+      postedDate: job.postedDate
+    });
+    setEditJobId(job.id); // Set the job ID being edited
+    setIsModalOpen(true);
+  };
+
+  const handleUpdateJob = async () => {
+    const user = auth.currentUser;
+    if (user && editJobId) {
+      const jobRef = doc(db, "Jobsposted", user.uid, "jobs", editJobId);
+
+      let imageUrl = newJob.img;
+      if (image) {
+        const storageRef = ref(storage, `projects/${user.uid}/${image.name}`);
+        await uploadBytes(storageRef, image);
+        imageUrl = await getDownloadURL(storageRef);
+      }
+
+      let companyLogoUrl = newJob.companyLogo;
+      if (companyLogo) {
+        const storageRef = ref(storage, `projects/${user.uid}/${companyLogo.name}`);
+        await uploadBytes(storageRef, companyLogo);
+        companyLogoUrl = await getDownloadURL(storageRef);
+      }
+
+      await updateDoc(jobRef, {
+        title: newJob.title,
+        description: newJob.description,
+        Requirements: newJob.Requirements,
+        experienceLevel: newJob.experienceLevel,
+        jobLocation: newJob.jobLocation,
+        employmentType: newJob.employmentType,
+        companyName: newJob.companyName,
+        img: imageUrl,
+        companyLogo: companyLogoUrl
+      });
+      fetchJobs();
+      setIsModalOpen(false);
+      setEditJobId(null); // Reset editJobId
+    }
+  };
+
+  const handleDeleteJob = async (id) => {
+    const user = auth.currentUser;
+    if (user) {
+      const jobRef = doc(db, "Jobsposted", user.uid, "jobs", id);
+      await deleteDoc(jobRef);
+      fetchJobs();
+    }
+  };
+
   return (
-    <div className="max-w-screen-2xl container mx-auto xl:px-24 px-4 bg-[#FFF2E1] md:py-20 py-14" style={{"marginTop": "24px"}}>
-      <h1 className="font-bold text-primary mb-3 text-5xl">Post a <span className="text-[teal]">new job</span> today</h1>
-      <p className=" text-black/70 mb-8 text-lg">Unlock your team's potential with top talent—let's build the future together!</p>
-      <form>
-        <div className=" flex justify-start md:flex-row flex-col md:gap-0 gap-4">
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
+    <div>
+      <Typography variant="h4" gutterBottom>
+        Jobs
+      </Typography>
+      
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
         <Button style={{ backgroundColor: 'teal' }}
           variant="contained"
           onClick={() => setIsModalOpen(true)}
         >
           Post a Job
         </Button>
-        <Modal
+      </div>
+      
+      <Grid container spacing={3}>
+        {jobs.map(({ id, img, title, description, Requirements, experienceLevel, jobLocation, employmentType, companyName, companyLogo, postedDate }) => (
+          <Grid item xs={12} sm={6} md={6} lg={6} key={id}>
+            <Card style={{
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100%', // Ensure card stretches to fill available height
+              boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+            }}>
+              <CardContent style={{ flex: 1 }}>
+                <img src={companyLogo} alt="Company Logo" style={{ width: '50px', height: '50px' }} />
+                <Typography variant="h6">{title}</Typography>
+                <Typography variant="body2">
+                  {description}
+                </Typography>
+                <div className=' mt-2'>
+                <Typography variant="body2" >
+                  Requirements: {Requirements}
+                </Typography>
+                </div>
+                <div className=' mt-2'>
+                <Typography variant="body2">
+                  Experience Level: {experienceLevel}
+                </Typography>
+                </div>
+                <div className=' mt-2'>
+                <Typography variant="body2">
+                  Location: {jobLocation}
+                </Typography>
+                </div>
+                <div className=' mt-2'>
+                <Typography variant="body2">
+                  Employment Type: {employmentType}
+                </Typography>
+                </div>
+                <div className=' mt-2'>
+                <Typography variant="body2">
+                  Company: {companyName}
+                </Typography>
+                </div>
+                <div className=' mt-2'>
+                <Typography variant="body2">
+                  Posted Date: {new Date(postedDate).toLocaleDateString()}
+                </Typography>
+                </div>
+              </CardContent>
+              <CardActions>
+                <Button variant="outlined" size="small" onClick={() => handleEditJob({ id, img, title, description, Requirements, experienceLevel, jobLocation, employmentType, companyName, companyLogo, postedDate })}>
+                  Edit
+                </Button>
+                <Button variant="outlined" size="small" onClick={() => handleDeleteJob(id)}>
+                  Delete
+                </Button>
+              </CardActions>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+
+      <Modal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         aria-labelledby="upload-job-modal"
@@ -115,7 +249,7 @@ const Banner = () => {
           boxShadow: '0 4px 8px rgba(0,0,0,0.2)' 
         }}>
           <Typography id="upload-job-modal" variant="h6" component="h2">
-            {"Add New Job"}
+            {editJobId ? "Edit Job" : "Add New Job"}
           </Typography>
           <TextField
             name="title"
@@ -207,17 +341,13 @@ const Banner = () => {
               />
             </div>
           </div> */}
-          <Button variant="contained" color="primary" onClick={handleAddJob}>
-            { "Add Job"}
+          <Button variant="contained" color="primary" onClick={editJobId ? handleUpdateJob : handleAddJob}>
+            {editJobId ? "Update Job" : "Add Job"}
           </Button>
         </div>
       </Modal>
-      </div>
-        </div>
-      </form>
     </div>
-   
-  )
-}
+  );
+};
 
-export default Banner
+export default Jobs;

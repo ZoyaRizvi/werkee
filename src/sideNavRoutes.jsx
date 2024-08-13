@@ -18,7 +18,6 @@ import {
   Notifications as CandidateNotifications,
 } from '@/pages/candidate';
 import SkillAssessment from './pages/candidate/skillassessment';
-
 import {
   Home as AdminHome,
  } from '@/pages/admin';
@@ -95,12 +94,7 @@ const sideNavRoutes = (userRole) => {
           //   path: '/notifications',
           //   element: <DashboardNotifications />,
           // },
-          {
-            icon: <InformationCircleIcon {...icon} />,
-            name: 'Posting',
-            path: '/posting',
-            element: <Posting />,
-          },
+          
         ],
       },
     ];

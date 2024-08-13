@@ -2,7 +2,7 @@ import React from 'react'
 
 export default function Whyteens() {
   return (
-    <div>
+    <div id='whyteens'>
 		<div data-aos="flip-up" className="max-w-xl mx-auto text-center mt-24">
     <h1 className="font-bold text-darken my-3 text-2xl">Why work <span className="text-teal-500">in your Teens</span></h1>
     <p className="leading-relaxed text-gray-500">

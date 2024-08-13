@@ -3,7 +3,7 @@ import React from 'react'
 export default function AboutWerky() {
   return (
     <div>
-            <div className="mt-28">
+            <div id='about' className="mt-28">
       <div data-aos="flip-down" className="text-center max-w-screen-md mx-auto">
         <h1 className="text-3xl font-bold mb-4">What <span className="text-teal-500">WERKY </span> is about?</h1>
         <p className="text-gray-500">

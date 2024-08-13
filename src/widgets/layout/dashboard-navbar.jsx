@@ -1,13 +1,13 @@
-import { doSignInWithEmailAndPassword, doSignInWithGoogle, doSignOut } from '../../firebase/auth';
+import React, { useEffect, useState } from 'react';
+import { doSignOut } from '../../firebase/auth';
 import { useAuth } from '../../context/authContext/index';
-import { useLocation, Link, useNavigate } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import {
   Navbar,
   Typography,
   Button,
   IconButton,
   Breadcrumbs,
-  Input,
   Menu,
   MenuHandler,
   MenuList,
@@ -16,6 +16,7 @@ import {
 } from "@material-tailwind/react";
 import {
   UserCircleIcon,
+  ArrowLeftOnRectangleIcon,
   Cog6ToothIcon,
   BellIcon,
   ClockIcon,
@@ -34,12 +35,17 @@ export function DashboardNavbar() {
   const { fixedNavbar, openSidenav } = controller;
   const { pathname } = useLocation();
   const [layout, page] = pathname.split("/").filter((el) => el !== "");
-  // const navigate = useNavigate()
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem('user'));
+    setUser(userData);
+  }, []);
 
   const signOut = async (e) => {
-    e.preventDefault()
-    doSignOut(e)
-  }
+    e.preventDefault();
+    doSignOut(e);
+  };
 
   return (
     <Navbar
@@ -81,9 +87,6 @@ export function DashboardNavbar() {
           </Typography>
         </div>
         <div className="flex items-center">
-          <div className="mr-auto md:mr-4 md:w-56">
-            <Input label="Search" />
-          </div>
           <IconButton
             variant="text"
             color="blue-gray"
@@ -94,65 +97,66 @@ export function DashboardNavbar() {
           </IconButton>
 
           {!userLoggedIn ? (
+            <Link to="/auth/sign-in">
+              <Button
+                variant="text"
+                color="blue-gray"
+                className="items-center gap-1 px-4 normal-case"
+              >
+                <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
+              </Button>
+            </Link>
+          ) : (
             <>
-              <Link to="/auth/sign-in">
+              {user && user.img ? (
+                <Avatar
+                  src={user.img}
+                  alt={user.displayName || user.email}
+                  className="h-8 w-8"
+                />
+              ) : (
+                <>
+                </>
+              )}
+              <div className="ml-3"></div>
+              <Typography
+                style={{ fontSize: '13px', paddingTop: '4px' }}
+                variant="small"
+                color="blue-gray"
+                className="mb-1 font-normal"
+              >
+                {user ? (user.displayName || user.email) : 'Loading...'}
+              </Typography>
+              <Link to="/">
                 <Button
+                  onClick={(e) => {
+                    signOut(e).then(
+                      localStorage.removeItem("user"),
+                      window.location.href = "/auth/sign-in"
+                    );
+                  }}
                   variant="text"
                   color="blue-gray"
-                  className="hidden items-center gap-1 px-4 xl:flex normal-case"
+                  className="items-center gap-1 px-4 normal-case hidden xl:flex"
                 >
-                  <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-                  Sign In
+                  <ArrowLeftOnRectangleIcon className="h-5 w-5 text-blue-gray-500" />
                 </Button>
                 <IconButton
+                  onClick={(e) => {
+                    signOut(e).then(
+                      localStorage.removeItem("user"),
+                      window.location.href = "/auth/sign-in"
+                    );
+                  }}
                   variant="text"
                   color="blue-gray"
-                  className="grid xl:hidden"
+                  className="xl:hidden"
                 >
-                  <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
+                  <ArrowLeftOnRectangleIcon className="h-5 w-5 text-blue-gray-500" />
                 </IconButton>
               </Link>
             </>
-          ) : (
-            <>
-            <Typography
-            style={{ 'fontSize': '13px', 'paddingTop': '4px' }}
-            variant="small"
-            color="blue-gray"
-            className="mb-1 font-normal"
-            >
-              { (JSON.parse(localStorage.getItem('user')).displayName != null) ?
-                JSON.parse(localStorage.getItem('user')).displayName : JSON.parse(localStorage.getItem('user')).email }
-            </Typography>
-
-            {/* <span> */}
-            <Link to="/">
-              {/* <Button onClick={console.log("hello")}>
-                Test
-              </Button> */}
-              <Button
-                onClick={(e) => { signOut(e).then(
-                      // navigate("/auth/sign-in")
-    localStorage.removeItem("user"),
-    window.location.href="/auth/sign-in"
-                ) }}
-                variant="text"
-                color="blue-gray"
-                className="hidden items-center gap-1 px-4 xl:flex normal-case">
-                <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-                  Sign Out
-              </Button>
-              <IconButton
-                variant="text"
-                color="blue-gray"
-                className="grid xl:hidden">
-                <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-              </IconButton>
-            </Link>
-              {/* </span> */}
-            </>
-                )
-                }
+          )}
           <Menu>
             <MenuHandler>
               <IconButton variant="text" color="blue-gray">
@@ -247,4 +251,3 @@ export function DashboardNavbar() {
 DashboardNavbar.displayName = "/src/widgets/layout/dashboard-navbar.jsx";
 
 export default DashboardNavbar;
-

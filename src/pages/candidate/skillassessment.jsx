@@ -150,6 +150,41 @@ function SkillAssessment() {
     }
   }
 
+  const dialogStyle = {
+    backgroundColor: 'white',
+    padding: '2rem',
+    borderRadius: '8px',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    maxWidth: '400px',
+    width: '100%',
+    textAlign: 'center',
+  };
+
+  const passStyle = {
+    color: 'green',
+    fontSize: '2rem',
+  };
+
+  const failStyle = {
+    color: 'red',
+    fontSize: '2rem',
+  };
+
+  const progressBarStyle = {
+    height: '10px',
+    borderRadius: '5px',
+    backgroundColor: '#e0e0e0',
+    overflow: 'hidden',
+    margin: '1rem 0',
+  };
+
+  const progressStyle = {
+    height: '100%',
+    width: `${(score / questions.length) * 100}%`,
+    backgroundColor: score >= 8 ? 'green' : 'red',
+    transition: 'width 0.3s ease',
+  };
+
   return (
     <div className="bg-gradient-to-r from-teal-50 to-gray-100 min-h-screen p-8 flex flex-col items-center">
       <div className="w-full max-w-4xl bg-white rounded-lg shadow-lg p-6">
