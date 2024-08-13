@@ -39,76 +39,7 @@ export function Profile() {
   const handleStartTest = (skill) => {
     navigate('/skillassessment', { state: { skill } });
   };
-
-  const handleOpenSkillTest = () => setOpenSkillTest(!openSkillTest);
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const docRef = doc(db, 'users', userid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const fetchedData = docSnap.data();
-          setProfile({
-            ...defaultProfile,
-            ...fetchedData,
-            skills: fetchedData.skills || defaultProfile.skills,
-          });
-
-          // Fetch badges
-          if (fetchedData.badges) {
-            setBadges(fetchedData.badges);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching profile:', error);
-        setProfile(defaultProfile);
-      }
-    };
-
-    fetchProfile();
-  }, [userid]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setProfile((prevProfile) => ({ ...prevProfile, [name]: value }));
-  };
-
-  const handleSkillChange = (index, event) => {
-    const newSkills = profile.skills.map((skill, skillIndex) => (
-      index !== skillIndex ? skill : event.target.value
-    ));
-    setProfile((prevProfile) => ({ ...prevProfile, skills: newSkills }));
-  };
-
-  const handleAddSkill = () => {
-    setProfile((prevProfile) => ({ ...prevProfile, skills: [...prevProfile.skills, ''] }));
-  };
-
-  const handleRemoveSkill = (index) => {
-    setProfile((prevProfile) => ({
-      ...prevProfile,
-      skills: prevProfile.skills.filter((_, skillIndex) => index !== skillIndex)
-    }));
-  };
-
-  const handlePhotoUpload = async (file) => {
-    const storageRef = ref(storage, `images/${userid}/${file.name}`);
-    await uploadBytes(storageRef, file);
-    return getDownloadURL(storageRef);
-  };
-
-  const handlePhotoChange = async (e) => {
-    if (e.target.files[0]) {
-      const newCoverPhotoURL = await handlePhotoUpload(e.target.files[0]);
-      setProfile((prevProfile) => ({ ...prevProfile, coverPhoto: newCoverPhotoURL }));
-    }
-  };
   
-  const handleStartTest = (skill) => {
-    navigate('/dashboard/skillassessment', { state: { skill } });
-  };
-
   useEffect(() => {
     const fetchProfile = async () => {
       try {
