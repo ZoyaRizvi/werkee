@@ -118,6 +118,7 @@ export function DashboardNavbar() {
                 <>
                 </>
               )}
+              <div className="ml-3"></div>
               <Typography
                 style={{ fontSize: '13px', paddingTop: '4px' }}
                 variant="small"
