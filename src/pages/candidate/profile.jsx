@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './profile.css';
 import { Card, CardBody, Avatar, Typography, Tabs, TabsHeader, Tab, Tooltip, Button } from '@material-tailwind/react';
-import { HomeIcon, ChatBubbleLeftEllipsisIcon, LightBulbIcon, PencilIcon, TrophyIcon } from '@heroicons/react/24/solid';
+import { ChatBubbleLeftEllipsisIcon, LightBulbIcon, PencilIcon, TrophyIcon } from '@heroicons/react/24/solid';
 import { ProfileInfoCard } from '@/widgets/cards';
 import { useAuth } from '../../context/authContext/index';
 import { Dialog as MuiDialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
@@ -25,20 +25,9 @@ const defaultProfile = {
   img: '',
 };
 
-const skills = [
-  { name: 'Project Management', description: 'Manage projects effectively.' },
-  { name: 'DevOps', description: 'DevOps practices and tools.' },
-  { name: 'Content Writing', description: 'Creating and managing content.' },
-  { name: 'Video Editing', description: 'Editing video content.' },
-  { name: 'Marketing', description: 'Marketing strategies and implementation.' },
-  { name: 'Technical Writing', description: 'Writing technical documentation.' },
-  { name: 'SQA', description: 'Software Quality Assurance.' },
-];
-
 export function Profile() {
   const { userLoggedIn } = useAuth();
   const [openSkillTest, setOpenSkillTest] = useState(false);
-  const [selectedSkill, setSelectedSkill] = useState('');
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(!open);
@@ -52,6 +41,73 @@ export function Profile() {
   };
 
   const handleOpenSkillTest = () => setOpenSkillTest(!openSkillTest);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const docRef = doc(db, 'users', userid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const fetchedData = docSnap.data();
+          setProfile({
+            ...defaultProfile,
+            ...fetchedData,
+            skills: fetchedData.skills || defaultProfile.skills,
+          });
+
+          // Fetch badges
+          if (fetchedData.badges) {
+            setBadges(fetchedData.badges);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        setProfile(defaultProfile);
+      }
+    };
+
+    fetchProfile();
+  }, [userid]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setProfile((prevProfile) => ({ ...prevProfile, [name]: value }));
+  };
+
+  const handleSkillChange = (index, event) => {
+    const newSkills = profile.skills.map((skill, skillIndex) => (
+      index !== skillIndex ? skill : event.target.value
+    ));
+    setProfile((prevProfile) => ({ ...prevProfile, skills: newSkills }));
+  };
+
+  const handleAddSkill = () => {
+    setProfile((prevProfile) => ({ ...prevProfile, skills: [...prevProfile.skills, ''] }));
+  };
+
+  const handleRemoveSkill = (index) => {
+    setProfile((prevProfile) => ({
+      ...prevProfile,
+      skills: prevProfile.skills.filter((_, skillIndex) => index !== skillIndex)
+    }));
+  };
+
+  const handlePhotoUpload = async (file) => {
+    const storageRef = ref(storage, `images/${userid}/${file.name}`);
+    await uploadBytes(storageRef, file);
+    return getDownloadURL(storageRef);
+  };
+
+  const handlePhotoChange = async (e) => {
+    if (e.target.files[0]) {
+      const newCoverPhotoURL = await handlePhotoUpload(e.target.files[0]);
+      setProfile((prevProfile) => ({ ...prevProfile, coverPhoto: newCoverPhotoURL }));
+    }
+  };
+  
+  const handleStartTest = (skill) => {
+    navigate('/dashboard/skillassessment', { state: { skill } });
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -202,17 +258,13 @@ export function Profile() {
             <div className="w-96">
               <Tabs value="app">
                 <TabsHeader>
-                  <Tab value="app">
-                    <HomeIcon className="-mt-1 mr-2 inline-block h-5 w-5" />
-                    App
-                  </Tab>
                   <Tab value="message">
                     <ChatBubbleLeftEllipsisIcon className="-mt-0.5 mr-2 inline-block h-5 w-5" />
                     Message
                   </Tab>
-                  <Tab value="skillassessment" onClick={() => setOpenSkillTest(true)}>
+                  <Tab value="skillassessment" onClick={() => handleStartTest(true)}>
                     <LightBulbIcon className="-mt-1 mr-2 inline-block h-5 w-5" />
-                    Skill Test
+                    Skill Assessment
                   </Tab>
                 </TabsHeader>
               </Tabs>
@@ -276,37 +328,6 @@ export function Profile() {
           </div>
         </CardBody>
       </Card>
-
-      {/* Skill Dialog */}
-      <MuiDialog open={openSkillTest} onClose={() => setOpenSkillTest(false)} fullWidth maxWidth="sm">
-        <DialogTitle className="flex items-center gap-2 text-blue-600">
-          <LightBulbIcon className="h-6 w-6" />
-          Select a Skill
-        </DialogTitle>
-        <DialogContent>
-          <div className="grid grid-cols-2 gap-4 p-4">
-            {skills.map((skill) => (
-              <Tooltip key={skill.name} title={skill.description} placement="top">
-                <Button
-                  variant={selectedSkill === skill.name ? 'contained' : 'outlined'}
-                  color="primary"
-                  onClick={() => handleSkillSelect(skill.name)}
-                  className={`transition-transform duration-300 transform ${
-                    selectedSkill === skill.name ? 'scale-105' : 'scale-100'
-                  }`}
-                >
-                  {skill.name}
-                </Button>
-              </Tooltip>
-            ))}
-          </div>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenSkillTest(false)} color="gray">
-            Close
-          </Button>
-        </DialogActions>
-      </MuiDialog>
 
       {/* Edit Profile Dialog */}
       <MuiDialog open={open} onClose={handleOpen} fullWidth maxWidth="sm">

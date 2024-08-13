@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { db } from "../../firebase/firebase";
-import { collection, addDoc, updateDoc, doc, getDoc } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth'; // Import this to get the current user
-import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa'; // Add icons for pass/fail
+import { updateDoc, doc, getDoc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import { LightBulbIcon, FaceSmileIcon, FaceFrownIcon } from '@heroicons/react/24/solid';
+import { Dialog as MuiDialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Tooltip, Button } from '@material-tailwind/react';
+import './profile.css';
 
 function SkillAssessment() {
   const [questions, setQuestions] = useState([]);
@@ -13,19 +16,30 @@ function SkillAssessment() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showScoreDialog, setShowScoreDialog] = useState(false);
-  const [passStatus, setPassStatus] = useState(''); // Pass/Fail status
-  const location = useLocation();
+  const [openSkillTest, setOpenSkillTest] = useState(true);
+  const [selectedSkill, setSelectedSkill] = useState(null);
+  const [passStatus, setPassStatus] = useState('');
   const navigate = useNavigate();
-  const { skill } = location.state || {};
   const hasGeneratedQuestions = useRef(false);
   const [assessmentId, setAssessmentId] = useState(null);
 
+  const skills = [
+    { name: 'Project Management', description: 'Manage projects effectively.' },
+    { name: 'DevOps', description: 'DevOps practices and tools.' },
+    { name: 'Content Writing', description: 'Creating and managing content.' },
+    { name: 'Video Editing', description: 'Editing video content.' },
+    { name: 'Marketing', description: 'Marketing strategies and implementation.' },
+    { name: 'Technical Writing', description: 'Writing technical documentation.' },
+    { name: 'SQA', description: 'Software Quality Assurance.' },
+    { name: 'Graphic Designing', description: 'Knowledge of graphics.' },
+  ];
+
   useEffect(() => {
-    if (skill && !hasGeneratedQuestions.current) {
-      handleGenerateQuestions(skill);
+    if (selectedSkill && !hasGeneratedQuestions.current) {
+      handleGenerateQuestions(selectedSkill);
       hasGeneratedQuestions.current = true;
     }
-  }, [skill]);
+  }, [selectedSkill]);
 
   async function handleGenerateQuestions(skill) {
     setLoading(true);
@@ -55,62 +69,85 @@ function SkillAssessment() {
     return questions.length > 0 && questions.length === Object.keys(answers).length;
   }
 
-  function calculateScore() {
-    let correctCount = 0;
-    questions.forEach((question, index) => {
-      if (answers[index] === question.correctAnswer) {
-        correctCount += 1;
-      }
-    });
-    return correctCount;
-  }
-
   async function handleSubmit() {
     if (assessmentId) {
       try {
-        const userScore = calculateScore();
-        await updateDoc(doc(db, 'assessment', assessmentId), {
+        // Fetch quizData from Firestore
+        const assessmentDocRef = doc(db, 'assessment', assessmentId);
+        const assessmentDoc = await getDoc(assessmentDocRef);
+        const assessmentData = assessmentDoc.data();
+        const quizData = assessmentData.quizData; // assuming quizData is stored in the 'quizData' field
+  
+        if (!quizData || !quizData.questions) {
+          throw new Error("No quiz data found.");
+        }
+  
+        // Calculate score
+        const userScore = calculateScore(quizData.questions);
+        await updateDoc(assessmentDocRef, {
           response: answers,
           score: userScore
         });
 
-        // Determine pass/fail based on the score
         const status = userScore >= 8 ? 'Passed' : 'Failed';
         setPassStatus(status);
-
-        // Update user document if passed
+  
+        // Update user badges if passed
         if (status === 'Passed') {
-          const auth = getAuth(); // Get authentication instance
-          const user = auth.currentUser; // Get current user
-
+          const auth = getAuth();
+          const user = auth.currentUser;
+  
           if (user) {
-            const userDocRef = doc(db, 'users', user.uid); // Get user document reference
-
-            // Fetch the existing user document
+            const userDocRef = doc(db, 'users', user.uid);
             const userDoc = await getDoc(userDocRef);
             const userData = userDoc.data();
-
-            // Append the new badge to the existing badges field
-            const existingBadges = userData.badges ? userData.badges.split(',') : [];
-            if (!existingBadges.includes(skill)) {
-              existingBadges.push(skill);
+            const existingBadges = userData.badges ? userData.badges : [];
+            if (!existingBadges.includes(selectedSkill)) {
+              existingBadges.push(selectedSkill);
               await updateDoc(userDocRef, {
-                badges: existingBadges.join(',')
+                badges: existingBadges
               });
             }
           }
         }
-
         setScore(userScore);
         setShowScoreDialog(true);
       } catch (error) {
         console.error("Error saving responses and score:", error);
+        setError("An error occurred while processing your submission.");
       }
     }
   }
+  
+  function calculateScore(questions) {
+    let correctCount = 0;
+  
+    questions.forEach((question, index) => {
+      const correctAnswer = question.correctAnswer;
+      const userAnswer = answers[index];
+  
+      if (userAnswer === correctAnswer) {
+        correctCount += 1;
+      }
+    });
+  
+    return correctCount;
+  }
+  
+  function handleSkillSelect(skill) {
+    setSelectedSkill(skill);
+    setOpenSkillTest(false);
+  }
 
   function handleDialogClose() {
-    navigate('/dashboard/profile');
+    if (passStatus === 'Passed') {
+      navigate('/dashboard/profile');
+    } else {
+      setShowScoreDialog(false);
+      setOpenSkillTest(true);
+      setSelectedSkill(null);
+      hasGeneratedQuestions.current = false;
+    }
   }
 
   const dialogStyle = {
@@ -149,16 +186,15 @@ function SkillAssessment() {
   };
 
   return (
-    <div className="bg-gradient-to-r from-blue-50 to-blue-100 min-h-screen p-8 flex flex-col items-center">
+    <div className="bg-gradient-to-r from-teal-50 to-gray-100 min-h-screen p-8 flex flex-col items-center">
       <div className="w-full max-w-4xl bg-white rounded-lg shadow-lg p-6">
-        <h1 className="text-3xl font-bold text-blue-600 mb-6 text-center">
-          Skill Assessment for <span className="text-blue-800">{skill}</span>
+        <h1 className="text-3xl font-bold mb-6 text-center" style={{ color: '#3cacae' }}>
+          Skill Assessment for <span style={{ color: '#545454' }}>{selectedSkill}</span>
         </h1>
-
         {loading ? (
           <div className="flex justify-center items-center min-h-[200px]">
-            <div className="animate-spin border-t-4 border-blue-600 border-solid rounded-full w-16 h-16"></div>
-            <p className="ml-4 text-lg text-blue-600">Loading questions...</p>
+            <div className="animate-spin border-t-4 border-gray-600 border-solid rounded-full w-16 h-16"></div>
+            <p className="ml-4 text-lg text-gray-600">Loading questions...</p>
           </div>
         ) : error ? (
           <div className="text-center text-red-600">
@@ -190,7 +226,7 @@ function SkillAssessment() {
                 <button 
                   onClick={handleSubmit} 
                   disabled={!isAllAnswered()}
-                  className={`py-2 px-4 rounded-lg font-semibold text-white ${isAllAnswered() ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}
+                  className={`py-2 px-4 rounded-lg font-semibold text-white ${isAllAnswered() ? 'bg-gray-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}
                 >
                   Submit
                 </button>
@@ -200,12 +236,42 @@ function SkillAssessment() {
         )}
       </div>
 
+      <MuiDialog open={openSkillTest} onClose={() => setOpenSkillTest(false)} fullWidth maxWidth="sm">
+        <DialogTitle className="flex items-center gap-2 text-gray-600">
+          <LightBulbIcon className="h-6 w-6" style={{ color: '#3cacae' }} />
+          Select a Skill
+        </DialogTitle>
+        <DialogContent>
+          <div className="grid grid-cols-2 gap-4 p-4">
+            {skills.map((skill) => (
+              <Tooltip key={skill.name} title={skill.description} placement="top">
+                <Button
+                  variant={selectedSkill === skill.name ? 'filled' : 'outlined'}
+                  color={selectedSkill === skill.name ? 'blue' : 'gray'}
+                  onClick={() => handleSkillSelect(skill.name)}
+                  className={`transition-transform duration-300 transform ${
+                    selectedSkill === skill.name ? 'scale-105' : 'scale-100'
+                  }`}
+                >
+                  {skill.name}
+                </Button>
+              </Tooltip>
+            ))}
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => navigate('/dashboard/home')} color="gray">
+            Close
+          </Button>
+        </DialogActions>
+      </MuiDialog>
+
       {showScoreDialog && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div style={dialogStyle}>
             <h2 className="text-2xl font-bold mb-4" style={{ color: passStatus === 'Passed' ? 'green' : 'red' }}>
               <span className="mr-2">
-                {passStatus === 'Passed' ? <FaCheckCircle style={passStyle} /> : <FaTimesCircle style={failStyle} />}
+                {passStatus === 'Passed' ? <FaceSmileIcon className="h-10 w-10 inline" style={passStyle} /> : <FaceFrownIcon className="h-10 w-10 inline" style={failStyle} />}
               </span>
               {passStatus === 'Passed' ? 'Congratulations!' : 'Sorry!'}
             </h2>
@@ -215,9 +281,9 @@ function SkillAssessment() {
             </div>
             <button 
               onClick={handleDialogClose} 
-              className="py-2 px-4 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700"
+              className="py-2 px-4 bg-gray-600 text-white rounded-lg font-semibold hover:bg-blue-700"
             >
-              OK
+              {passStatus === 'Passed' ? 'OK' : 'Try Again'}
             </button>
           </div>
         </div>

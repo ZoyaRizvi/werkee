@@ -7,8 +7,8 @@ import {
   RectangleStackIcon,
 } from '@heroicons/react/24/solid';
 import { Home, Profile, Chat, Notifications } from '@/pages/dashboard';
+import SkillAssessment from './pages/candidate/skillassessment';
 import { SignIn, SignUp } from '@/pages/auth';
-
 
 const icon = {
   className: 'w-5 h-5 text-inherit',
@@ -42,9 +42,13 @@ export const routes = [
         path: '/notifications',
         element: <Notifications />,
       },
-      
+      {
+        name: 'skillassessment',
+        path: '/skillassessment',
+        element: <SkillAssessment />,
+      },
     ],
-  },
+  }, 
   {
     title: 'auth pages',
     layout: 'auth',
