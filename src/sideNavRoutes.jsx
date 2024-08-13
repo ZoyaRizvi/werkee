@@ -2,6 +2,7 @@ import {
   HomeIcon,
   UserCircleIcon,
   ChatBubbleOvalLeftIcon,
+  LightBulbIcon,
   InformationCircleIcon,
 } from '@heroicons/react/24/solid';
 import {
@@ -16,8 +17,7 @@ import {
   Chat as CandidateChat,
   Notifications as CandidateNotifications,
 } from '@/pages/candidate';
-
-import Posting from './pages/dashboard/posting';
+import SkillAssessment from './pages/candidate/skillassessment';
 
 import {
   Home as AdminHome,
@@ -50,6 +50,12 @@ const sideNavRoutes = (userRole) => {
             name: 'Chat',
             path: '/chat',
             element: <CandidateChat />,
+          },
+          {
+            icon: <LightBulbIcon {...icon} />,
+            name: 'Skill Assessment',
+            path: '/skillassessment',
+            element: <SkillAssessment />,
           },
           // {
           //   icon: <InformationCircleIcon {...icon} />,

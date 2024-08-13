@@ -1,23 +1,8 @@
-import React, { useState } from 'react';
-import {
-  Card,
-  CardBody,
-  Avatar,
-  Typography,
-  Tabs,
-  TabsHeader,
-  Tab,
-  Tooltip,
-  Button,
-} from '@material-tailwind/react';
-import {
-  HomeIcon,
-  ChatBubbleLeftEllipsisIcon,
-  LightBulbIcon,
-  PencilIcon,
-} from '@heroicons/react/24/solid';
-import { ProfileInfoCard, MessageCard } from '@/widgets/cards';
-import { conversationsData } from '@/data';
+import React, { useState, useEffect } from 'react';
+import './profile.css';
+import { Card, CardBody, Avatar, Typography, Tabs, TabsHeader, Tab, Tooltip, Button } from '@material-tailwind/react';
+import { ChatBubbleLeftEllipsisIcon, LightBulbIcon, PencilIcon, TrophyIcon } from '@heroicons/react/24/solid';
+import { ProfileInfoCard } from '@/widgets/cards';
 import { useAuth } from '../../context/authContext/index';
 import {
   Dialog,
@@ -29,20 +14,9 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
-const skills = [
-  'Prject Management',
-  'DevOps',
-  'Content Writing',
-  'Video Editing',
-  'Marketing',
-  'Technical Writing',
-  'SQA',
-];
-
 export function Profile() {
   const { userLoggedIn } = useAuth();
   const [openSkillTest, setOpenSkillTest] = useState(false);
-  const [selectedSkill, setSelectedSkill] = useState('');
   const navigate = useNavigate();
 
   const handleTabChange = (value) => {
@@ -52,9 +26,113 @@ export function Profile() {
   };
 
   const handleStartTest = (skill) => {
-    console.log('Starting test for skill:', skill);
-    // Add logic to start the skill test with the selected skill
-    navigate('/skillassessment', { state: { skill } });
+    navigate('/dashboard/skillassessment', { state: { skill } });
+  };
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const docRef = doc(db, 'users', userid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const fetchedData = docSnap.data();
+          setProfile({
+            ...defaultProfile,
+            ...fetchedData,
+            skills: fetchedData.skills || defaultProfile.skills,
+          });
+
+          // Fetch badges
+          if (fetchedData.badges) {
+            setBadges(fetchedData.badges);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        setProfile(defaultProfile);
+      }
+    };
+
+    fetchProfile();
+  }, [userid]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setProfile((prevProfile) => ({ ...prevProfile, [name]: value }));
+  };
+
+  const handleSkillChange = (index, event) => {
+    const newSkills = profile.skills.map((skill, skillIndex) => (
+      index !== skillIndex ? skill : event.target.value
+    ));
+    setProfile((prevProfile) => ({ ...prevProfile, skills: newSkills }));
+  };
+
+  const handleAddSkill = () => {
+    setProfile((prevProfile) => ({ ...prevProfile, skills: [...prevProfile.skills, ''] }));
+  };
+
+  const handleRemoveSkill = (index) => {
+    setProfile((prevProfile) => ({
+      ...prevProfile,
+      skills: prevProfile.skills.filter((_, skillIndex) => index !== skillIndex)
+    }));
+  };
+
+  const handlePhotoUpload = async (file) => {
+    const storageRef = ref(storage, `images/${userid}/${file.name}`);
+    await uploadBytes(storageRef, file);
+    return getDownloadURL(storageRef);
+  };
+
+  const handlePhotoChange = async (e) => {
+    if (e.target.files[0]) {
+      const newCoverPhotoURL = await handlePhotoUpload(e.target.files[0]);
+      setProfile((prevProfile) => ({ ...prevProfile, coverPhoto: newCoverPhotoURL }));
+    }
+  };
+
+  const handlePhotoChange2 = async (e) => {
+    if (e.target.files[0]) {
+      const newProfilePhotoURL = await handlePhotoUpload(e.target.files[0]);
+      setProfile((prevProfile) => ({ ...prevProfile, img: newProfilePhotoURL }));
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    try {
+      await updateDoc(doc(db, 'users', userid), {
+        displayName: profile.displayName,
+        title: profile.title,
+        info: profile.info,
+        location: profile.location,
+        facebook: profile.facebook,
+        twitter: profile.twitter,
+        instagram: profile.instagram,
+        coverPhoto: profile.coverPhoto,
+        img: profile.img,
+        skills: profile.skills
+      });
+      setOpen(false);
+    } catch (error) {
+      console.error('Error updating document: ', error);
+    }
+  };
+
+  const validateForm = () => {
+    const errors = {};
+    if (!profile.displayName) {
+      errors.displayName = 'Name is required';
+    }
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const resetProfile = () => {
+    setProfile(defaultProfile);
   };
 
   return (
@@ -88,17 +166,13 @@ export function Profile() {
             <div className="w-96">
               <Tabs value="app" onChange={(e, value) => handleTabChange(value)}>
                 <TabsHeader>
-                  <Tab value="app">
-                    <HomeIcon className="-mt-1 mr-2 inline-block h-5 w-5" />
-                    App
-                  </Tab>
                   <Tab value="message">
                     <ChatBubbleLeftEllipsisIcon className="-mt-0.5 mr-2 inline-block h-5 w-5" />
                     Message
                   </Tab>
-                  <Tab value="skillassessment" onClick={() => setOpenSkillTest(true)}>
+                  <Tab value="skillassessment" onClick={() => handleStartTest(true)}>
                     <LightBulbIcon className="-mt-1 mr-2 inline-block h-5 w-5" />
-                    Skill Test
+                    Skill Assessment
                   </Tab>
                 </TabsHeader>
               </Tabs>
@@ -149,25 +223,148 @@ export function Profile() {
         </CardBody>
       </Card>
 
-      <Dialog open={openSkillTest} onClose={() => setOpenSkillTest(false)}>
-        <DialogTitle>Select a Skill</DialogTitle>
+      {/* Edit Profile Dialog */}
+      <MuiDialog open={open} onClose={handleOpen} fullWidth maxWidth="sm">
+        <DialogTitle>Edit Profile</DialogTitle>
         <DialogContent>
-          <Autocomplete
-            options={skills}
-            freeSolo
-            onInputChange={(event, newValue) => setSelectedSkill(newValue)}
-            renderInput={(params) => (
-              <TextField {...params} label="Skill" variant="outlined" />
-            )}
-          />
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label className="block text-gray-700">Name</label>
+              <input
+                type="text"
+                name="displayName"
+                value={profile.displayName}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+              {errors.displayName && <p className="text-red-500">{errors.displayName}</p>}
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Title</label>
+              <input
+                type="text"
+                name="title"
+                value={profile.title}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Info</label>
+              <textarea
+                name="info"
+                value={profile.info}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Location</label>
+              <input
+                type="text"
+                name="location"
+                value={profile.location}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Facebook</label>
+              <input
+                type="text"
+                name="facebook"
+                value={profile.facebook}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Twitter</label>
+              <input
+                type="text"
+                name="twitter"
+                value={profile.twitter}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Instagram</label>
+              <input
+                type="text"
+                name="instagram"
+                value={profile.instagram}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Profile Photo:</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoChange2}
+                className="mt-2"
+              />
+              {profile.img && (
+                <img
+                  src={profile.img}
+                  alt="Profile Preview"
+                  className="profile-preview mt-2 w-24 h-24 object-cover rounded"
+                />
+              )}
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Cover Photo:</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoChange}
+                className="mt-2"
+              />
+              {profile.coverPhoto && (
+                <img
+                  src={profile.coverPhoto}
+                  alt="Cover Preview"
+                  className="cover-preview mt-2 w-full h-24 object-cover rounded"
+                />
+              )}
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Skills:</label>
+              {profile.skills.map((skill, index) => (
+                <div key={index} className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={skill}
+                    onChange={(e) => handleSkillChange(index, e)}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
+                  />
+                  <Button type="button" onClick={() => handleRemoveSkill(index)} color="red">
+                    Remove
+                  </Button>
+                </div>
+              ))}
+              <Button type="button" onClick={handleAddSkill}>
+                Add Skill
+              </Button>
+            </div>
+            <div className="flex justify-end gap-4">
+              <Button type="button" onClick={resetProfile} color="gray">
+                Reset
+              </Button>
+              <Button type="submit" color="blue">
+                Save Changes
+              </Button>
+            </div>
+          </form>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenSkillTest(false)}>Cancel</Button>
-          <Button onClick={() => { handleStartTest(selectedSkill); setOpenSkillTest(false); }} disabled={!selectedSkill}>
-            Start Test
+          <Button onClick={handleOpen} color="gray">
+            Close
           </Button>
         </DialogActions>
-      </Dialog>
+      </MuiDialog>
     </>
   );
 }

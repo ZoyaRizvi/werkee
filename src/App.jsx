@@ -21,7 +21,7 @@ function App() {
       element: <Dashboard />,
     },
     {
-      path: '/skillassessment',
+      path: '/skillassessment/*',
       element: <SkillAssessment />,
     },
     // {
