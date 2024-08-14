@@ -237,12 +237,12 @@ export function Profile() {
                 ),
                 badge:(
                   <div className="badge-container">
-                  {badges.length > 0 && badges.map((badge, index) => (
-                    <Tooltip key={index} content={badge} placement="top">
-                      <TrophyIcon className="h-6 w-6 text-orange-500" />
-                    </Tooltip>
+                  {badges.length > 0 && Array.isArray(badges) && badges.map((badge, index) => (
+                  <Tooltip key={index} content={badge} placement="top">
+                    <TrophyIcon className="h-6 w-6 text-orange-500" />
+                  </Tooltip>
                   ))}
-                </div>
+                  </div>
                 )
               }}
               action={
