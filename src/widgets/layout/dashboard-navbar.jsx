@@ -28,7 +28,8 @@ import {
   setOpenConfigurator,
   setOpenSidenav,
 } from "@/context";
-
+import { getDoc, doc } from "firebase/firestore";
+import { db } from "@/firebase/firebase";
 export function DashboardNavbar() {
   const { userLoggedIn } = useAuth();
   const [controller, dispatch] = useMaterialTailwindController();
@@ -38,8 +39,17 @@ export function DashboardNavbar() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem('user'));
-    setUser(userData);
+    const fetchUserData = async () => {
+      const userId = JSON.parse(localStorage.getItem('user')).uid; // Assuming user ID is stored in localStorage
+      const userDoc = await getDoc(doc(db, "users", userId));
+      if (userDoc.exists()) {
+        setUser(userDoc.data());
+      } else {
+        console.error("No such user!");
+      }
+    };
+
+    fetchUserData();
   }, []);
 
   const signOut = async (e) => {
@@ -115,8 +125,7 @@ export function DashboardNavbar() {
                   className="h-8 w-8"
                 />
               ) : (
-                <>
-                </>
+                <UserCircleIcon className="h-8 w-8 text-blue-gray-500" />
               )}
               <div className="ml-3"></div>
               <Typography
