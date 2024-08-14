@@ -161,7 +161,7 @@ function SkillAssessment() {
   };
 
   const passStyle = {
-    color: 'green',
+    color: 'teal',
     fontSize: '2rem',
   };
 
@@ -181,7 +181,7 @@ function SkillAssessment() {
   const progressStyle = {
     height: '100%',
     width: `${(score / questions.length) * 100}%`,
-    backgroundColor: score >= 8 ? 'green' : 'red',
+    backgroundColor: score >= 8 ? 'teal' : 'red',
     transition: 'width 0.3s ease',
   };
 
@@ -226,7 +226,7 @@ function SkillAssessment() {
                 <button 
                   onClick={handleSubmit} 
                   disabled={!isAllAnswered()}
-                  className={`py-2 px-4 rounded-lg font-semibold text-white ${isAllAnswered() ? 'bg-gray-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}
+                  className={`py-2 px-4 rounded-lg font-semibold text-white ${isAllAnswered() ? 'bg-gray-600 hover:bg-teal-700' : 'bg-gray-400 cursor-not-allowed'}`}
                 >
                   Submit
                 </button>
@@ -269,7 +269,7 @@ function SkillAssessment() {
       {showScoreDialog && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div style={dialogStyle}>
-            <h2 className="text-2xl font-bold mb-4" style={{ color: passStatus === 'Passed' ? 'green' : 'red' }}>
+            <h2 className="text-2xl font-bold mb-4" style={{ color: passStatus === 'Passed' ? 'teal' : 'red' }}>
               <span className="mr-2">
                 {passStatus === 'Passed' ? <FaceSmileIcon className="h-10 w-10 inline" style={passStyle} /> : <FaceFrownIcon className="h-10 w-10 inline" style={failStyle} />}
               </span>
@@ -281,7 +281,7 @@ function SkillAssessment() {
             </div>
             <button 
               onClick={handleDialogClose} 
-              className="py-2 px-4 bg-gray-600 text-white rounded-lg font-semibold hover:bg-blue-700"
+              className="py-2 px-4 bg-gray-600 text-white rounded-lg font-semibold hover:bg-teal-700"
             >
               {passStatus === 'Passed' ? 'OK' : 'Try Again'}
             </button>

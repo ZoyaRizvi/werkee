@@ -194,7 +194,7 @@ export function Home() {
               >
                 <ArrowUpIcon
                   strokeWidth={3}
-                  className="h-3.5 w-3.5 text-green-500"
+                  className="h-3.5 w-3.5 text-teal-500"
                 />
                 <strong>24%</strong> this month
               </Typography>

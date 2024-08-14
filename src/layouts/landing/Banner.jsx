@@ -35,10 +35,10 @@ export default function Banner() {
           </div>
           
           <div className="w-full lg:w-6/12 lg:-mt-10 relative" id="girl">
-            <img data-aos="fade-up" data-aos-once="true" className="w-10/12 mx-auto 2xl:-mb-20" src="/img/girl.png" />
+            <img data-aos="fade-up" data-aos-once="true" className="w-10/10 mx-auto 2xl:-mb-20" src="/img/girl.png" />
             
-            <div data-aos="fade-up" data-aos-delay="300" data-aos-once="true" className="absolute top-20 -left-6 sm:top-32 sm:left-10 md:top-40 md:left-16 lg:-left-0 lg:top-52 floating-4">
-              <img height={'400px'} className=" bg-opacity-80 rounded-lg h-50 sm:h-16" src='/img/bot.png'/>
+            <div data-aos="fade-up" data-aos-delay="300" data-aos-once="true" className="absolute top-16 -left-6 sm:top-28 sm:left-20 md:top-36 md:left-20 lg:left-4 lg:top-48 floating-4">
+               <img height={'400px'} className="bg-opacity-80 rounded-lg h-50 sm:h-16" src='/img/bot.png'/>
             </div>
           
             <div data-aos="fade-up" data-aos-delay="400" data-aos-once="true" className="absolute top-20 right-10 sm:right-24 sm:top-28 md:top-36 md:right-32 lg:top-32 lg:right-16 floating">
@@ -50,7 +50,7 @@ export default function Banner() {
             </div>
             
             <div data-aos="fade-up" data-aos-delay="600" data-aos-once="true" className="absolute bottom-20 md:bottom-48 lg:bottom-52 -right-6 lg:right-8 floating-4">
-              <img className=" bg-opacity-80 rounded-lg h-18 sm:h-16" src="/img/bot2.jpg" alt=""/>
+              <img className=" bg-opacity-80 rounded-lg h-18 sm:h-16" src="/img/bot2.png" alt=""/>
             </div>
           </div>
         </div>

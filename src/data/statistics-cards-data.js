@@ -12,7 +12,7 @@ export const statisticsCardsData = [
     title: "Today's Money",
     value: "$53k",
     footer: {
-      color: "text-green-500",
+      color: "text-teal-500",
       value: "+55%",
       label: "than last week",
     },
@@ -23,7 +23,7 @@ export const statisticsCardsData = [
     title: "Today's Users",
     value: "2,300",
     footer: {
-      color: "text-green-500",
+      color: "text-teal-500",
       value: "+3%",
       label: "than last month",
     },
@@ -45,7 +45,7 @@ export const statisticsCardsData = [
     title: "Sales",
     value: "$103,430",
     footer: {
-      color: "text-green-500",
+      color: "text-teal-500",
       value: "+5%",
       label: "than yesterday",
     },

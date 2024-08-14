@@ -382,7 +382,7 @@ export function Profile() {
                 )}
               </div>
 
-              <button variant="gradient" color="green" type="submit">
+              <button variant="gradient" color="teal" type="submit">
                 Submit
               </button>
             </form>
