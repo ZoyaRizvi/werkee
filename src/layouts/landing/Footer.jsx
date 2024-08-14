@@ -18,26 +18,24 @@ const Footer = () => {
         </div>
 
         <div className="w-full md:w-1/3 mb-6 md:mb-0">
-  <div className="flex items-center mb-4">
-    <MapPinIcon className="w-6 h-6 text-teal-600 mr-3" />
-    <p className="text-gray-700 text-sm">
-      <span className="block font-medium">444 S. Cedros Ave</span>
-      Solana Beach, California
-    </p>
-  </div>
-  <div className="flex items-center mb-4">
-    <PhoneIcon className="w-6 h-6 text-teal-600 mr-3" />
-    <p className="text-gray-700 text-sm">+1.555.555.5555</p>
-  </div>
-  <div className="flex items-center mb-4">
-    <EnvelopeIcon className="w-6 h-6 text-teal-600 mr-3" />
-    <p className="text-gray-700 text-sm">
-      <a href="mailto:support@company.com" className="text-teal-600 hover:underline">teamwerky@gmail.com</a>
-    </p>
-  </div>
-</div>
-
-
+          <div className="flex items-center mb-4">
+            <MapPinIcon className="w-6 h-6 text-teal-600 mr-3" />
+            <p className="text-gray-700 text-sm">
+              <span className="block font-medium">444 S. Cedros Ave</span>
+              Solana Beach, California
+            </p>
+          </div>
+          <div className="flex items-center mb-4">
+            <PhoneIcon className="w-6 h-6 text-teal-600 mr-3" />
+            <p className="text-gray-700 text-sm">+1.555.555.5555</p>
+          </div>
+          <div className="flex items-center mb-4">
+            <EnvelopeIcon className="w-6 h-6 text-teal-600 mr-3" />
+            <p className="text-gray-700 text-sm">
+              <a href="mailto:support@company.com" className="text-teal-600 hover:underline">teamwerky@gmail.com</a>
+            </p>
+          </div>
+        </div>
         <div className="w-full md:w-1/3 mb-6 md:mb-0">
           <p className="text-gray-600 text-sm mb-6">
             <span className="block text-gray-800 text-base font-semibold mb-3">About the company</span>
