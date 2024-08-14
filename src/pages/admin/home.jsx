@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { db } from "../../firebase/firebase";
 import { collection, getDocs, addDoc, deleteDoc, doc, serverTimestamp, updateDoc } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 import {
   Typography,
   Card,
@@ -24,7 +25,7 @@ import {
   PencilIcon,
   TrashIcon
 } from "@heroicons/react/24/outline";
-import { CheckCircleIcon, MinusCircleIcon } from "@heroicons/react/24/solid";
+import { CheckCircleIcon } from "@heroicons/react/24/solid";
 
 export function Home() {
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
@@ -35,19 +36,23 @@ export function Home() {
   const [userToDelete, setUserToDelete] = useState(null);
   const [postToDelete, setPostToDelete] = useState(null);
   const [usersData, setUsersData] = useState([]);
-  const [postsData, setPostsData] = useState([]);
-  const [newUser, setNewUser] = useState({ displayName: '', email: '', role: '' });
-  const [newPost, setNewPost] = useState({ jobTitle: '', companyName: '', jobLocation: '', postingDate: '' });
-  const [currentPost, setCurrentPost] = useState(null);
   const [jobsData, setJobsData] = useState([]);
+  const [newUser, setNewUser] = useState({ displayName: '', email: '', role: '' });
+  const [newPost, setNewPost] = useState({ title: '', companyName: '', jobLocation: '', description: '', recruiter: '' });
+  const [currentPost, setCurrentPost] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const auth = getAuth();
+  const currentUserId = auth.currentUser?.uid;
   const projectId = "Yshu6K2j2CZzuu7CbAICFshK0gd2";
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, "users"));
-        const users = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const users = querySnapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter(user => user.id !== currentUserId); // Exclude the logged-in user
         setUsersData(users);
       } catch (error) {
         console.error("Error fetching users: ", error);
@@ -55,8 +60,8 @@ export function Home() {
     };
 
     fetchUsers();
-  }, []);
-  
+  }, [currentUserId]);
+
   useEffect(() => {
     const fetchJobs = async () => {
       try {
@@ -73,8 +78,6 @@ export function Home() {
 
     fetchJobs();
   }, [projectId]);
-    
-  
 
   const handleOpenConfirmDialog = (userId) => {
     setUserToDelete(userId);
@@ -111,11 +114,12 @@ export function Home() {
     try {
       await addDoc(collection(db, "users"), {
         ...newUser,
-        img: '', // Optionally handle user avatar image
-        createdAt: serverTimestamp(), // Add creation timestamp
+        img: '',
+        createdAt: serverTimestamp(),
       });
       const querySnapshot = await getDocs(collection(db, "users"));
-      const users = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const users = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(user => user.id !== currentUserId); // Exclude the logged-in user
       setUsersData(users);
       handleCloseAddUserDialog();
     } catch (error) {
@@ -136,10 +140,10 @@ export function Home() {
   const handleUpdatePost = async () => {
     if (currentPost) {
       try {
-        await updateDoc(doc(db, "projects", currentPost.id), currentPost);
-        const querySnapshot = await getDocs(collection(db, "projects"));
-        const posts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setPostsData(posts);
+        await updateDoc(doc(db, `Jobsposted/${projectId}/jobs`, currentPost.id), currentPost);
+        const jobsSnapshot = await getDocs(collection(db, `Jobsposted/${projectId}/jobs`));
+        const jobs = jobsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setJobsData(jobs);
         handleClosePostEditDialog();
       } catch (error) {
         console.error("Error updating post: ", error);
@@ -160,8 +164,8 @@ export function Home() {
   const handleConfirmPostDelete = async () => {
     if (postToDelete) {
       try {
-        await deleteDoc(doc(db, "projects", postToDelete));
-        setPostsData(postsData.filter(post => post.id !== postToDelete));
+        await deleteDoc(doc(db, `Jobsposted/${projectId}/jobs`, postToDelete));
+        setJobsData(jobsData.filter(post => post.id !== postToDelete));
         handleClosePostConfirmDialog();
       } catch (error) {
         console.error("Error deleting post: ", error);
@@ -175,18 +179,18 @@ export function Home() {
 
   const handleCloseAddPostDialog = () => {
     setOpenAddPostDialog(false);
-    // setNewPost({ jobTitle: '', companyName: '', jobLocation: '', postingDate: '' });
+    setNewPost({ title: '', companyName: '', jobLocation: '', description: '', recruiter: '' });
   };
 
   const handleAddPost = async () => {
     try {
-      await addDoc(collection(db, "projects"), {
+      await addDoc(collection(db, `Jobsposted/${projectId}/jobs`), {
         ...newPost,
-        createdAt: serverTimestamp(), // Add creation timestamp
+        createdAt: serverTimestamp(),
       });
-      const querySnapshot = await getDocs(collection(db, "projects"));
-      const posts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setPostsData(posts);
+      const jobsSnapshot = await getDocs(collection(db, `Jobsposted/${projectId}/jobs`));
+      const jobs = jobsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setJobsData(jobs);
       handleCloseAddPostDialog();
     } catch (error) {
       console.error("Error adding post: ", error);
@@ -210,7 +214,7 @@ export function Home() {
               </Typography>
               <Typography
                 variant="small"
-                className="flex items-center gap-1 font-normal text-blue-gray-600" 
+                className="flex items-center gap-1 font-normal text-blue-gray-600"
               >
                 <CheckCircleIcon strokeWidth={3} className="h-4 w-4 text-blue-gray-200" />
                 <strong>{usersData.length}</strong> registered
@@ -235,7 +239,7 @@ export function Home() {
             <table className="w-full min-w-[640px] table-auto">
               <thead>
                 <tr>
-                  {["avatar", "name", "email", "role", ""].map((header, index) => (
+                  {["Avatar", "Name", "Email", "Role", ""].map((header, index) => (
                     <th key={index} className="border-b border-blue-gray-100 py-3 px-5 text-left">
                       <Typography
                         variant="small"
@@ -249,49 +253,47 @@ export function Home() {
                 </tr>
               </thead>
               <tbody>
-                {usersData.map((user) => (
-                  <tr key={user.id}>
-                    <td className="py-3 px-5">
-                      <Avatar
-                        src={user.img || ""}
-                        alt={user.displayName}
-                        size="sm"
-                        variant="circular"
-                      />
-                    </td>
-                    <td className="py-3 px-5">
-                      <Typography variant="small" color="blue-gray" className="font-bold">
-                        {user.displayName}
-                      </Typography>
-                    </td>
-                    <td className="py-3 px-5">
-                      <Typography variant="small" color="blue-gray">
-                        {user.email}
-                      </Typography>
-                    </td>
-                    <td className="py-3 px-5">
-                      <Typography variant="small" color="blue-gray">
-                        {user.role}
-                      </Typography>
-                    </td>
-                    <td className="py-3 px-5">
-                      <IconButton
-                        variant="text"
-                        color="red"
-                        onClick={() => handleOpenConfirmDialog(user.id)}
-                      >
-                        <TrashIcon strokeWidth={2} className="h-5 w-5" />
-                      </IconButton>
-                    </td>
-                  </tr>
-                ))}
+                {usersData.map(({ img, id, displayName, email, role }, index) => {
+                  const isLast = index === usersData.length - 1;
+                  const classes = isLast
+                    ? "py-3 px-5"
+                    : "py-3 px-5 border-b border-blue-gray-50";
+
+                  return (
+                    <tr key={id}>
+                      <td className={classes}>
+                        <Avatar src={img} alt={displayName} />
+                      </td>
+                      <td className={classes}>
+                        <Typography variant="small" color="blue-gray" className="font-bold">
+                          {displayName}
+                        </Typography>
+                      </td>
+                      <td className={classes}>
+                        <Typography variant="small" color="blue-gray" className="font-normal">
+                          {email}
+                        </Typography>
+                      </td>
+                      <td className={classes}>
+                        <Typography variant="small" color="blue-gray" className="font-normal">
+                          {role}
+                        </Typography>
+                      </td>
+                      <td className={classes}>
+                        <IconButton size="sm" variant="text" color="blue-gray" onClick={() => handleOpenConfirmDialog(id)}>
+                          <TrashIcon className="h-4 w-4" />
+                        </IconButton>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </CardBody>
         </Card>
       </div>
 
-      {/* Posts Table */}
+      {/* Jobs Table */}
       <div className="mb-4 grid grid-cols-1 gap-6 xl:grid-cols-2">
         <Card className="overflow-hidden xl:col-span-2 border border-blue-gray-100 shadow-sm">
           <CardHeader
@@ -302,104 +304,102 @@ export function Home() {
           >
             <div>
               <Typography variant="h6" color="blue-gray" className="mb-1">
-                Posts
+                Jobs
               </Typography>
               <Typography
                 variant="small"
                 className="flex items-center gap-1 font-normal text-blue-gray-600"
               >
+                <CheckCircleIcon strokeWidth={3} className="h-4 w-4 text-blue-gray-200" />
                 <strong>{jobsData.length}</strong> available
               </Typography>
             </div>
+            <Menu placement="left-start">
+              <MenuHandler>
+                <IconButton size="sm" variant="text" color="blue-gray" onClick={handleOpenAddPostDialog}>
+                  <EllipsisVerticalIcon
+                    strokeWidth={3}
+                    fill="currentColor"
+                    className="h-6 w-6"
+                  />
+                </IconButton>
+              </MenuHandler>
+              <MenuList>
+                <MenuItem onClick={handleOpenAddPostDialog}>Create Job</MenuItem>
+              </MenuList>
+            </Menu>
           </CardHeader>
           <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
-            {loading ? (
-              <Typography variant="small" color="blue-gray" className="text-center">
-                Loading jobs...
-              </Typography>
-            ) : (
-              <table className="w-full min-w-[640px] table-auto">
-                <thead>
-                  <tr>
-                    {["Job Title", "Company Name", "Location", "Description", ""].map((header, index) => (
-                      <th key={index} className="border-b border-blue-gray-100 py-3 px-5 text-left">
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-normal leading-none opacity-70"
-                        >
-                          {header}
-                        </Typography>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {jobsData.map((job) => (
-                    <tr key={job.id}>
-                      <td className="py-3 px-5">
+            <table className="w-full min-w-[640px] table-auto">
+              <thead>
+                <tr>
+                  {["Title", "Company", "Location", "Description", "Recruiter", ""].map((header, index) => (
+                    <th key={index} className="border-b border-blue-gray-100 py-3 px-5 text-left">
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-bold leading-none opacity-70"
+                      >
+                        {header}
+                      </Typography>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {jobsData.map(({ id, title, companyName, jobLocation, description, recruiter }, index) => {
+                  const isLast = index === jobsData.length - 1;
+                  const classes = isLast
+                    ? "py-3 px-5"
+                    : "py-3 px-5 border-b border-blue-gray-50";
+
+                  return (
+                    <tr key={id}>
+                      <td className={classes}>
                         <Typography variant="small" color="blue-gray" className="font-bold">
-                          {job.title}
+                          {title}
                         </Typography>
                       </td>
-                      <td className="py-3 px-5">
-                        <Typography variant="small" color="blue-gray">
-                          {job.companyName}
+                      <td className={classes}>
+                        <Typography variant="small" color="blue-gray" className="font-normal">
+                          {companyName}
                         </Typography>
                       </td>
-                      <td className="py-3 px-5">
-                        <Typography variant="small" color="blue-gray">
-                          {job.jobLocation}
+                      <td className={classes}>
+                        <Typography variant="small" color="blue-gray" className="font-normal">
+                          {jobLocation}
                         </Typography>
                       </td>
-                      <td className="py-3 px-5">
-                        <Typography variant="small" color="blue-gray">
-                          {job.description}
+                      <td className={classes}>
+                        <Typography variant="small" color="blue-gray" className="font-normal">
+                          {description}
                         </Typography>
                       </td>
-                      <td className="py-3 px-5">
-                        <IconButton variant="text" color="red">
-                          <TrashIcon strokeWidth={2} className="h-5 w-5" />
+                      <td className={classes}>
+                        <Typography variant="small" color="blue-gray" className="font-normal">
+                          {recruiter}
+                        </Typography>
+                      </td>
+                      <td className={classes}>
+                        <IconButton size="sm" variant="text" color="blue-gray" onClick={() => handleOpenPostConfirmDialog(id)}>
+                          <TrashIcon className="h-4 w-4" />
                         </IconButton>
-                        <IconButton variant="text" color="blue">
-                          <PencilIcon strokeWidth={2} className="h-5 w-5" />
+                        <IconButton size="sm" variant="text" color="blue-gray" onClick={() => handleOpenPostEditDialog({ id, title, companyName, jobLocation, postingDate, recruiter })}>
+                          <PencilIcon className="h-4 w-4" />
                         </IconButton>
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+                  );
+                })}
+              </tbody>
+            </table>
           </CardBody>
         </Card>
       </div>
 
-      {/* Dialogs */}
-      <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
-        <DialogHeader>Confirm Deletion</DialogHeader>
-        <DialogBody>
-          Are you sure you want to delete this user? This action cannot be undone.
-        </DialogBody>
-        <DialogFooter>
-          <Button
-            variant="text"
-            color="red"
-            onClick={handleConfirmDelete}
-          >
-            Confirm
-          </Button>
-          <Button
-            variant="text"
-            color="blue"
-            onClick={handleCloseConfirmDialog}
-          >
-            Cancel
-          </Button>
-        </DialogFooter>
-      </Dialog>
-
+      {/* Add User Dialog */}
       <Dialog open={openAddUserDialog} onClose={handleCloseAddUserDialog}>
-        <DialogHeader>Add New User</DialogHeader>
+        <DialogHeader>Create User</DialogHeader>
         <DialogBody>
           <Input
             label="Display Name"
@@ -408,7 +408,6 @@ export function Home() {
           />
           <Input
             label="Email"
-            type="email"
             value={newUser.email}
             onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
           />
@@ -419,115 +418,36 @@ export function Home() {
           />
         </DialogBody>
         <DialogFooter>
-          <Button
-            variant="text"
-            color="blue"
-            onClick={handleAddUser}
-          >
-            Add User
-          </Button>
-          <Button
-            variant="text"
-            color="red"
-            onClick={handleCloseAddUserDialog}
-          >
+          <Button variant="text" color="blue-gray" onClick={handleCloseAddUserDialog}>
             Cancel
           </Button>
+          <Button onClick={handleAddUser}>Add User</Button>
         </DialogFooter>
       </Dialog>
 
-      <Dialog open={openPostEditDialog} onClose={handleClosePostEditDialog}>
-        <DialogHeader>Edit Post</DialogHeader>
-        <DialogBody>
-          <Input
-            label="Job Title"
-            value={currentPost?.jobTitle || ''}
-            onChange={(e) => setCurrentPost({ ...currentPost, jobTitle: e.target.value })}
-          />
-          <Input
-            label="Description"
-            value={currentPost?.description || ''}
-            onChange={(e) => setCurrentPost({ ...currentPost, description: e.target.value })}
-          />
-          <Input
-            label="Company Name"
-            value={currentPost?.companyName || ''}
-            onChange={(e) => setCurrentPost({ ...currentPost, companyName: e.target.value })}
-          />
-          <Input
-            label="Job Location"
-            value={currentPost?.jobLocation || ''}
-            onChange={(e) => setCurrentPost({ ...currentPost, jobLocation: e.target.value })}
-          />
-          <Input
-            label="Recruiter"
-            value={currentPost?.recruiter || ''}
-            onChange={(e) => setCurrentPost({ ...currentPost, recruiter: e.target.value })}
-          />
-        </DialogBody>
-        <DialogFooter>
-          <Button
-            variant="text"
-            color="blue"
-            onClick={handleUpdatePost}
-          >
-            Update Post
-          </Button>
-          <Button
-            variant="text"
-            color="red"
-            onClick={handleClosePostEditDialog}
-          >
-            Cancel
-          </Button>
-        </DialogFooter>
-      </Dialog>
-
-      <Dialog open={openPostConfirmDialog} onClose={handleClosePostConfirmDialog}>
-        <DialogHeader>Confirm Post Deletion</DialogHeader>
-        <DialogBody>
-          Are you sure you want to delete this post? This action cannot be undone.
-        </DialogBody>
-        <DialogFooter>
-          <Button
-            variant="text"
-            color="red"
-            onClick={handleConfirmPostDelete}
-          >
-            Confirm
-          </Button>
-          <Button
-            variant="text"
-            color="blue"
-            onClick={handleClosePostConfirmDialog}
-          >
-            Cancel
-          </Button>
-        </DialogFooter>
-      </Dialog>
-
+      {/* Add Job Dialog */}
       <Dialog open={openAddPostDialog} onClose={handleCloseAddPostDialog}>
-        <DialogHeader>Add New Post</DialogHeader>
+        <DialogHeader>Create Job</DialogHeader>
         <DialogBody>
           <Input
-            label="Job Title"
-            value={newPost.jobTitle}
-            onChange={(e) => setNewPost({ ...newPost, jobTitle: e.target.value })}
+            label="title"
+            value={newPost.title}
+            onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
           />
           <Input
-            label="Description"
-            value={newPost.description}
-            onChange={(e) => setNewPost({ ...newPost, description: e.target.value })}
-          />
-          <Input
-            label="Company Name"
+            label="Company"
             value={newPost.companyName}
             onChange={(e) => setNewPost({ ...newPost, companyName: e.target.value })}
           />
           <Input
-            label="Job Location"
+            label="Location"
             value={newPost.jobLocation}
             onChange={(e) => setNewPost({ ...newPost, jobLocation: e.target.value })}
+          />
+          <Input
+            label="Description"
+            value={newPost.postingDate}
+            onChange={(e) => setNewPost({ ...newPost, postingDate: e.target.value })}
           />
           <Input
             label="Recruiter"
@@ -536,24 +456,81 @@ export function Home() {
           />
         </DialogBody>
         <DialogFooter>
-          <Button
-            variant="text"
-            color="blue"
-            onClick={handleAddPost}
-          >
-            Add Post
-          </Button>
-          <Button
-            variant="text"
-            color="red"
-            onClick={handleCloseAddPostDialog}
-          >
+          <Button variant="text" color="blue-gray" onClick={handleCloseAddPostDialog}>
             Cancel
           </Button>
+          <Button onClick={handleAddPost}>Add Job</Button>
+        </DialogFooter>
+      </Dialog>
+
+      {/* Edit Job Dialog */}
+      <Dialog open={openPostEditDialog} onClose={handleClosePostEditDialog}>
+        <DialogHeader>Edit Job</DialogHeader>
+        <DialogBody>
+          <Input
+            label="title"
+            value={currentPost?.title || ''}
+            onChange={(e) => setCurrentPost({ ...currentPost, title: e.target.value })}
+          />
+          <Input
+            label="Company"
+            value={currentPost?.companyName || ''}
+            onChange={(e) => setCurrentPost({ ...currentPost, companyName: e.target.value })}
+          />
+          <Input
+            label="Location"
+            value={currentPost?.jobLocation || ''}
+            onChange={(e) => setCurrentPost({ ...currentPost, jobLocation: e.target.value })}
+          />
+          <Input
+            label="Description"
+            value={currentPost?.description || ''}
+            onChange={(e) => setCurrentPost({ ...currentPost, description: e.target.value })}
+          />
+          <Input
+            label="Recruiter"
+            value={currentPost?.recruiter || ''}
+            onChange={(e) => setCurrentPost({ ...currentPost, recruiter: e.target.value })}
+          />
+        </DialogBody>
+        <DialogFooter>
+          <Button variant="text" color="blue-gray" onClick={handleClosePostEditDialog}>
+            Cancel
+          </Button>
+          <Button onClick={handleUpdatePost}>Update Job</Button>
+        </DialogFooter>
+      </Dialog>
+
+      {/* Confirm User Deletion Dialog */}
+      <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
+        <DialogHeader>Confirm Delete</DialogHeader>
+        <DialogBody>
+          Are you sure you want to delete this user?
+        </DialogBody>
+        <DialogFooter>
+          <Button variant="text" color="blue-gray" onClick={handleCloseConfirmDialog}>
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmDelete}>Delete</Button>
+        </DialogFooter>
+      </Dialog>
+
+      {/* Confirm Job Deletion Dialog */}
+      <Dialog open={openPostConfirmDialog} onClose={handleClosePostConfirmDialog}>
+        <DialogHeader>Confirm Delete</DialogHeader>
+        <DialogBody>
+          Are you sure you want to delete this job?
+        </DialogBody>
+        <DialogFooter>
+          <Button variant="text" color="blue-gray" onClick={handleClosePostConfirmDialog}>
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmPostDelete}>Delete</Button>
         </DialogFooter>
       </Dialog>
     </div>
   );
-};
+}
+
 
 export default Home;
