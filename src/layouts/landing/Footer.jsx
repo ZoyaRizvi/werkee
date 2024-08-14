@@ -3,6 +3,8 @@ import { EnvelopeIcon, MapPinIcon, PhoneIcon } from "@heroicons/react/24/outline
 
 const Footer = () => {
   return (
+    <>
+    <br></br><br></br>
     <footer className="bg-transparent shadow-md box-border w-full text-left font-sans p-10">
       <div className="flex flex-wrap justify-between">
         <div className="w-full md:w-1/3 mb-6 md:mb-0">
@@ -39,8 +41,8 @@ const Footer = () => {
         <div className="w-full md:w-1/3 mb-6 md:mb-0">
           <p className="text-gray-600 text-sm mb-6">
             <span className="block text-gray-800 text-base font-semibold mb-3">About the company</span>
-            Our comprehensive career platform empowers students,<br/> professionals, small businesses, 
-            and startups to connect, collaborate, and succeed in today's dynamic job market.
+            Our comprehensive career platform empowers students, professionals,<br/> small businesses, 
+            and startups to connect, collaborate, and succeed in<br/> today's dynamic job market.
           </p>
           <div className="flex space-x-4">
             <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer">
@@ -62,6 +64,7 @@ const Footer = () => {
         </div>
       </div>
     </footer>
+    </>
   );
 };
 
