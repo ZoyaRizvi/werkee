@@ -54,8 +54,9 @@ export function Home() {
     setQuery(event.target.value);
   };
 
+  // Updated filteredItems with check for job.title
   const filteredItems = jobs.filter((job) =>
-    job.title.toLowerCase().includes(query.toLowerCase())
+    (job.title || "").toLowerCase().includes(query.toLowerCase())
   );
 
   const handleChange = (event) => {

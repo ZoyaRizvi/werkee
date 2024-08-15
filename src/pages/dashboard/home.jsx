@@ -53,8 +53,9 @@ export function Home() {
     setQuery(event.target.value);
   };
 
+  // Updated code to handle undefined titles
   const filteredItems = jobs.filter((job) =>
-    job.title.toLowerCase().includes(query.toLowerCase())
+    job.title?.toLowerCase().includes(query.toLowerCase())
   );
 
   const handleChange = (event) => {
@@ -243,4 +244,3 @@ export function Home() {
 }
 
 export default Home;
-
