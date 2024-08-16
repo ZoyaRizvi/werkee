@@ -46,6 +46,7 @@ const Jobs = () => {
   };
 
   const handleAddJob = async () => {
+    alert("job posted successfully")
     const user = auth.currentUser;
     if (user) {
       let imageUrl = '';
@@ -92,6 +93,7 @@ const Jobs = () => {
         companyLogo: '',
         postedDate: ''
       });
+      
     }
   };
 

@@ -39,7 +39,9 @@ export function Profile() {
   const handleStartTest = (skill) => {
     navigate('/skillassessment', { state: { skill } });
   };
-  
+  const DEFAULT_PROFILE_IMAGE = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUFJ4m3HGM8397IWhGhLphaU38QtqrcYQoUg&s';
+
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -109,6 +111,15 @@ export function Profile() {
       setProfile((prevProfile) => ({ ...prevProfile, img: newProfilePhotoURL }));
     }
   };
+  const getUserProfilePhoto = () => {
+    const user = localStorage.getItem('user');
+    if (user) {
+      const parsedUser = JSON.parse(user);
+      return parsedUser.img ? parsedUser.img : DEFAULT_PROFILE_IMAGE;
+    }
+    return DEFAULT_PROFILE_IMAGE;
+  };
+  const avatarSrc = getUserProfilePhoto();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -171,7 +182,7 @@ export function Profile() {
           <div className="mb-10 flex items-center justify-between flex-wrap gap-6">
             <div className="flex items-center gap-6">
               <Avatar
-                src={profile.img}
+                src={profile.img || avatarSrc}
                 alt="Profile"
                 size="xl"
                 variant="rounded"
@@ -182,7 +193,7 @@ export function Profile() {
                   {profile.displayName}
                 </Typography>
                 <Typography variant="small" className="font-normal text-blue-gray-600">
-                  {profile.title}
+                  {profile.title ? profile.title : "Add Title"}
                 </Typography>
               </div>
             </div>
@@ -202,11 +213,11 @@ export function Profile() {
             </div>
           </div>
           <div className="grid-cols-1 mb-12 grid gap-12 px-4 lg:grid-cols-2 xl:grid-cols-2">
-            <ProfileInfoCard title="Profile Information" description={profile.info} />
- 
+            <ProfileInfoCard title="Profile Information" description={profile.info ? profile.info : "Add profile info"} />
+
             <ProfileInfoCard
               details={{
-                location: <div className="flex items-center gap-4">{profile.location}</div>,
+                location: <div className="flex items-center gap-4">{profile.location ? profile.location : "Add location"}</div>,
                 social: (
                   <div className="flex items-center gap-4">
                     {profile.facebook && (
@@ -228,30 +239,38 @@ export function Profile() {
                 ),
                 skills: (
                   <div id="skills-container">
-                    {profile.skills.length > 0 ? profile.skills.map((skill, index) => (
-                      <button key={index} className="button">{skill}</button>
-                    )) : defaultProfile.skills.map((skill, index) => (
-                      <button key={index} className="button">{skill}</button>
-                    ))}
+                    {profile.skills.length > 0 ? (
+                      profile.skills.map((skill, index) => (
+                        <button key={index} className="button">{skill}</button>
+                      ))
+                    ) : (
+                      <p className="text-gray-600">Please add your skills here</p>
+                    )}
                   </div>
+
                 ),
-                badge:(
+                badge: (
                   <div className="badge-container">
-                  {badges.length > 0 && badges.map((badge, index) => (
-                    <Tooltip key={index} content={badge} placement="top">
-                      <TrophyIcon className="h-6 w-6 text-orange-500" />
-                    </Tooltip>
-                  ))}
-                </div>
+                    {badges.length > 0 ? (
+                      badges.map((badge, index) => (
+                        <Tooltip key={index} content={badge} placement="top">
+                          <TrophyIcon className="h-6 w-6 text-orange-500" />
+                        </Tooltip>
+                      ))
+                    ) : (
+                      <p className="text-gray-600 mt-[-10px]">Get badge now</p>
+                    )}
+                  </div>
+
                 )
               }}
               action={
                 <Tooltip content="Edit Profile">
                   <PencilIcon onClick={handleOpen} variant="gradient" className="h-4 cursor-pointer text-blue-gray-500" />
                 </Tooltip>
-                
+
               }
-              
+
             />
           </div>
           <div>
@@ -272,10 +291,12 @@ export function Profile() {
                 name="displayName"
                 value={profile.displayName}
                 onChange={handleChange}
+                placeholder="Enter your full name"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               />
               {errors.displayName && <p className="text-red-500">{errors.displayName}</p>}
             </div>
+
             <div className="mb-4">
               <label className="block text-gray-700">Title</label>
               <input
@@ -283,18 +304,22 @@ export function Profile() {
                 name="title"
                 value={profile.title}
                 onChange={handleChange}
+                placeholder="Enter your job title"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               />
             </div>
+
             <div className="mb-4">
               <label className="block text-gray-700">Info</label>
               <textarea
                 name="info"
                 value={profile.info}
                 onChange={handleChange}
+                placeholder="Tell us about yourself"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               />
             </div>
+
             <div className="mb-4">
               <label className="block text-gray-700">Location</label>
               <input
@@ -302,9 +327,11 @@ export function Profile() {
                 name="location"
                 value={profile.location}
                 onChange={handleChange}
+                placeholder="Enter your location"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               />
             </div>
+
             <div className="mb-4">
               <label className="block text-gray-700">Facebook</label>
               <input
@@ -312,9 +339,11 @@ export function Profile() {
                 name="facebook"
                 value={profile.facebook}
                 onChange={handleChange}
+                placeholder="Enter your Facebook profile URL"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               />
             </div>
+
             <div className="mb-4">
               <label className="block text-gray-700">Twitter</label>
               <input
@@ -322,9 +351,11 @@ export function Profile() {
                 name="twitter"
                 value={profile.twitter}
                 onChange={handleChange}
+                placeholder="Enter your Twitter handle"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               />
             </div>
+
             <div className="mb-4">
               <label className="block text-gray-700">Instagram</label>
               <input
@@ -332,9 +363,11 @@ export function Profile() {
                 name="instagram"
                 value={profile.instagram}
                 onChange={handleChange}
+                placeholder="Enter your Instagram profile URL"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               />
             </div>
+
             <div className="mb-4">
               <label className="block text-gray-700">Profile Photo:</label>
               <input
@@ -351,6 +384,7 @@ export function Profile() {
                 />
               )}
             </div>
+
             <div className="mb-4">
               <label className="block text-gray-700">Cover Photo:</label>
               <input
@@ -367,6 +401,7 @@ export function Profile() {
                 />
               )}
             </div>
+
             <div className="mb-4">
               <label className="block text-gray-700">Skills:</label>
               {profile.skills.map((skill, index) => (
@@ -375,6 +410,7 @@ export function Profile() {
                     type="text"
                     value={skill}
                     onChange={(e) => handleSkillChange(index, e)}
+                    placeholder={`Skill #${index + 1}`}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
                   />
                   <Button type="button" onClick={() => handleRemoveSkill(index)} color="red">
@@ -386,6 +422,7 @@ export function Profile() {
                 Add Skill
               </Button>
             </div>
+
             <div className="flex justify-end gap-4">
               <Button type="button" onClick={resetProfile} color="gray">
                 Reset
@@ -395,6 +432,7 @@ export function Profile() {
               </Button>
             </div>
           </form>
+
         </DialogContent>
         <DialogActions>
           <Button onClick={handleOpen} color="gray">

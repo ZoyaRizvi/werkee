@@ -34,41 +34,6 @@ import Responses from './Responses';
 import { Chat } from '../candidate';
 import Messages from './UserDashboard/Messages';
 
-const data = [
-  {
-    label: "HTML",
-    value: "html",
-    desc: `It really matters and then like it really doesn't matter.
-    What matters is the people who are sparked by it. And the people 
-    who are like offended by it, it doesn't matter.`,
-  },
-  {
-    label: "React",
-    value: "react",
-    desc: `Because it's about motivating the doers. Because I'm here
-    to follow my dreams and inspire other people to follow their dreams, too.`,
-  },
-  {
-    label: "Vue",
-    value: "vue",
-    desc: `We're not always in the position that we want to be at.
-    We're constantly growing. We're constantly making mistakes. We're
-    constantly trying to express ourselves and actualize our dreams.`,
-  },
-  {
-    label: "Angular",
-    value: "angular",
-    desc: `Because it's about motivating the doers. Because I'm here
-    to follow my dreams and inspire other people to follow their dreams, too.`,
-  },
-  {
-    label: "Svelte",
-    value: "svelte",
-    desc: `We're not always in the position that we want to be at.
-    We're constantly growing. We're constantly making mistakes. We're
-    constantly trying to express ourselves and actualize our dreams.`,
-  },
-];
 
 // Default values
 const defaultProfile = {
@@ -137,7 +102,7 @@ export function Profile() {
     await uploadBytes(storageRef, file);
     return getDownloadURL(storageRef);
   };
-  
+
   // Function to handle the cover photo change
   const handlePhotoChange = async (e) => {
     if (e.target.files[0]) {
@@ -145,7 +110,7 @@ export function Profile() {
       setProfile((prevProfile) => ({ ...prevProfile, coverPhoto: newCoverPhotoURL }));
     }
   };
-  
+
   // Function to handle the profile photo change
   const handlePhotoChange2 = async (e) => {
     if (e.target.files[0]) {
@@ -206,7 +171,7 @@ export function Profile() {
                   variant="small"
                   className="font-normal text-blue-gray-600"
                 >
-                  {profile.title}
+                  {profile.title ? profile.title : "Add Title"}
                 </Typography>
               </div>
             </div>
@@ -217,13 +182,13 @@ export function Profile() {
           <div className="grid-cols-1 mb-12 grid gap-12 px-4 lg:grid-cols-2 xl:grid-cols-2">
             <ProfileInfoCard
               title="Profile Information"
-              description={profile.info}
+              description={profile.info ? profile.info : "Add profile info"}
             />
             <ProfileInfoCard
               details={{
                 location: (
                   <div className="flex items-center gap-4">
-                    {profile.location}
+                    {profile.location ? profile.location : "Add location"}
                   </div>
                 ),
                 social: (
@@ -285,107 +250,139 @@ export function Profile() {
         <DialogBody className="h-[42rem] overflow-scroll">
           <div className="form-container">
             <form onSubmit={handleSubmit}>
-              <div>
-                <label>Name:</label>
+              <div className="mb-4">
+                <label className="block text-gray-700">Name:</label>
                 <input
                   type="text"
                   name="displayName"
                   value={profile.displayName}
                   onChange={handleChange}
+                  placeholder="Enter your full name"
                   required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 />
-                <label>Title:</label>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-700">Title:</label>
                 <input
                   type="text"
                   name="title"
                   value={profile.title}
                   onChange={handleChange}
+                  placeholder="Enter Title"
                   required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 />
               </div>
-              <div>
-                <label>Profile Photo:</label>
+
+              <div className="mb-4">
+                <label className="block text-gray-700">Profile Photo:</label>
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handlePhotoChange2}
+                  className="mt-2"
                 />
                 {profile.img && (
                   <img
                     src={profile.img}
                     alt="Profile Preview"
-                    className="profile-preview"
+                    className="profile-preview mt-2 w-24 h-24 object-cover rounded"
                   />
                 )}
               </div>
-              <div>
-                <label>Info:</label>
+
+              <div className="mb-4">
+                <label className="block text-gray-700">Info:</label>
                 <input
-                  maxLength={350}
                   type="text"
                   name="info"
                   value={profile.info}
                   onChange={handleChange}
+                  placeholder="Enter a brief description about yourself"
+                  maxLength={350}
                   required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 />
               </div>
-              <div>
-                <label>Location:</label>
+
+              <div className="mb-4">
+                <label className="block text-gray-700">Location:</label>
                 <input
                   type="text"
                   name="location"
                   value={profile.location}
                   onChange={handleChange}
+                  placeholder="Enter your location"
                   required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 />
               </div>
-              <div>
-                <label>Facebook URL:</label>
+
+              <div className="mb-4">
+                <label className="block text-gray-700">Facebook URL:</label>
                 <input
                   type="url"
                   name="facebook"
                   value={profile.facebook}
                   onChange={handleChange}
+                  placeholder="Enter your Facebook profile URL"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 />
               </div>
-              <div>
-                <label>Twitter URL:</label>
+
+              <div className="mb-4">
+                <label className="block text-gray-700">Twitter URL:</label>
                 <input
                   type="url"
                   name="twitter"
                   value={profile.twitter}
                   onChange={handleChange}
+                  placeholder="Enter your Twitter profile URL"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 />
               </div>
-              <div>
-                <label>Instagram URL:</label>
+
+              <div className="mb-4">
+                <label className="block text-gray-700">Instagram URL:</label>
                 <input
                   type="url"
                   name="instagram"
                   value={profile.instagram}
                   onChange={handleChange}
+                  placeholder="Enter your Instagram profile URL"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 />
               </div>
-              <div>
-                <label>Cover Photo:</label>
+
+              <div className="mb-4">
+                <label className="block text-gray-700">Cover Photo:</label>
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handlePhotoChange}
+                  className="mt-2"
                 />
                 {profile.coverPhoto && (
                   <img
                     src={profile.coverPhoto}
                     alt="Cover Preview"
-                    className="cover-preview"
+                    className="cover-preview mt-2 w-full h-24 object-cover rounded"
                   />
                 )}
               </div>
 
-              <button variant="gradient" color="teal" type="submit">
-                Submit
-              </button>
+              <div className="flex justify-end gap-4">
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-teal-500 text-white rounded-md hover:bg-teal-600"
+                >
+                  Submit
+                </button>
+              </div>
             </form>
+
           </div>
         </DialogBody>
         <DialogFooter>

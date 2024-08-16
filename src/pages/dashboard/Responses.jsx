@@ -87,14 +87,14 @@ export default function Responses() {
                 </div>
               </div>
               <div className="flex flex-col gap-y-2">
-                <Button variant="outlined" size="sm">
+                <Button variant="outlined" color="green" size="sm">
                   Accept
                 </Button>
-                <Button variant="outlined" size="sm" onClick={() => handleDelete(id)}>
-                  Delete
+                <Button variant="outlined" color="red" size="sm" onClick={() => handleDelete(id)}>
+                  Reject
                 </Button>
                 <Button variant="outlined" size="sm">
-                  Message Recruiter
+                  Message Candidate
                 </Button>
               </div>
             </div>
