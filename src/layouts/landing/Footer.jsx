@@ -1,214 +1,71 @@
 import React from 'react';
+import { EnvelopeIcon, MapPinIcon, PhoneIcon } from "@heroicons/react/24/outline";
 
-// Assuming you're using Tailwind CSS
 const Footer = () => {
   return (
-    <footer className="bg-white mx-auto" aria-labelledby="footer-heading">
-      <h2 id="footer-heading" className="sr-only">Footer</h2>
-      <div className="mx-auto max-w-7xl px-6 pb-8 pt-16 sm:pt-24 lg:px-8 lg:pt-32">
-        <div className="xl:grid xl:grid-cols-3 xl:gap-8">
-          <div className="space-y-8">
-            <img
-              className="h-20"
-              src="./img/logo.png"
-              alt="Company name"
-            />
-            <p className="text-sm leading-6 text-gray-600">
-            Our comprehensive career platform empowers students,<br/> professionals, small businesses, 
-            and startups to connect, collaborate,<br/> and succeed in today's dynamic job market
-            </p>
-            <div className="flex space-x-6">
-              <a href="#" className="text-gray-400 hover:text-gray-500">
-                <span className="sr-only">Facebook</span>
-                <svg
-                  className="h-6 w-6"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </a>
-              <a href="#" className="text-yellow-500 hover:text-gray-500">
-                <span className="sr-only">Fire</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 16 16"
-                  fill="currentColor"
-                  className="w-4 h-4"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M8.074.945A4.993 4.993 0 0 0 6 5v.032c.004.6.114 1.176.311 1.709.16.428-.204.91-.61.7a5.023 5.023 0 0 1-1.868-1.677c-.202-.304-.648-.363-.848-.058a6 6 0 1 0 8.017-1.901l-.004-.007a4.98 4.98 0 0 1-2.18-2.574c-.116-.31-.477-.472-.744-.28Zm.78 6.178a3.001 3.001 0 1 1-3.473 4.341c-.205-.365.215-.694.62-.59a4.008 4.008 0 0 0 1.873.03c.288-.065.413-.386.321-.666A3.997 3.997 0 0 1 8 8.999c0-.585.126-1.14.351-1.641a.42.42 0 0 1 .503-.235Z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </a>
-              <a href="#" className="text-gray-400 hover:text-blue-400">
-                <span className="sr-only">X</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 16 16"
-                  fill="currentColor"
-                  className="w-4 h-4"
-                >
-                  <path
-                    d="M2.75 2a.75.75 0 0 0-.75.75v10.5a.75.75 0 0 0 1.5 0v-2.624l.33-.083A6.044 6.044 0 0 1 8 11c1.29.645 2.77.807 4.17.457l1.48-.37 a.462.462 0 0 0 .35-.448V3.56 a.438.438 0 0 0-.544-.425l-1.287.322C10.77 3.808 9.291 3.646 8 3a6.045 6.045 0 0 0-4.17-.457l-.34.085 A.75.75 0 0 0 2.75 2Z"
-                  />
-                </svg>
-              </a>
-              <a href="#" className="text-gray-400 hover:text-gray-500">
-                <span className="sr-only">GitHub</span>
-                <svg
-                  className="h-6 w-6"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504c.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703c-2.782.605-3.369-1.343-3.369-1.343c-.454-1.158-1.11-1.466-1.11-1.466c-.908-.62.069-.608.069-.608c1.003.07 1.531 1.032 1.531 1.032c.892 1.53 2.341 1.088 2.91.832c.092-.647.35-1.088.636-1.338c-2.22-.253-4.555-1.113-4.555-4.951c0-1.093.39-1.988 1.029-2.688c-.103-.253-.446-1.272.098-2.65c0 0 .84-.27 2.75 1.026a9.564 9.564 0 0 1 3.672-.687c.85.004 1.705.115 2.504.337 c1.909-1.296 2.747-1.027 2.747-1.027c.546 1.379.202 2.398.1 2.651c.64.7 1.028 1.595 1.028 2.688c0 3.848-2.339 4.695-4.566 4.943c.359.309.678.92.678 1.855c0 1.338-.012 2.419-.012 2.747c0 .268.18.58.688.482c3.974 1.323 6.839-3.079 6.839-9.504C22 6.484 17.522 2 12 2Z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </a>
-              <a href="#" className="text-gray-400 hover:text-gray-500">
-                <span className="sr-only">YouTube</span>
-                <svg
-                  className="h-6 w-6"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M19.812 5.418c.861.23 1.538.907 1.768 1.768c.418 1.559.418 4.814.418 4.814s0 3.255-.418 4.814a2.504 2.504 0 0 1-1.768 1.768c-1.56.419-7.814.419-7.814.419s-6.255 0-7.814-.419a2.505 2.505 0 0 1-1.768-1.768C2 15.255 2 12 2 12s0-3.255.417-4.814a2.507 2.507 0 0 1 1.768-1.768C5.744 5 11.998 5 11.998 5s6.255 0 7.814.418ZM15.194 12 10 15V9l5.194 3Z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </a>
-            </div>
+    <>
+    <br></br><br></br>
+    <footer className="bg-transparent shadow-md box-border w-full text-left font-sans p-10">
+      <div className="flex flex-wrap justify-between">
+        <div className="w-full md:w-1/3 mb-6 md:mb-0">
+          <img src="/img/logo.png" alt="Company Logo" className="h-10 mb-6" />
+          <div className="text-gray-600 mb-4">
+            <a href="#" className="mr-4 hover:text-teal-600">Home</a>
+            <a href="#" className="mr-4 hover:text-teal-600">About</a>
+            <a href="#" className="mr-4 hover:text-teal-600">Why Teens</a>
+            <a href="#" className="mr-4 hover:text-teal-600">What's New</a>
+            <a href="#" className="mr-4 hover:text-teal-600">Faq</a>
           </div>
-          <div className="mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
-            <div className="md:grid md:grid-cols-2 md:gap-8">
-              <div>
-                <h3 className="text-sm font-semibold leading-6 text-gray-900">Categories</h3>
-                <ul role="list" className="mt-6 space-y-4">
-                  <li>
-                    <a href="#" className="text-sm leading-6 text-gray-600 hover:text-gray-900">
-                    Digital Marketing
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="text-sm leading-6 text-gray-600 hover:text-gray-900">
-                    Writing & Translation
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="text-sm leading-6 text-gray-600 hover:text-gray-900">
-                    Video & Animation
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="text-sm leading-6 text-gray-600 hover:text-gray-900">
-                    Graphics & Design
-                    </a>
-                  </li>
-                </ul>
-              </div>
-              <div className="mt-10 md:mt-0">
-                <h3 className="text-sm font-semibold leading-6 text-gray-900">Support</h3>
-                <ul role="list" className="mt-6 space-y-4">
-                  <li>
-                    <a href="#" className="text-sm leading-6 text-gray-600 hover:text-gray-900">
-                    Help & Support
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="text-sm leading-6 text-gray-600 hover:text-gray-900">
-                      Hiring on Werky
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="text-sm leading-6 text-gray-600 hover=text-gray-900">
-                      Councelling on Werky
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="text-sm leading-6 text-gray-600 hover=text-gray-900">
-                      Projects on Werky
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <div className="md:grid md:grid-cols-2 md:gap-8">
-              <div>
-                <h3 className="text-sm font-semibold leading-6 text-gray-900">Company</h3>
-                <ul role="list" className="mt-6 space-y-4">
-                  <li>
-                    <a href="#" className="text-sm leading-6 text-gray-600 hover=text-gray-900">
-                      About
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="text-sm leading-6 text-gray-600 hover=text-gray-900">
-                      Blog
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="text-sm leading-6 text-gray-600 hover=text-gray-900">
-                      Jobs
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="text-sm leading-6 text-gray-600 hover=text-gray-900">
-                      Press
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="text-sm leading-6 text-gray-600 hover=text-gray-900">
-                      Partners
-                    </a>
-                  </li>
-                </ul>
-              </div>
-              <div className="mt-10 md:mt-0">
-                <h3 className="text-sm font-semibold leading-6 text-gray-900">Legal</h3>
-                <ul role="list" className="mt-6 space-y-4">
-                  <li>
-                    <a href="#" className="text-sm leading-6 text-gray-600 hover=text-gray-900">
-                      Claim
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="text-sm leading-6 text-gray-600 hover=text-gray-900">
-                      Privacy
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" class="text-sm leading-6 text-gray-600 hover=text-gray-900">
-                      Terms
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </div>
+          <p className="text-gray-700 text-sm">© Werky Ltd.2024</p>
+        </div>
+
+        <div className="w-full md:w-1/3 mb-6 md:mb-0">
+          <div className="flex items-center mb-4">
+            <MapPinIcon className="w-6 h-6 text-teal-600 mr-3" />
+            <p className="text-gray-700 text-sm">
+              <span className="block font-medium">444 S. Cedros Ave</span>
+              Solana Beach, California
+            </p>
+          </div>
+          <div className="flex items-center mb-4">
+            <PhoneIcon className="w-6 h-6 text-teal-600 mr-3" />
+            <p className="text-gray-700 text-sm">+1.555.555.5555</p>
+          </div>
+          <div className="flex items-center mb-4">
+            <EnvelopeIcon className="w-6 h-6 text-teal-600 mr-3" />
+            <p className="text-gray-700 text-sm">
+              <a href="mailto:support@company.com" className="text-teal-600 hover:underline">teamwerky@gmail.com</a>
+            </p>
           </div>
         </div>
-        <div className="mt-16 border-t border-gray-900/10 pt-8 sm:mt-20 lg:mt-24">
-          <p className="text-xs leading-5 text-gray-500">
-            &copy; 2020 Your Company, Inc. All rights reserved.
+        <div className="w-full md:w-1/3 mb-6 md:mb-0">
+          <p className="text-gray-600 text-sm mb-6">
+            <span className="block text-gray-800 text-base font-semibold mb-3">About the company</span>
+            Our comprehensive career platform empowers students, professionals,<br/> small businesses, 
+            and startups to connect, collaborate, and succeed in<br/> today's dynamic job market.
           </p>
+          <div className="flex space-x-4">
+            <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 30 30" fill="currentColor" className="w-6 h-6">
+              <path d="M15,3C8.373,3,3,8.373,3,15c0,6.016,4.432,10.984,10.206,11.852V18.18h-2.969v-3.154h2.969v-2.099c0-3.475,1.693-5,4.581-5 c1.383,0,2.115,0.103,2.461,0.149v2.753h-1.97c-1.226,0-1.654,1.163-1.654,2.473v1.724h3.593L19.73,18.18h-3.106v8.697 C22.481,26.083,27,21.075,27,15C27,8.373,21.627,3,15,3z" />
+            </svg>
+            </a>
+            <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 30 30" fill="currentColor" className="w-6 h-6">
+                <path d="M 9.9980469 3 C 6.1390469 3 3 6.1419531 3 10.001953 L 3 20.001953 C 3 23.860953 6.1419531 27 10.001953 27 L 20.001953 27 C 23.860953 27 27 23.858047 27 19.998047 L 27 9.9980469 C 27 6.1390469 23.858047 3 19.998047 3 L 9.9980469 3 z M 22 7 C 22.552 7 23 7.448 23 8 C 23 8.552 22.552 9 22 9 C 21.448 9 21 8.552 21 8 C 21 7.448 21.448 7 22 7 z M 15 9 C 18.309 9 21 11.691 21 15 C 21 18.309 18.309 21 15 21 C 11.691 21 9 18.309 9 15 C 9 11.691 11.691 9 15 9 z M 15 11 A 4 4 0 0 0 11 15 A 4 4 0 0 0 15 19 A 4 4 0 0 0 19 15 A 4 4 0 0 0 15 11 z" />
+              </svg>
+            </a>
+            <a href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 30 30" fill="currentColor" className="w-6 h-6">
+                <path d="M24,4H6C4.895,4,4,4.895,4,6v18c0,1.105,0.895,2,2,2h18c1.105,0,2-0.895,2-2V6C26,4.895,25.105,4,24,4z M10.954,22h-2.95 v-9.492h2.95V22z M9.449,11.151c-0.951,0-1.72-0.771-1.72-1.72c0-0.949,0.77-1.719,1.72-1.719c0.948,0,1.719,0.771,1.719,1.719 C11.168,10.38,10.397,11.151,9.449,11.151z M22.004,22h-2.948v-4.616c0-1.101-0.02-2.517-1.533-2.517 c-1.535,0-1.771,1.199-1.771,2.437V22h-2.948v-9.492h2.83v1.297h0.04c0.394-0.746,1.356-1.533,2.791-1.533 c2.987,0,3.539,1.966,3.539,4.522V22z" />
+              </svg>
+            </a>
+          </div>
         </div>
       </div>
     </footer>
+    </>
   );
 };
 
 export default Footer;
-

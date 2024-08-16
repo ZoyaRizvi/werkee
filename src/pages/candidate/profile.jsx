@@ -37,7 +37,7 @@ export function Profile() {
   const [badges, setBadges] = useState([]);
 
   const handleStartTest = (skill) => {
-    navigate('/skillassessment', { state: { skill } });
+    navigate('/dashboard/skillassessment', { state: { skill } });
   };
   const DEFAULT_PROFILE_IMAGE = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUFJ4m3HGM8397IWhGhLphaU38QtqrcYQoUg&s';
 
