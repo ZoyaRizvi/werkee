@@ -86,7 +86,7 @@ const Banner = () => {
   };
   return (
     <div className="max-w-screen-2xl container mx-auto xl:px-24 px-4 bg-[#FFF2E1] md:py-20 py-14" style={{"marginTop": "24px"}}>
-      <h1 className="font-bold text-primary mb-3 text-5xl">Post a <span className="text-[teal]">new job</span> today</h1>
+      <h1 className="font-bold text-primary mb-3 text-5xl">Post a <span className="text-[teal]">new prjoect</span> today</h1>
       <p className=" text-black/70 mb-8 text-lg">Unlock your team's potential with top talent—let's build the future together!</p>
       <form>
         <div className=" flex justify-start md:flex-row flex-col md:gap-0 gap-4">
@@ -95,7 +95,7 @@ const Banner = () => {
           variant="contained"
           onClick={() => setIsModalOpen(true)}
         >
-          Post a Job
+          Post a Project
         </Button>
         <Modal
         open={isModalOpen}
@@ -115,8 +115,8 @@ const Banner = () => {
           boxShadow: '0 4px 8px rgba(0,0,0,0.2)' 
         }}>
           <Typography id="upload-job-modal" variant="h6" component="h2">
-            {"Add New Job"}
-          </Typography>
+            {"Add New Project"}
+          </Typography><br></br>
           <TextField
             name="title"
             label="Title"
@@ -157,7 +157,7 @@ const Banner = () => {
             fullWidth
             style={{ marginBottom: '16px' }}
           />
-          <div className="w-full md:w-3/12 mb-4 md:mb-0">
+          {/* <div className="w-full md:w-3/12 mb-4 md:mb-0">
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="employmentType">
               Employment Type
             </label>
@@ -174,7 +174,7 @@ const Banner = () => {
                 <option value="Contract">Contract</option>
               </select>
             </div>
-          </div>
+          </div> */}
           <TextField
             name="companyName"
             label="Company Name"
@@ -207,8 +207,11 @@ const Banner = () => {
               />
             </div>
           </div> */}
-          <Button variant="contained" color="primary" onClick={handleAddJob}>
-            { "Add Job"}
+          <br></br>
+          <Button variant="contained" 
+           style={{ backgroundColor: 'teal', color: 'white' }}
+           onClick={handleAddJob}>
+            { "Add Project"}
           </Button>
         </div>
       </Modal>

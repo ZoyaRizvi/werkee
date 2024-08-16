@@ -69,7 +69,7 @@ export default function Responses() {
                   </Typography>
                   <div className="flex flex-wrap gap-3 mt-1">
                     <Typography variant="small" color="blue-gray">
-                      Job Title: <b>{jobTitle}</b>
+                      Project Title: <b>{jobTitle}</b>
                     </Typography>
                   </div>
                   <div>

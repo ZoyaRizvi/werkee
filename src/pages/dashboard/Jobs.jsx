@@ -162,7 +162,7 @@ const Jobs = () => {
   return (
     <div>
       <Typography variant="h4" gutterBottom>
-        Jobs
+        Projects
       </Typography>
       
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
@@ -170,7 +170,7 @@ const Jobs = () => {
           variant="contained"
           onClick={() => setIsModalOpen(true)}
         >
-          Post a Job
+          Post a Project
         </Button>
       </div>
       
@@ -239,114 +239,111 @@ const Jobs = () => {
         aria-labelledby="upload-job-modal"
         aria-describedby="upload-job-description"
       >
-        <div style={{ 
-          position: 'absolute', 
-          top: '50%', 
-          left: '50%', 
-          transform: 'translate(-50%, -50%)', 
-          width: '80%', 
-          maxWidth: '600px', 
-          backgroundColor: 'white', 
-          padding: '20px', 
-          boxShadow: '0 4px 8px rgba(0,0,0,0.2)' 
-        }}>
-          <Typography id="upload-job-modal" variant="h6" component="h2">
-            {editJobId ? "Edit Job" : "Add New Job"}
-          </Typography>
-          <TextField
-            name="title"
-            label="Title"
-            value={newJob.title}
-            onChange={handleInputChange}
-            fullWidth
-            style={{ marginBottom: '16px' }}
-          />
-          <TextField
-            name="description"
-            label="Description"
-            value={newJob.description}
-            onChange={handleInputChange}
-            fullWidth
-            style={{ marginBottom: '16px' }}
-          />
-          <TextField
-            name="Requirements"
-            label="Requirements"
-            value={newJob.Requirements}
-            onChange={handleInputChange}
-            fullWidth
-            style={{ marginBottom: '16px' }}
-          />
-          <TextField
-            name="experienceLevel"
-            label="Experience Level"
-            value={newJob.experienceLevel}
-            onChange={handleInputChange}
-            fullWidth
-            style={{ marginBottom: '16px' }}
-          />
-          <TextField
-            name="jobLocation"
-            label="Location"
-            value={newJob.jobLocation}
-            onChange={handleInputChange}
-            fullWidth
-            style={{ marginBottom: '16px' }}
-          />
-          <div className="w-full md:w-3/12 mb-4 md:mb-0">
-            <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="employmentType">
-              Employment Type
-            </label>
-            <div className="relative">
-              <select
-                name="employmentType"
-                value={newJob.employmentType}
-                onChange={handleInputChange}
-                className="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
-              >
-                <option value="Full-time">Full-time</option>
-                <option value="Part-time">Part-time</option>
-                <option value="Freelance">Freelance</option>
-                <option value="Contract">Contract</option>
-              </select>
-            </div>
-          </div>
-          <TextField
-            name="companyName"
-            label="Company Name"
-            value={newJob.companyName}
-            onChange={handleInputChange}
-            fullWidth
-            style={{ marginBottom: '16px' }}
-          />
-          <div className="w-full md:w-3/12 mb-4 md:mb-0">
-            <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="companyLogo">
-              Company Logo
-            </label>
-            <div className="relative">
-              <input
-                type="file"
-                onChange={handleLogoChange}
-                className="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
-              />
-            </div>
-          </div>
-          {/* <div className="w-full md:w-3/12 mb-4 md:mb-0">
-            <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="img">
-              Job Image
-            </label>
-            <div className="relative">
-              <input
-                type="file"
-                onChange={handleImageChange}
-                className="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
-              />
-            </div>
-          </div> */}
-          <Button variant="contained" color="primary" onClick={editJobId ? handleUpdateJob : handleAddJob}>
-            {editJobId ? "Update Job" : "Add Job"}
-          </Button>
-        </div>
+    <div style={{ 
+  position: 'absolute', 
+  top: '50%', 
+  left: '50%', 
+  transform: 'translate(-50%, -50%)', 
+  width: '80%', 
+  maxWidth: '600px', 
+  backgroundColor: 'white', 
+  padding: '20px', 
+  boxShadow: '0 4px 8px rgba(0,0,0,0.2)' 
+}}>
+  <Typography id="upload-job-modal" variant="h6" component="h2">
+    {editJobId ? "Edit Project" : "Add New Project"}
+  </Typography>
+  <TextField
+    name="title"
+    label="Title"
+    value={newJob.title}
+    onChange={handleInputChange}
+    placeholder="Enter Project title"
+    fullWidth
+    style={{ marginBottom: '16px' }}
+  />
+  <TextField
+    name="description"
+    label="Description"
+    value={newJob.description}
+    onChange={handleInputChange}
+    placeholder="Enter job description"
+    fullWidth
+    style={{ marginBottom: '16px' }}
+  />
+  <TextField
+    name="Requirements"
+    label="Requirements"
+    value={newJob.Requirements}
+    onChange={handleInputChange}
+    placeholder="Enter job requirements"
+    fullWidth
+    style={{ marginBottom: '16px' }}
+  />
+  <TextField
+    name="experienceLevel"
+    label="Experience Level"
+    value={newJob.experienceLevel}
+    onChange={handleInputChange}
+    placeholder="Enter experience level"
+    fullWidth
+    style={{ marginBottom: '16px' }}
+  />
+  <TextField
+    name="jobLocation"
+    label="Location"
+    value={newJob.jobLocation}
+    onChange={handleInputChange}
+    placeholder="Enter job location"
+    fullWidth
+    style={{ marginBottom: '16px' }}
+  />
+  {/* <div className="w-full md:w-3/12 mb-4 md:mb-0">
+    <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="employmentType">
+      Employment Type
+    </label>
+    <div className="relative">
+      <select
+        name="employmentType"
+        value={newJob.employmentType}
+        onChange={handleInputChange}
+        className="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+      >
+        <option value="Full-time">Full-time</option>
+        <option value="Part-time">Part-time</option>
+        <option value="Freelance">Freelance</option>
+        <option value="Contract">Contract</option>
+      </select>
+    </div>
+  </div> */}
+  <TextField
+    name="companyName"
+    label="Company Name"
+    value={newJob.companyName}
+    onChange={handleInputChange}
+    placeholder="Enter company name"
+    fullWidth
+    style={{ marginBottom: '16px' }}
+  />
+  <div className="w-full md:w-3/12 mb-4 md:mb-0">
+    <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="companyLogo">
+      Company Logo
+    </label>
+    <div className="relative">
+      <input
+        type="file"
+        onChange={handleLogoChange}
+        className="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+      />
+    </div>
+  </div><br></br>
+  <Button variant="contained" 
+  style={{ backgroundColor: 'teal', color: 'white' }}
+   onClick={editJobId ? handleUpdateJob : handleAddJob}>
+    {editJobId ? "Update Project" : "Add Project"}
+  </Button>
+</div>
+
       </Modal>
     </div>
   );

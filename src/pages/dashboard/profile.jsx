@@ -47,7 +47,7 @@ const defaultProfile = {
   skills: [],
   coverPhoto: 'https://via.placeholder.com/150',
 };
-const DEFAULT_PROFILE_IMAGE = 'https://i.pinimg.com/736x/cf/ea/30/cfea305ef815385ef069b123625ee2c0.jpg';
+const DEFAULT_PROFILE_IMAGE = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUFJ4m3HGM8397IWhGhLphaU38QtqrcYQoUg&s';
 
 const getUserProfilePhoto = () => {
   const user = localStorage.getItem('user');
@@ -136,7 +136,7 @@ export function Profile() {
   };
 
   const data = [
-    { label: "JOBS", value: "JOBS", component: <Jobs /> },
+    { label: "Projects", value: "JOBS", component: <Jobs /> },
     { label: "Responses", value: "responses", component: <Responses userId={userid} /> }
   ];
 
