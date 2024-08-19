@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { db } from "../../firebase/firebase";
-import { collection, getDocs, addDoc, deleteDoc, doc, serverTimestamp, updateDoc } from "firebase/firestore";
+import { collection, getDocs,collectionGroup, addDoc, deleteDoc, doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import {
   Typography,
@@ -65,8 +65,8 @@ export function Home() {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const jobsCollection = collection(db, `Jobsposted/${projectId}/jobs`);
-        const jobsSnapshot = await getDocs(jobsCollection);
+        
+        const jobsSnapshot = await getDocs(collectionGroup(db, "jobs"));
         const jobs = jobsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setJobsData(jobs);
         setLoading(false);
