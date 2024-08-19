@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
+import { useAuth } from '../../context/authContext/index';
+
 
 function Counsellor() {
     const [question, setQuestion] = useState('');
     const [messages, setMessages] = useState([]);
     const [generatingAnswer, setGeneratingAnswer] = useState(false);
     const [conversationStarted, setConversationStarted] = useState(false); // Track if conversation has started
-  
+    const { userLoggedIn, dbUser } = useAuth();
+    const userimg = JSON.parse(localStorage.getItem('user'))?.img
+
     // Helper function to construct conversation history as a string
     const getConversationHistory = () => {
       return messages
@@ -77,7 +81,7 @@ function Counsellor() {
           <div key={index} className={`flex ${msg.sender === 'user' ? 'flex-row' : 'flex-row-reverse'} items-start`}>
             {/* User or Bot Picture */}
             <img
-              src={msg.sender === 'user' ? 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUFJ4m3HGM8397IWhGhLphaU38QtqrcYQoUg&s' : 'https://www.shutterstock.com/image-vector/3d-vector-robot-chatbot-ai-600nw-2294117979.jpg'}
+              src={msg.sender === 'user' ? userimg : 'https://www.shutterstock.com/image-vector/3d-vector-robot-chatbot-ai-600nw-2294117979.jpg'}
               alt={msg.sender === 'user' ? 'User' : 'Bot'}
               className=" h-14 rounded-full shadow-md mr-2"
             />
