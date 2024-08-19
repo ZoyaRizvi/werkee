@@ -109,7 +109,7 @@ function Counsellor() {
     ></textarea>
     <button
       onClick={generateAnswer}
-      className={`ml-4 bg-blue-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-600 transition-all duration-300 ${
+      className={`ml-4 bg-[#008080] text-white px-6 py-2 rounded-lg shadow-md transition-all duration-300 ${
         generatingAnswer ? 'opacity-50 cursor-not-allowed' : ''
       }`}
       disabled={generatingAnswer}
