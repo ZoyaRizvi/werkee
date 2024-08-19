@@ -2,6 +2,7 @@ import {
   HomeIcon,
   UserCircleIcon,
   ChatBubbleOvalLeftIcon,
+  ChatBubbleLeftEllipsisIcon,
   LightBulbIcon,
   InformationCircleIcon,
 } from '@heroicons/react/24/solid';
@@ -18,6 +19,8 @@ import {
   Notifications as CandidateNotifications,
 } from '@/pages/candidate';
 import SkillAssessment from './pages/candidate/skillassessment';
+import Counsellor from './pages/candidate/counsellor';
+
 import {
   Home as AdminHome,
  } from '@/pages/admin';
@@ -56,6 +59,13 @@ const sideNavRoutes = (userRole) => {
             path: '/skillassessment',
             element: <SkillAssessment />,
           },
+          {
+            icon: <ChatBubbleLeftEllipsisIcon {...icon} />,
+            name: 'Your AI Counsellor',
+            path: '/counsellor',
+            element: <Counsellor/>,
+          },
+
           // {
           //   icon: <InformationCircleIcon {...icon} />,
           //   name: 'Notifications',
