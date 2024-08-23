@@ -16,8 +16,10 @@ function SkillAssessment() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showScoreDialog, setShowScoreDialog] = useState(false);
-  const [openSkillTest, setOpenSkillTest] = useState(true);
+  const [openSkillTest, setOpenSkillTest] = useState(false);
+  const [openLevelDialog, setOpenLevelDialog] = useState(true);
   const [selectedSkill, setSelectedSkill] = useState(null);
+  const [selectedLevel, setSelectedLevel] = useState(null);
   const [passStatus, setPassStatus] = useState('');
   const navigate = useNavigate();
   const hasGeneratedQuestions = useRef(false);
@@ -36,17 +38,17 @@ function SkillAssessment() {
 
   useEffect(() => {
     if (selectedSkill && !hasGeneratedQuestions.current) {
-      handleGenerateQuestions(selectedSkill);
+      handleGenerateQuestions(selectedSkill, selectedLevel);
       hasGeneratedQuestions.current = true;
     }
-  }, [selectedSkill]);
+  }, [selectedSkill, selectedLevel]);
 
-  async function handleGenerateQuestions(skill) {
+  async function handleGenerateQuestions(skill, level) {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await axios.post('https://werky-backend.onrender.com/api/assessment', { skill });
+      const response = await axios.post('https://werky-backend.onrender.com/api/assessment', { skill, level });
       const quizData = response.data;
       setQuestions(quizData.questions);
       setAnswers({});
@@ -72,17 +74,15 @@ function SkillAssessment() {
   async function handleSubmit() {
     if (assessmentId) {
       try {
-        // Fetch quizData from Firestore
         const assessmentDocRef = doc(db, 'assessment', assessmentId);
         const assessmentDoc = await getDoc(assessmentDocRef);
         const assessmentData = assessmentDoc.data();
-        const quizData = assessmentData.quizData; // assuming quizData is stored in the 'quizData' field
-  
+        const quizData = assessmentData.quizData;
+
         if (!quizData || !quizData.questions) {
           throw new Error("No quiz data found.");
         }
-  
-        // Calculate score
+
         const userScore = calculateScore(quizData.questions);
         await updateDoc(assessmentDocRef, {
           response: answers,
@@ -91,12 +91,11 @@ function SkillAssessment() {
 
         const status = userScore >= 8 ? 'Passed' : 'Failed';
         setPassStatus(status);
-  
-        // Update user badges if passed
+
         if (status === 'Passed') {
           const auth = getAuth();
           const user = auth.currentUser;
-  
+
           if (user) {
             const userDocRef = doc(db, 'users', user.uid);
             const userDoc = await getDoc(userDocRef);
@@ -118,25 +117,31 @@ function SkillAssessment() {
       }
     }
   }
-  
+
   function calculateScore(questions) {
     let correctCount = 0;
-  
+
     questions.forEach((question, index) => {
       const correctAnswer = question.correctAnswer;
       const userAnswer = answers[index];
-  
+
       if (userAnswer === correctAnswer) {
         correctCount += 1;
       }
     });
-  
+
     return correctCount;
   }
-  
+
   function handleSkillSelect(skill) {
     setSelectedSkill(skill);
     setOpenSkillTest(false);
+  }
+
+  function handleLevelSelect(level) {
+    setSelectedLevel(level);
+    setOpenLevelDialog(false);
+    setOpenSkillTest(true);
   }
 
   function handleDialogClose() {
@@ -144,8 +149,9 @@ function SkillAssessment() {
       navigate('/dashboard/profile');
     } else {
       setShowScoreDialog(false);
-      setOpenSkillTest(true);
+      setOpenLevelDialog(true);
       setSelectedSkill(null);
+      setSelectedLevel(null);
       hasGeneratedQuestions.current = false;
     }
   }
@@ -235,6 +241,25 @@ function SkillAssessment() {
           )
         )}
       </div>
+
+      {/* Level Selection Dialog */}
+      <MuiDialog open={openLevelDialog}>
+        <DialogTitle>Select Your Level</DialogTitle>
+        <DialogContent>
+          <div className="space-y-4">
+            {['Entry', 'Basic', 'Intermediate', 'Advanced'].map((level) => (
+              <Button
+                key={level}
+                onClick={() => handleLevelSelect(level)}
+                color="teal"
+                fullWidth
+              >
+                {level}
+              </Button>
+            ))}
+          </div>
+        </DialogContent>
+      </MuiDialog>
 
       <MuiDialog open={openSkillTest} onClose={() => setOpenSkillTest(false)} fullWidth maxWidth="sm">
         <DialogTitle className="flex items-center gap-2 text-gray-600">
