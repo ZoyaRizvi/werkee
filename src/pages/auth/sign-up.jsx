@@ -97,12 +97,12 @@ export function SignUp() {
                   />
                 </div>
                 <Card className="mb-4 p-4 bg-gray-50 rounded-lg shadow-sm">
-                  <Typography variant="h5" className="mb-4 text-center">Join as {role === 'candidate' ? 'Candidate' : 'Recruiter'}</Typography>
+                  <Typography variant="h5" className="mb-4 text-center">Join as {role === 'candidate' ? 'Worker' : 'Recruiter'}</Typography>
                   <div className="mb-4 flex justify-around">
                     <Radio
                       id="candidate"
                       name="role"
-                      label="Candidate"
+                      label="Worker"
                       checked={role === 'candidate'}
                       onChange={() => setRole('candidate')}
                     />
