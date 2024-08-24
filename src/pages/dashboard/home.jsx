@@ -117,7 +117,7 @@ export function Home() {
               color="transparent"
               className="m-0 flex items-center justify-between p-6"
             >
-              <div>
+              {/* <div>
                 <Typography variant="h6" color="blue-gray" className="mb-1">
                   Projects: Viewing as Recruiter
                 </Typography>
@@ -137,7 +137,7 @@ export function Home() {
                   <MenuItem>Another Action</MenuItem>
                   <MenuItem>Something else here</MenuItem>
                 </MenuList>
-              </Menu>
+              </Menu> */}
             </CardHeader>
             <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
               {isLoading ? (
