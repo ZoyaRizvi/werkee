@@ -14,6 +14,7 @@ import {
   setSidenavType,
   setFixedNavbar,
 } from "@/context";
+import Counsellor from "@/pages/candidate/counsellor";
 
 function formatNumber(number, decPlaces) {
   decPlaces = Math.pow(10, decPlaces);
@@ -74,6 +75,7 @@ export function Configurator() {
         >
           <XMarkIcon strokeWidth={2.5} className="h-5 w-5" />
         </IconButton>
+       
       </div>
       <div className="py-4 px-6">
         <div className="mb-12">

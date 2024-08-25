@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiCalendar, FiClock, FiMapPin } from 'react-icons/fi';
 import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 import { IoIosArrowDroprightCircle } from "react-icons/io";
-import { db, storage } from "@/firebase/firebase"; // Adjust the path as necessary
+import { db, storage, auth } from "@/firebase/firebase"; // Adjust the path as necessary
 import { collection, addDoc, doc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'; // Add these imports
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { onAuthStateChanged } from 'firebase/auth'; // Import auth methods
 
 const CustomCard = ({ data }) => {
   const {
-    id, // Assuming this is the jobId
+    id, 
     companyName,
     title,
     companyLogo,
@@ -19,7 +20,7 @@ const CustomCard = ({ data }) => {
     employmentType,
     experienceLevel,
     description,
-    recruiter, // Add recruiter here
+    recruiter, 
     jobTitle,
     recruiter_id,
   } = data;
@@ -27,10 +28,21 @@ const CustomCard = ({ data }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
     resume: null,
     coverLetter: ''
   });
+  const [currentUserEmail, setCurrentUserEmail] = useState('');
+
+  useEffect(() => {
+    // Listen to authentication state changes and get the current user
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCurrentUserEmail(user.email); // Set the current user's email
+      }
+    });
+
+    return () => unsubscribe(); // Clean up the listener on unmount
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -53,7 +65,7 @@ const CustomCard = ({ data }) => {
     try {
       // Upload resume to Firebase Storage
       const resumeRef = ref(storage, `resumes/${formData.resume.name}`);
-      const uploadResult = await uploadBytes(resumeRef, formData.resume);
+      await uploadBytes(resumeRef, formData.resume);
       const resumeUrl = await getDownloadURL(resumeRef);
 
       // Save the form data to Firestore under the specific recruiter
@@ -62,7 +74,8 @@ const CustomCard = ({ data }) => {
 
       await addDoc(applicationsCollectionRef, {
         ...formData,
-        resume: resumeUrl, // store the download URL of the resume
+        email: currentUserEmail, // Save the session user's email
+        resume: resumeUrl, // Store the download URL of the resume
         jobId: id, // Add jobId to the application data
         jobTitle: title, // Add jobTitle to the application data
         timestamp: new Date()
@@ -153,19 +166,6 @@ const CustomCard = ({ data }) => {
                 </div>
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
                     Resume
                   </label>
                   <input
@@ -213,6 +213,7 @@ const CustomCard = ({ data }) => {
 };
 
 export default CustomCard;
+
 
 
 

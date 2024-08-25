@@ -97,6 +97,7 @@ const sideNavRoutes = (userRole) => {
             name: 'Chat',
             path: '/chat',
             element: <DashboardChat />,
+            
           },
           // {
           //   icon: <InformationCircleIcon {...icon} />,

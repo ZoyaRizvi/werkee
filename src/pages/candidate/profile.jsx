@@ -162,6 +162,7 @@ export function Profile() {
   const resetProfile = () => {
     setProfile(defaultProfile);
   };
+  
 
   return (
     <>

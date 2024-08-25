@@ -13,6 +13,7 @@ import { PlusIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import { db } from "../../firebase/firebase";
 import { collection, addDoc, query, orderBy, onSnapshot, Timestamp, where, or, getDocs } from "firebase/firestore";
 import { useAuth } from '../../context/authContext/';
+import CreateOfferForm from "./CreateOfferForm";
 
 export function Chat() {
   const { userLoggedIn, dbUser } = useAuth(); // Assuming useAuth provides user role
@@ -52,6 +53,16 @@ export function Chat() {
       });
       setNewMessage("");
     }
+  };
+
+
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
   };
 
   const handleNewSendMessage = async () => {
@@ -299,39 +310,83 @@ export function Chat() {
         <div className="border border-gray-200 rounded-lg h-full flex flex-col overflow-hidden">
           {selectedChat && (
             <div className="border-b border-gray-200 p-4 flex items-center">
-            <Avatar src={selectedChat.img} alt={selectedChat.displayName} size="sm" variant="rounded" />
-            <div className="ml-4">
-              <Typography variant="h6" color="blue-gray" className="font-semibold">
-                {selectedChat.displayName}
-              </Typography>
-              <Typography variant="body2" color="blue-gray" className="text-sm">
-                {selectedChat.email}
-              </Typography>
+              <Avatar src={selectedChat.img} alt={selectedChat.displayName} size="sm" variant="rounded" />
+              <div className="ml-4">
+                <Typography variant="h6" color="blue-gray" className="font-semibold">
+                  {selectedChat.displayName}
+                </Typography>
+                <Typography variant="body2" color="blue-gray" className="text-sm">
+                  {selectedChat.email}
+                </Typography>
+              </div>
             </div>
-          </div>
           )}
-          <selectedChatContext.Provider value={selectedChat}>
-            <div className="flex-1 overflow-y-auto p-4">
-              {messages3.map((message) => (
-                <div key={message.timestamp} className={`flex ${message.from === dbUser.email ? "justify-end" : ""} mb-4`}>
-                  <div className={`flex flex-col ${message.from === dbUser.email ? "items-end" : "items-start"}`}>
-                    <Typography variant="small" color="blue-gray" className='font-semibold'>
-                      {message.from}
-                    </Typography>
-                    <Typography className="bg-blue-100 p-2 rounded-md text-blue-gray-800">
-                      {message.text}
-                    </Typography>
-                    <Typography variant="small" className="text-blue-gray-500">
-                      {message.timestamp.toDate().toUTCString()}
-                    </Typography>
-                  </div>
+          <div className="flex-1 overflow-y-auto p-4">
+            {messages3.map((message) => (
+              <div key={message.timestamp} className={`flex ${message.from === dbUser.email ? "justify-end" : ""} mb-4`}>
+                <div className={`flex flex-col ${message.from === dbUser.email ? "items-end" : "items-start"}`}>
+                  <Typography variant="small" color="blue-gray" className="font-semibold">
+                    {message.from}
+                  </Typography>
+                  <Typography className="bg-blue-100 p-2 rounded-md text-blue-gray-800">
+                    {message.text}
+                  </Typography>
+                  {/* Offer details section */}
+                  {message.offerDetails && (
+                    <div className="mt-4 w-full p-6 bg-white shadow-lg rounded-xl border border-gray-300">
+                      <Typography variant="h6" color="blue-gray" className="font-semibold mb-2">
+                        Offer Details:
+                      </Typography>
+
+                      <div className="mb-2">
+                        <Typography variant="small" color="blue-gray" className="font-medium">Title:</Typography>
+                        <Typography className="text-lg font-bold">{message.offerDetails.title}</Typography>
+                      </div>
+
+                      {/* Inline flex container for Delivery Time, Revision Offered, and Amount */}
+                      <div className="mb-2 flex flex-wrap gap-4">
+                        <div className="flex items-center">
+                          <Typography variant="small" color="blue-gray" className="font-medium">Delivery Time (in days):</Typography>
+                          <Typography className="text-sm  ml-2">{message.offerDetails.deliveryTime}</Typography>
+                        </div>
+
+                        <div className="flex items-center">
+                          <Typography variant="small" color="blue-gray" className="font-medium">Revision Offered:</Typography>
+                          <Typography className="text-sm  ml-2">{message.offerDetails.revisions}</Typography>
+                        </div>
+
+                        <div className="flex items-center">
+                          <Typography variant="small" color="blue-gray" className="font-medium">Amount:</Typography>
+                          <Typography className="text-sm  ml-2">{message.offerDetails.price}</Typography>
+                        </div>
+                      </div>
+
+                      <div className="mb-2">
+                        <Typography variant="small" color="blue-gray" className="font-medium">Additional Service:</Typography>
+                        <Typography className="text-base">{message.offerDetails.service}</Typography>
+                      </div>
+
+                      <div className="mb-2">
+                        <Typography variant="small" color="blue-gray" className="font-medium">Description:</Typography>
+                        <Typography className="text-base">{message.offerDetails.description}</Typography>
+                      </div>
+
+
+                    </div>
+
+                  )}
+                  <Typography variant="small" className="text-blue-gray-500">
+                    {message.timestamp.toDate().toUTCString()}
+                  </Typography>
                 </div>
-              ))}
-            </div>
-          </selectedChatContext.Provider>
+              </div>
+            ))}
+          </div>
           {selectedChat && (
             <div className="border-t border-gray-200 p-4">
-              <div className="flex items-center">
+              <CreateOfferForm email={selectedChat.email} />
+
+              <div className="flex items-center mb-2">
                 <Input
                   type="text"
                   value={newMessage}
@@ -340,15 +395,19 @@ export function Chat() {
                   placeholder="Type your message here..."
                   className="flex-1 p-2 rounded-lg mr-4"
                 />
-                <Button color="blue" onClick={handleSendMessage}>
+
+                <Button color="teal" onClick={handleSendMessage}>
                   Send
                 </Button>
               </div>
+
             </div>
           )}
         </div>
       </div>
+
     </div>
+
   );
 }
 

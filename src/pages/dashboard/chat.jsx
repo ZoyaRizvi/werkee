@@ -11,12 +11,12 @@ import {
 } from "@material-tailwind/react";
 import { PlusIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import { db } from "../../firebase/firebase";
-import { collection, addDoc, query, orderBy, onSnapshot, Timestamp, where, or, getDocs } from "firebase/firestore";
+import { collection, addDoc, query, orderBy, onSnapshot, Timestamp, where, or } from "firebase/firestore";
 import { useAuth } from '../../context/authContext/';
+import PaymentModal from "./PaymentModal";
 
 export function Chat() {
-  const { userLoggedIn, dbUser } = useAuth(); // Assuming useAuth provides user role
-  // instant messaging functionality
+  const { userLoggedIn, dbUser } = useAuth();
   const [messages1, setMessages1] = useState([]);
   const [messages2, setMessages2] = useState([]);
   const [messages3, setMessages3] = useState([]);
@@ -25,19 +25,19 @@ export function Chat() {
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // selected chat based off context provider
   const selectedChatContext = createContext(null);
-  const [selectedChat, setSelectedChat] = useState(null); // todo set an initial value
-  // the "from" list
+  const [selectedChat, setSelectedChat] = useState(null);
   const [uniqueChatList, setUniqueChatList] = useState([]);
-  const [nonUniqueChatList, setNonUniqueChatList] = useState([]);
   const [uniqueUsersList, setUniqueUsersList] = useState([]);
   const [initalized, setInitialized] = useState(false);
   const [finalInit, setFinalInit] = useState(false);
-  // new chat recipient email
-  const [recruiter, setRecruiter] = useState(null)
-  const [jobTitle, setJobTitle] = useState(null)
-  const [newMessagePost, setNewMessagePost] = useState("")
+  const [recruiter, setRecruiter] = useState(null);
+  const [jobTitle, setJobTitle] = useState(null);
+  const [newMessagePost, setNewMessagePost] = useState("");
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
+  const openPaymentModal = () => setIsPaymentModalOpen(true);
+  const closePaymentModal = () => setIsPaymentModalOpen(false);
 
   const navigate = useNavigate();
 
@@ -45,8 +45,8 @@ export function Chat() {
     if (newMessage.trim()) {
       await addDoc(collection(db, 'messages'), {
         from: dbUser.email,
-        to: selectedChat.email, // to the selectedChat (uses context provider to re-render)
-        users: [dbUser.email, selectedChat.email], // [from, to]
+        to: selectedChat.email,
+        users: [dbUser.email, selectedChat.email],
         text: newMessage,
         timestamp: Timestamp.now(),
       });
@@ -64,136 +64,91 @@ export function Chat() {
         timestamp: Timestamp.now(),
       });
       setNewMessagePost("");
-      handleOpen()
-      // show some kind of confirmation before returning to home
-      window.location.href = '/dashboard/chat'
+      handleOpen();
+      window.location.href = '/dashboard/chat';
     }
   };
 
   const handleNewKeyPress = (event) => {
     if (event.key === "Enter") {
       handleSendMessage();
-      // handleOpen()
     }
   };
 
-  // New Chat dialog
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const handleOpen = () => {
     setOpen(!open);
   };
 
   useEffect(() => {
     if (finalInit) {
-      // User has come through postings page
-      // e.g. url param = recruiter
       if (recruiter) {
-        // Open newChat dialog
-        handleOpen()
+        handleOpen();
       } else {
-        setSelectedChat(uniqueUsersList[0])
+        setSelectedChat(uniqueUsersList[0]);
       }
     }
-  }, [finalInit])
-
-  // Cross reference users from messages list (uniqueChatList), and return all users | uniqueUsersList
+  }, [finalInit]);
 
   useEffect(() => {
     if (initalized) {
-      // Get users based off associated chats - ensures that current user isn't included
       try {
-        const q = query(collection(db, "users"), where("email", "in", uniqueChatList), where("email", "!=", dbUser.email), orderBy("createdAt"))
-        const unsubscribe2 = onSnapshot(q, snapshot => {
-          // Get only unique chats (since there are multiple messages from the same user)
-          setUniqueUsersList(snapshot.docs.map(doc => (doc.data())))
-          setFinalInit(true)
+        const q = query(collection(db, "users"), where("email", "in", uniqueChatList), where("email", "!=", dbUser.email), orderBy("createdAt"));
+        const unsubscribe2 = onSnapshot(q, (snapshot) => {
+          setUniqueUsersList(snapshot.docs.map((doc) => doc.data()));
+          setFinalInit(true);
         });
         return () => unsubscribe2();
       } catch (err) {
-        console.log(err)
-        // uniqueChatList showing empty edge case
-
-        setFinalInit(true)
-        return
+        console.log(err);
+        setFinalInit(true);
+        return;
       }
     }
-  }, [initalized])
-
-  // Get a unique list of users from your associated messages | uniqueChatList
+  }, [initalized]);
 
   useEffect(() => {
     if (!dbUser) return;
-    // Get messages where sender and recipient is current user
-    const q = query(collection(db, "messages"), or(where("from", "==", dbUser.email), where("to", "==", dbUser.email)), orderBy("timestamp"))
-    const unsubscribe = onSnapshot(q, snapshot => {
-      const chatList = snapshot.docs.flatMap(doc => {
+    const q = query(collection(db, "messages"), or(where("from", "==", dbUser.email), where("to", "==", dbUser.email)), orderBy("timestamp"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const chatList = snapshot.docs.flatMap((doc) => {
         const data = doc.data();
         return [data.from, data.to];
       });
-      setNonUniqueChatList(chatList);
-
-      // Get only unique chats (since there are multiple messages from the same user)
-      setUniqueChatList(
-        [...new Set(chatList)]
-      )
-      // Make sure we initialize in the same block as the snapshot
-      setInitialized(true)
-      // set the recipient of newChat object if user has been directed from postings page
-      const urlParams = new URLSearchParams(window.location.search)
-      setRecruiter(urlParams.get('reference'))
-      setJobTitle(decodeURI(urlParams.get('job')))
+      setUniqueChatList([...new Set(chatList)]);
+      setInitialized(true);
+      const urlParams = new URLSearchParams(window.location.search);
+      setRecruiter(urlParams.get("reference"));
+      setJobTitle(decodeURI(urlParams.get("job")));
     });
     return () => unsubscribe();
   }, [dbUser]);
 
-  // This is only a test block to see if states work fine
-  useEffect(() => {
-    if (messagesReceived) {
-      console.log(messages1)
-      console.log(messages2)
-      console.log(messages3)
-      console.log(uniqueUsersList)
-      console.log(nonUniqueChatList)
-      console.log(uniqueChatList)
-    }
-  }, [messagesReceived])
-
-  // Get selected chat messages
-
   useEffect(() => {
     if (!selectedChat) return;
 
-    // Example flow: One way
-    //
-    // from:admin, to:candid
-    // admin > candid : hello
-    // admin > candid : how are you?
+    const q1 = query(collection(db, "messages"), where("from", "==", dbUser.email), where("to", "==", selectedChat.email), orderBy("timestamp"));
+    const unsubscribe1 = onSnapshot(q1, (snapshot) => {
+      setMessages1(snapshot.docs.map((doc) => doc.data()));
+    });
 
-    // Get all messages that have fields from:current user AND to:selectedUser >>>>> Meaning one way messages from sender to recipient
-    if (selectedChat) {
-      // from sender to recipient
-      const q = query(collection(db, "messages"), where("from", "==", dbUser.email), where("to", "==", selectedChat.email), orderBy("timestamp"));
-      const unsubscribe = onSnapshot(q, snapshot => {
-        setMessages1(snapshot.docs.map(doc => doc.data()));
-      })
+    const q2 = query(collection(db, "messages"), where("from", "==", selectedChat.email), where("to", "==", dbUser.email), orderBy("timestamp"));
+    const unsubscribe2 = onSnapshot(q2, (snapshot) => {
+      setMessages2(snapshot.docs.map((doc) => doc.data()));
+    });
 
-      // from recipient to sender
-      const q2 = query(collection(db, "messages"), where("from", "==", selectedChat.email), where("to", "==", dbUser.email), orderBy("timestamp"))
-      const unsubscribe2 = onSnapshot(q2, snapshot => {
-        setMessages2(snapshot.docs.map(doc => doc.data()));
-        // setMessages1(prevState => ({ ...prevState, t_message2 }))
-      })
-      return () => { unsubscribe(), unsubscribe2(), setMessagesReceived(true) }
-    }
+    return () => {
+      unsubscribe1();
+      unsubscribe2();
+      setMessagesReceived(true);
+    };
   }, [selectedChat]);
 
   useEffect(() => {
     const combined = [...messages1, ...messages2];
     combined.sort((a, b) => a.timestamp - b.timestamp);
     setMessages3(combined);
-  }, [messages1, messages2])
-
-
+  }, [messages1, messages2]);
 
   const handleKeyPress = (event) => {
     if (event.key === "Enter") {
@@ -210,30 +165,28 @@ export function Chat() {
   );
 
   return (
-    <div className="flex" style={{ height: 'calc(100vh - 100px' }}>
+    <div className="flex" style={{ height: "calc(100vh - 100px" }}>
       <Dialog open={open} handler={handleOpen}>
         <DialogBody>
-          {/* passing logged in user as prop for testing */}
-          {/* <NewChat recruiter={queryParameters} handleOpen={handleOpen}/> */}
           <form onSubmit={handleNewSendMessage} className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
-            {/* Select User to send message to */}
             <div className="mb-4">
-              {recruiter ?
-                <Typography variant="regular" color="blue-gray" className="font-medium">Applying for {jobTitle ? jobTitle : null}</Typography>
-                :
-                <></>}
+              {recruiter && (
+                <Typography variant="regular" color="blue-gray" className="font-medium">
+                  Applying for {jobTitle ? jobTitle : null}
+                </Typography>
+              )}
               <Input
                 size="lg"
                 placeholder="name@mail.com"
                 className="border border-gray-300 rounded-md mt-2"
                 value={recruiter}
-                onChange={e => setRecruiter(e.target.value)}
+                onChange={(e) => setRecruiter(e.target.value)}
               />
             </div>
-
-            {/* Chat Window */}
             <div className="mb-4">
-              <Typography variant="small" color="blue-gray" className="font-medium">Add a message</Typography>
+              <Typography variant="small" color="blue-gray" className="font-medium">
+                Add a message
+              </Typography>
               <div className="flex items-center">
                 <Input
                   type="text"
@@ -251,18 +204,13 @@ export function Chat() {
           </form>
         </DialogBody>
         <DialogFooter>
-          <Button
-            variant="text"
-            color="red"
-            onClick={handleOpen}
-            className="mr-1"
-          >
+          <Button variant="text" color="red" onClick={handleOpen} className="mr-1">
             <span>Cancel</span>
           </Button>
         </DialogFooter>
       </Dialog>
-      {/* Sidebar */}
-      <div className="w-1/4 bg-white border-r border-gray-200 p-4 overflow-y-auto" style={{ height: 'calc(100vh - 120px' }}>
+
+      <div className="w-1/4 bg-white border-r border-gray-200 p-4 overflow-y-auto" style={{ height: "calc(100vh - 120px" }}>
         <div className="flex items-center justify-between mb-4">
           <Input
             type="text"
@@ -272,16 +220,14 @@ export function Chat() {
             icon={<MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />}
             className="w-full"
           />
-          {/* <PlusIcon className="h-4 w-8" /> */}
-          <Button onClick={handleOpen} variant="gradient">
+          {/* <Button onClick={handleOpen} variant="gradient">
             <PlusIcon className="h-4 w-8" />
-          </Button>
+          </Button> */}
         </div>
         {filteredChats && filteredChats.map((chat) => (
           <div key={chat.displayName}
             className={`flex items-center gap-4 p-4 cursor-pointer hover:bg-gray-100`}
             onClick={() => setSelectedChat(chat)}>
-            {/* <Avatar src={chat.img} alt={chat.name} size="sm" variant="rounded" /> */}
             <div>
               <Typography variant="small" color="blue-gray" className={(selectedChat && selectedChat.email === chat.email) ? 'font-semibold' : 'body1'}>
                 {chat.displayName}
@@ -295,60 +241,111 @@ export function Chat() {
       </div>
 
       {/* Chat Window */}
-      <div className="flex-1 p-4 bg-white">
-        <div className="border border-gray-200 rounded-lg h-full flex flex-col overflow-hidden">
-          {selectedChat && (
-            <div className="border-b border-gray-200 p-4 flex items-center">
-            <Avatar src={selectedChat.img} alt={selectedChat.displayName} size="sm" variant="rounded" />
-            <div className="ml-4">
-              <Typography variant="h6" color="blue-gray" className="font-semibold">
-                {selectedChat.displayName}
-              </Typography>
-              <Typography variant="body2" color="blue-gray" className="text-sm">
-                {selectedChat.email}
-              </Typography>
-            </div>
-          </div>
-          )}
-          <selectedChatContext.Provider value={selectedChat}>
-            <div className="flex-1 overflow-y-auto p-4">
-              {messages3.map((message) => (
-                <div key={message.timestamp} className={`flex ${message.from === dbUser.email ? "justify-end" : ""} mb-4`}>
-                  <div className={`flex flex-col ${message.from === dbUser.email ? "items-end" : "items-start"}`}>
-                    <Typography variant="small" color="blue-gray" className='font-semibold'>
-                      {message.from}
-                    </Typography>
-                    <Typography className="bg-blue-100 p-2 rounded-md text-blue-gray-800">
-                      {message.text}
-                    </Typography>
-                    <Typography variant="small" className="text-blue-gray-500">
-                      {message.timestamp.toDate().toUTCString()}
-                    </Typography>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </selectedChatContext.Provider>
-          {selectedChat && (
-            <div className="border-t border-gray-200 p-4">
-              <div className="flex items-center">
-                <Input
-                  type="text"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Type your message here..."
-                  className="flex-1 p-2 rounded-lg mr-4"
-                />
-                <Button color="blue" onClick={handleSendMessage}>
-                  Send
-                </Button>
+      <div className="flex-1 bg-gray-100 p-4  bg-white">
+        {selectedChat ? (
+          <div>
+            <div className="mb-4">
+              <div className="flex items-center gap-4">
+                <Avatar src={selectedChat.img} alt={selectedChat.displayName} size="sm" variant="rounded" />
+                <Typography variant="h5" color="blue-gray" className="font-medium">
+                  {selectedChat.displayName}
+                </Typography>
               </div>
             </div>
-          )}
-        </div>
+
+            <div className="mb-4">
+              {messages3.map((message, index) => (
+                    <div key={message.timestamp} className={`flex ${message.from === dbUser.email ? "justify-end" : ""} mb-4`}>
+                    <div className={`flex flex-col ${message.from === dbUser.email ? "items-end" : "items-start"}`}>
+                      <Typography variant="small" color="blue-gray" className="font-semibold">
+                        {message.from}
+                      </Typography>
+                      <Typography className="bg-blue-100 p-2 rounded-md text-blue-gray-800">
+                        {message.text}
+                      </Typography>
+                      {/* Offer details section */}
+                      {message.offerDetails && (
+                        <div className="mt-4 w-full p-6 bg-white shadow-lg rounded-xl border border-gray-300">
+                          <Typography variant="h6" color="blue-gray" className="font-semibold mb-2">
+                            Offer Details:
+                          </Typography>
+    
+                          <div className="mb-2">
+                            <Typography variant="small" color="blue-gray" className="font-medium">Title:</Typography>
+                            <Typography className="text-lg font-bold">{message.offerDetails.title}</Typography>
+                          </div>
+    
+                          {/* Inline flex container for Delivery Time, Revision Offered, and Amount */}
+                          <div className="mb-2 flex flex-wrap gap-4">
+                            <div className="flex items-center">
+                              <Typography variant="small" color="blue-gray" className="font-medium">Delivery Time (ndays):</Typography>
+                              <Typography className="text-lg font-bold ml-2">{message.offerDetails.deliveryTime}</Typography>
+                            </div>
+    
+                            <div className="flex items-center">
+                              <Typography variant="small" color="blue-gray" className="font-medium">Revision Offered:</Typography>
+                              <Typography className="text-lg font-bold ml-2">{message.offerDetails.revisions}</Typography>
+                            </div>
+    
+                            <div className="flex items-center">
+                              <Typography variant="small" color="blue-gray" className="font-medium">Amount:</Typography>
+                              <Typography className="text-lg font-bold ml-2">{message.offerDetails.price}</Typography>
+                            </div>
+                          </div>
+    
+                          <div className="mb-2">
+                            <Typography variant="small" color="blue-gray" className="font-medium">Additional Service:</Typography>
+                            <Typography className="text-base">{message.offerDetails.service}</Typography>
+                          </div>
+    
+                          <div className="mb-2">
+                            <Typography variant="small" color="blue-gray" className="font-medium">Description:</Typography>
+                            <Typography className="text-base">{message.offerDetails.description}</Typography>
+                          </div>
+    
+                          <div className="flex items-center justify-between mt-4">
+                            <Button onClick={openPaymentModal} size="sm" variant="gradient" color="green">
+                              Accept Offer
+                            </Button>
+                            <PaymentModal isOpen={isPaymentModalOpen}  />
+                            <Button size="sm" variant="text" color="red">
+                              Decline
+                            </Button>
+                          </div>
+                        </div>
+    
+                      )}
+                      <Typography variant="small" className="text-blue-gray-500">
+                        {message.timestamp.toDate().toUTCString()}
+                      </Typography>
+                    </div>
+                  </div>
+              ))}
+            </div>
+
+
+            <div className="flex items-center gap-4">
+              <Input
+                type="text"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Type your message here..."
+                className="flex-1 p-2 rounded-lg mr-4"
+              />
+              <Button color="blue" onClick={handleSendMessage}>
+                Send
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Typography variant="h6" color="blue-gray">
+            Select a chat to start messaging
+          </Typography>
+        )}
       </div>
     </div>
+
   );
 }
 
