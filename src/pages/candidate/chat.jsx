@@ -274,7 +274,7 @@ export function Chat() {
       </Dialog>
       {/* Sidebar */}
       <div className="w-1/4 bg-white border-r border-gray-200 p-4 overflow-y-auto" style={{ height: 'calc(100vh - 120px' }}>
-        <div className="flex items-center justify-between mb-4">
+        {/* <div className="flex items-center justify-between mb-4">
           <Input
             type="text"
             value={searchQuery}
@@ -282,12 +282,12 @@ export function Chat() {
             placeholder="Search chats..."
             icon={<MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />}
             className="w-full"
-          />
+          /> */}
           {/* <PlusIcon className="h-4 w-8" /> */}
-          <Button onClick={handleOpen} variant="gradient">
+          {/* <Button onClick={handleOpen} variant="gradient">
             <PlusIcon className="h-4 w-8" />
           </Button>
-        </div>
+        </div> */}
         {filteredChats && filteredChats.map((chat) => (
           <div key={chat.displayName}
             className={`flex items-center gap-4 p-4 cursor-pointer hover:bg-gray-100`}

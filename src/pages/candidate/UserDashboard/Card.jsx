@@ -114,9 +114,9 @@ const CustomCard = ({ data }) => {
           </div>
           <p className='text-base text-primary/70 pt-3 pl-3'>{description}</p>
           <div className="flex justify-between items-center p-4 mb-2">
-            <Link to={'/dashboard/chat?reference=' + encodeURIComponent(recruiter) + '&job=' + encodeURIComponent(jobTitle)} className='text-black flex items-center'>
+            {/* <Link to={'/dashboard/chat?reference=' + encodeURIComponent(recruiter) + '&job=' + encodeURIComponent(jobTitle)} className='text-black flex items-center'>
               <p className='text-white bg-cyan-500 py-2 px-4 mt-4 rounded flex items-center'><IoChatbubbleEllipsesOutline className='mr-2 items-end' />Message recruiter</p>
-            </Link>
+            </Link> */}
 
             <button onClick={() => setIsModalOpen(true)} className="bg-teal-500 text-white py-2 px-4 mt-4 rounded w-32 flex justify-center">
               <span className="mr-2">Apply</span><IoIosArrowDroprightCircle className="text-xl ml-3" />
