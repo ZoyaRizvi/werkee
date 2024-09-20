@@ -85,24 +85,28 @@ export function Home() {
     }
   };
 
-  const filteredData = (jobs, selected, query) => {
-    let filteredJobs = jobs;
+const filteredData = (jobs, selectedCategory, query) => {
+  let filteredJobs = jobs;
 
-    if (query) {
-      filteredJobs = filteredItems;
-    }
+  // Filter by search query (job title)
+  if (query) {
+    filteredJobs = filteredItems;
+  }
 
-    if (selected) {
-      filteredJobs = filteredJobs.filter(
-        ({ experienceLevel, postingDate, maxPrice }) =>
-          parseInt(maxPrice) <= parseInt(selected)
-      );
-    }
+  // Filter by selected category (location or any other selected filter)
+  if (selectedCategory) {
+    filteredJobs = filteredJobs.filter((job) => 
+      job.jobLocation && job.jobLocation.toLowerCase().includes(selectedCategory.toLowerCase())
+    );
+  }
 
-    const { startIndex, endIndex } = calculatePageRange();
-    filteredJobs = filteredJobs.slice(startIndex, endIndex);
-    return filteredJobs.map((data, i) => <CardCustom key={i} data={data} />);
-  };
+
+  const { startIndex, endIndex } = calculatePageRange();
+  filteredJobs = filteredJobs.slice(startIndex, endIndex);
+  
+  return filteredJobs.map((data, i) => <CardCustom key={i} data={data} />);
+};
+
 
   const result = filteredData(jobs, selectedCategory, query);
 
