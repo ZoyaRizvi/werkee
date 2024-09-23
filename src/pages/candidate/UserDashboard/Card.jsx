@@ -16,7 +16,7 @@ const CustomCard = ({ data }) => {
     companyLogo,
     Requirements,
     jobLocation,
-    postingDate,
+    postedDate,
     employmentType,
     experienceLevel,
     description,
@@ -109,7 +109,7 @@ const CustomCard = ({ data }) => {
             </span>
             <span className="flex items-center gap-2">
               <FiCalendar />
-              {new Date(postingDate).toLocaleDateString()}
+              {new Date(postedDate).toLocaleDateString()}
             </span>
           </div>
           <p className='text-base text-primary/70 pt-3 pl-3'>{description}</p>
