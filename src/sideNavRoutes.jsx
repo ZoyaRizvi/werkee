@@ -5,6 +5,7 @@ import {
   ChatBubbleLeftEllipsisIcon,
   LightBulbIcon,
   InformationCircleIcon,
+  ShoppingCartIcon
 } from '@heroicons/react/24/solid';
 import {
   Home as DashboardHome,
@@ -20,6 +21,7 @@ import {
 } from '@/pages/candidate';
 import SkillAssessment from './pages/candidate/skillassessment';
 import Counsellor from './pages/candidate/counsellor';
+import Orders from './pages/dashboard/Orders';
 
 import {
   Home as AdminHome,
@@ -97,6 +99,13 @@ const sideNavRoutes = (userRole) => {
             name: 'Chat',
             path: '/chat',
             element: <DashboardChat />,
+            
+          },
+          {
+            icon: <ShoppingCartIcon {...icon} />,
+            name: 'Orders',
+            path: '/orders',
+            element: <Orders />,
             
           },
           // {
