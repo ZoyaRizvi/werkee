@@ -70,6 +70,7 @@ const CreateOfferForm = ({ email }) => {
     }
   };
 
+
   return (
     <div className="max-w-3xl mx-auto p-8">
       <Button color="green" variant="outlined" onClick={handleOpen}>
@@ -176,7 +177,7 @@ const CreateOfferForm = ({ email }) => {
               </button>
             </div>
 
-            <div>
+            {/* <div>
               <label className="block text-lg font-medium text-gray-700">Upload Images</label>
               <input
                 type="file"
@@ -184,7 +185,7 @@ const CreateOfferForm = ({ email }) => {
                 onChange={handleImageUpload}
                 className="mt-2 block w-full text-lg text-gray-600 bg-gray-50 border border-gray-300 rounded-lg cursor-pointer focus:ring-2 focus:ring-blue-500 focus:outline-none"
               />
-            </div>
+            </div> */}
 
             <button
               type="submit" onClick={handleOpen}

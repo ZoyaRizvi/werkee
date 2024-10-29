@@ -11,9 +11,11 @@ import {
 } from "@material-tailwind/react";
 import { PlusIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import { db } from "../../firebase/firebase";
-import { collection, addDoc, query, orderBy, onSnapshot, Timestamp, where, or } from "firebase/firestore";
+import { collection, addDoc, query, orderBy, onSnapshot, Timestamp, where, or,doc } from "firebase/firestore";
 import { useAuth } from '../../context/authContext/';
 import PaymentModal from "./PaymentModal";
+
+
 
 export function Chat() {
   const { userLoggedIn, dbUser } = useAuth();
@@ -34,10 +36,9 @@ export function Chat() {
   const [recruiter, setRecruiter] = useState(null);
   const [jobTitle, setJobTitle] = useState(null);
   const [newMessagePost, setNewMessagePost] = useState("");
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [acceptedOffer, setAcceptedOffer] = useState(null);
+  const [showMessage, setShowMessage] = useState(false);
 
-  const openPaymentModal = () => setIsPaymentModalOpen(true);
-  const closePaymentModal = () => setIsPaymentModalOpen(false);
 
   const navigate = useNavigate();
 
@@ -78,6 +79,40 @@ export function Chat() {
   const [open, setOpen] = useState(false);
   const handleOpen = () => {
     setOpen(!open);
+  };
+
+  const handleOfferClick = async (message) => {
+    const offerDetails = message.offerDetails || {};
+    const orderNumber = Math.floor(100000 + Math.random() * 90000);
+
+    const orderData = {
+      title: offerDetails.title || "",
+      deliveryTime: offerDetails.deliveryTime || "",
+      revisions: offerDetails.revisions || "",
+      price: offerDetails.price || "",
+      service: offerDetails.service || "",
+      description: offerDetails.description || "",
+      RecruiterEmail:dbUser.email,
+      FreelancerEmail: selectedChat.email, 
+      timestamp: new Date(),
+      orderNumber:orderNumber,
+      status:"Pending",
+      img:selectedChat.img
+    };
+
+    try {
+      await addDoc(collection(db, 'orders'), orderData);
+      console.log('Order saved successfully');
+      
+      // Set offer as accepted and show success message
+      setAcceptedOffer(message.timestamp);
+      setShowMessage(true);
+
+      // Hide message after 3 seconds
+      setTimeout(() => setShowMessage(false), 3000);
+    } catch (error) {
+      console.error('Error saving order: ', error);
+    }
   };
 
   useEffect(() => {
@@ -254,73 +289,85 @@ export function Chat() {
             </div>
 
             <div className="mb-4">
-              {messages3.map((message, index) => (
-                    <div key={message.timestamp} className={`flex ${message.from === dbUser.email ? "justify-end" : ""} mb-4`}>
-                    <div className={`flex flex-col ${message.from === dbUser.email ? "items-end" : "items-start"}`}>
-                      <Typography variant="small" color="blue-gray" className="font-semibold">
-                        {message.from}
-                      </Typography>
-                      <Typography className="bg-blue-100 p-2 rounded-md text-blue-gray-800">
-                        {message.text}
-                      </Typography>
-                      {/* Offer details section */}
-                      {message.offerDetails && (
-                        <div className="mt-4 w-full p-6 bg-white shadow-lg rounded-xl border border-gray-300">
-                          <Typography variant="h6" color="blue-gray" className="font-semibold mb-2">
-                            Offer Details:
-                          </Typography>
-    
-                          <div className="mb-2">
-                            <Typography variant="small" color="blue-gray" className="font-medium">Title:</Typography>
-                            <Typography className="text-lg font-bold">{message.offerDetails.title}</Typography>
-                          </div>
-    
-                          {/* Inline flex container for Delivery Time, Revision Offered, and Amount */}
-                          <div className="mb-2 flex flex-wrap gap-4">
-                            <div className="flex items-center">
-                              <Typography variant="small" color="blue-gray" className="font-medium">Delivery Time (ndays):</Typography>
-                              <Typography className="text-lg font-bold ml-2">{message.offerDetails.deliveryTime}</Typography>
-                            </div>
-    
-                            <div className="flex items-center">
-                              <Typography variant="small" color="blue-gray" className="font-medium">Revision Offered:</Typography>
-                              <Typography className="text-lg font-bold ml-2">{message.offerDetails.revisions}</Typography>
-                            </div>
-    
-                            <div className="flex items-center">
-                              <Typography variant="small" color="blue-gray" className="font-medium">Amount:</Typography>
-                              <Typography className="text-lg font-bold ml-2">{message.offerDetails.price}</Typography>
-                            </div>
-                          </div>
-    
-                          <div className="mb-2">
-                            <Typography variant="small" color="blue-gray" className="font-medium">Additional Service:</Typography>
-                            <Typography className="text-base">{message.offerDetails.service}</Typography>
-                          </div>
-    
-                          <div className="mb-2">
-                            <Typography variant="small" color="blue-gray" className="font-medium">Description:</Typography>
-                            <Typography className="text-base">{message.offerDetails.description}</Typography>
-                          </div>
-    
-                          <div className="flex items-center justify-between mt-4">
-                            <Button onClick={openPaymentModal} size="sm" variant="gradient" color="green">
-                              Accept Offer
-                            </Button>
-                            <PaymentModal isOpen={isPaymentModalOpen}  />
-                            <Button size="sm" variant="text" color="red">
-                              Decline
-                            </Button>
-                          </div>
-                        </div>
-    
-                      )}
-                      <Typography variant="small" className="text-blue-gray-500">
-                        {message.timestamp.toDate().toUTCString()}
-                      </Typography>
-                    </div>
+            {messages3.map((message) => (
+        <div key={message.timestamp} className={`flex ${message.from === dbUser.email ? "justify-end" : ""} mb-4`}>
+          <div className={`flex flex-col ${message.from === dbUser.email ? "items-end" : "items-start"}`}>
+            <Typography variant="small" color="blue-gray" className="font-semibold">
+              {message.from}
+            </Typography>
+            <Typography className="bg-blue-100 p-2 rounded-md text-blue-gray-800">
+              {message.text}
+            </Typography>
+
+            {/* Offer details section */}
+            {message.offerDetails && (
+              <div className="mt-4 w-full p-6 bg-white shadow-lg rounded-xl border border-gray-300">
+                <Typography variant="h6" color="blue-gray" className="font-semibold mb-2">
+                  Offer Details:
+                </Typography>
+
+                <div className="mb-2">
+                  <Typography variant="small" color="blue-gray" className="font-medium">Title:</Typography>
+                  <Typography className="text-lg font-bold">{message.offerDetails.title}</Typography>
+                </div>
+
+                {/* Inline flex container for Delivery Time, Revision Offered, and Amount */}
+                <div className="mb-2 flex flex-wrap gap-4">
+                  <div className="flex items-center">
+                    <Typography variant="small" color="blue-gray" className="font-medium">Delivery Time (ndays):</Typography>
+                    <Typography className="text-lg font-bold ml-2">{message.offerDetails.deliveryTime}</Typography>
                   </div>
-              ))}
+
+                  <div className="flex items-center">
+                    <Typography variant="small" color="blue-gray" className="font-medium">Revision Offered:</Typography>
+                    <Typography className="text-lg font-bold ml-2">{message.offerDetails.revisions}</Typography>
+                  </div>
+
+                  <div className="flex items-center">
+                    <Typography variant="small" color="blue-gray" className="font-medium">Amount:</Typography>
+                    <Typography className="text-lg font-bold ml-2">{message.offerDetails.price}</Typography>
+                  </div>
+                </div>
+
+                <div className="mb-2">
+                  <Typography variant="small" color="blue-gray" className="font-medium">Additional Service:</Typography>
+                  <Typography className="text-base">{message.offerDetails.service}</Typography>
+                </div>
+
+                <div className="mb-2">
+                  <Typography variant="small" color="blue-gray" className="font-medium">Description:</Typography>
+                  <Typography className="text-base">{message.offerDetails.description}</Typography>
+                </div>
+
+                <div className="flex items-center justify-between mt-4">
+                  <Button
+                    onClick={() => handleOfferClick(message)}
+                    size="sm"
+                    variant="gradient"
+                    color="green"
+                    disabled={acceptedOffer === message.timestamp}
+                  >
+                    {acceptedOffer === message.timestamp ? "Offer Accepted" : "Accept Offer"}
+                  </Button>
+                  <Button size="sm" variant="text" color="red">
+                    Decline
+                  </Button>
+                </div>
+              </div>
+            )}
+            <Typography variant="small" className="text-blue-gray-500">
+              {message.timestamp.toDate().toUTCString()}
+            </Typography>
+          </div>
+        </div>
+      ))}
+
+      {/* Success message animation */}
+      {showMessage && (
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-4 bg-green-500 text-white rounded-lg animate-fade-in-center">
+          Offer accepted
+        </div>
+      )}
             </div>
 
 
