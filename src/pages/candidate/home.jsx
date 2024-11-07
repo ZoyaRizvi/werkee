@@ -5,26 +5,29 @@ import {
   CardHeader,
   CardBody,
   IconButton,
+  Menu,
+  MenuHandler,
+  MenuList,
+  MenuItem,
 } from "@material-tailwind/react";
-import { collectionGroup, getDocs } from "firebase/firestore";
+import { EllipsisVerticalIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
+import { ordersOverviewData } from "@/data";
 import Banner from "./UserDashboard/Banner";
 import { Jobs } from "./UserDashboard/Jobs";
 import CardCustom from "./UserDashboard/Card";
 import { db } from "../../firebase/firebase";
+import { collectionGroup, getDocs } from "firebase/firestore";
 import Jobpostingdate from "./Jobpostingdate";
 import Location from "./Location";
-import './style.css';
+import './style.css'
 
 export function Home() {
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [query, setQuery] = useState("");
   const itemsPerPage = 6;
 
-  // Fetch jobs from Firestore
   const fetchPost = async () => {
     try {
       const querySnapshot = await getDocs(collectionGroup(db, "jobs"));
@@ -45,16 +48,22 @@ export function Home() {
     fetchPost();
   }, []);
 
+  const [query, setQuery] = useState("");
   const handleInputChange = (event) => {
     setQuery(event.target.value);
   };
+
+  // Updated code to handle undefined titles
+  const filteredItems = jobs.filter((job) =>
+    job.title?.toLowerCase().includes(query.toLowerCase())
+  );
 
   const handleChange = (event) => {
     setSelectedCategory(event.target.value);
   };
 
-  const handleDateChange = (event) => {
-    setSelectedDate(event.target.value);
+  const handleClick = (event) => {
+    setSelectedCategory(event.target.value);
   };
 
   const calculatePageRange = () => {
@@ -75,40 +84,26 @@ export function Home() {
     }
   };
 
-  // Updated filteredData function to filter by date
-  const filteredData = (jobs, selectedCategory, selectedDate, query) => {
+  const filteredData = (jobs, selected, query) => {
     let filteredJobs = jobs;
 
-    // Filter by search query (job title)
     if (query) {
-      filteredJobs = filteredJobs.filter((job) =>
-        (job.title || "").toLowerCase().includes(query.toLowerCase())
-      );
+      filteredJobs = filteredItems;
     }
 
-    // Filter by location
-    if (selectedCategory) {
-      filteredJobs = filteredJobs.filter((job) =>
-        job.jobLocation && job.jobLocation.toLowerCase().includes(selectedCategory.toLowerCase())
+    if (selected) {
+      filteredJobs = filteredJobs.filter(
+        ({ experienceLevel, postingDate, maxPrice }) =>
+          parseInt(maxPrice) <= parseInt(selected)
       );
-    }
-
-    // Filter by selected date (postedDate)
-    if (selectedDate) {
-      const selectedDateObj = new Date(selectedDate);
-      filteredJobs = filteredJobs.filter((job) => {
-        const jobPostingDate = new Date(job.postedDate); // Use postedDate from jobs
-        return jobPostingDate >= selectedDateObj;
-      });
     }
 
     const { startIndex, endIndex } = calculatePageRange();
     filteredJobs = filteredJobs.slice(startIndex, endIndex);
-
     return filteredJobs.map((data, i) => <CardCustom key={i} data={data} />);
   };
 
-  const result = filteredData(jobs, selectedCategory, selectedDate, query);
+  const result = filteredData(jobs, selectedCategory, query);
 
   return (
     <>
@@ -121,7 +116,29 @@ export function Home() {
               shadow={false}
               color="transparent"
               className="m-0 flex items-center justify-between p-6"
-            />
+            >
+              {/* <div>
+                <Typography variant="h6" color="blue-gray" className="mb-1">
+                  Projects: Viewing as Recruiter
+                </Typography>
+              </div>
+              <Menu placement="left-start">
+                <MenuHandler>
+                  <IconButton size="sm" variant="text" color="blue-gray">
+                    <EllipsisVerticalIcon
+                      strokeWidth={3}
+                      fill="currentColor"
+                      className="h-6 w-6"
+                    />
+                  </IconButton>
+                </MenuHandler>
+                <MenuList>
+                  <MenuItem>Action</MenuItem>
+                  <MenuItem>Another Action</MenuItem>
+                  <MenuItem>Something else here</MenuItem>
+                </MenuList>
+              </Menu> */}
+            </CardHeader>
             <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
               {isLoading ? (
                 <Typography>Loading...</Typography>
@@ -140,11 +157,14 @@ export function Home() {
                         </button>
                         <span className="mx-2">
                           Page {currentPage} of{" "}
-                          {Math.ceil(jobs.length / itemsPerPage)}
+                          {Math.ceil(filteredItems.length / itemsPerPage)}
                         </span>
                         <button
                           onClick={nextPage}
-                          disabled={currentPage === Math.ceil(jobs.length / itemsPerPage)}
+                          disabled={
+                            currentPage ===
+                            Math.ceil(filteredItems.length / itemsPerPage)
+                          }
                           className="hover:underline"
                         >
                           Next
@@ -157,10 +177,67 @@ export function Home() {
             </CardBody>
           </Card>
           <div className=" bg-white rounded-lg p-8">
-            <Location handleChange={handleChange} />
-            <Jobpostingdate handleChange={handleDateChange} />
-          </div>
+          <Location handleChange = {handleChange} handleClick= {handleClick}/>
+        <Jobpostingdate handleChange = {handleChange} handleClick= {handleClick}/></div>
+          {/* <Card className="border border-blue-gray-100 shadow-sm">
+            <CardHeader
+              floated={false}
+              shadow={false}
+              color="transparent"
+              className="m-0 p-6"
+            >
+              <Typography variant="h6" color="blue-gray" className="mb-2">
+                Orders Overview
+              </Typography>
+              <Typography
+                variant="small"
+                className="flex items-center gap-1 font-normal text-blue-gray-600"
+              >
+                <ArrowUpIcon
+                  strokeWidth={3}
+                  className="h-3.5 w-3.5 text-teal-500"
+                />
+                <strong>24%</strong> this month
+              </Typography>
+            </CardHeader>
+            <CardBody className="pt-0">
+              {ordersOverviewData.map(
+                ({ icon, color, title, description }, key) => (
+                  <div key={title} className="flex items-start gap-4 py-3">
+                    <div
+                      className={`relative p-1 after:absolute after:-bottom-6 after:left-2/4 after:w-0.5 after:-translate-x-2/4 after:bg-blue-gray-50 after:content-[''] ${
+                        key === ordersOverviewData.length - 1
+                          ? "after:h-0"
+                          : "after:h-4/6"
+                      }`}
+                    >
+                      {React.createElement(icon, {
+                        className: `!w-5 !h-5 ${color}`,
+                      })}
+                    </div>
+                    <div>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="block font-medium"
+                      >
+                        {title}
+                      </Typography>
+                      <Typography
+                        as="span"
+                        variant="small"
+                        className="text-xs font-medium text-blue-gray-500"
+                      >
+                        {description}
+                      </Typography>
+                    </div>
+                  </div>
+                )
+              )}
+            </CardBody>
+          </Card> */}
         </div>
+
       </div>
     </>
   );
