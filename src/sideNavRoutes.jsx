@@ -22,6 +22,8 @@ import {
 import SkillAssessment from './pages/candidate/skillassessment';
 import Counsellor from './pages/candidate/counsellor';
 import Orders from './pages/dashboard/Orders';
+import COrders from './pages/candidate/Orders';
+
 
 import {
   Home as AdminHome,
@@ -67,7 +69,13 @@ const sideNavRoutes = (userRole) => {
             path: '/counsellor',
             element: <Counsellor/>,
           },
-
+          {
+            icon: <ShoppingCartIcon {...icon} />,
+            name: 'Orders',
+            path: '/orders',
+            element: <COrders />,
+            
+          },
           // {
           //   icon: <InformationCircleIcon {...icon} />,
           //   name: 'Notifications',

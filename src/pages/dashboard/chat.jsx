@@ -11,7 +11,7 @@ import {
 } from "@material-tailwind/react";
 import { PlusIcon, MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import { db } from "../../firebase/firebase";
-import { collection, addDoc, query, orderBy, onSnapshot, Timestamp, where, or,doc } from "firebase/firestore";
+import { setDoc,collection, addDoc, query, orderBy, onSnapshot, Timestamp, where, or,doc } from "firebase/firestore";
 import { useAuth } from '../../context/authContext/';
 import PaymentModal from "./PaymentModal";
 
@@ -84,7 +84,10 @@ export function Chat() {
   const handleOfferClick = async (message) => {
     const offerDetails = message.offerDetails || {};
     const orderNumber = Math.floor(100000 + Math.random() * 90000);
-
+  
+    // Generate a custom orderId or use orderNumber as the ID (adjust as needed)
+    const orderId = `order_${orderNumber}`;
+  
     const orderData = {
       title: offerDetails.title || "",
       deliveryTime: offerDetails.deliveryTime || "",
@@ -92,26 +95,27 @@ export function Chat() {
       price: offerDetails.price || "",
       service: offerDetails.service || "",
       description: offerDetails.description || "",
-      RecruiterEmail:dbUser.email,
-      FreelancerEmail: selectedChat.email, 
+      RecruiterEmail: dbUser.email,
+      FreelancerEmail: selectedChat.email,
       timestamp: new Date(),
-      orderNumber:orderNumber,
-      status:"Pending",
-      img:selectedChat.img
+      orderNumber: orderNumber,
+      status: "Pending",
+      img: selectedChat.img,
     };
-
+  
     try {
-      await addDoc(collection(db, 'orders'), orderData);
-      console.log('Order saved successfully');
-      
+      // Use setDoc with doc to specify the orderId as the document ID
+      await setDoc(doc(db, "orders", orderId), orderData);
+      console.log("Order saved successfully");
+  
       // Set offer as accepted and show success message
       setAcceptedOffer(message.timestamp);
       setShowMessage(true);
-
+  
       // Hide message after 3 seconds
       setTimeout(() => setShowMessage(false), 3000);
     } catch (error) {
-      console.error('Error saving order: ', error);
+      console.error("Error saving order: ", error);
     }
   };
 
