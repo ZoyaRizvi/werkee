@@ -12,9 +12,9 @@ export default function AboutWerky() {
     <div>
       <div id='about' className="mt-28">
         <div data-aos="flip-down" className="text-center max-w-screen-md mx-auto">
-          <h1 className="text-3xl font-bold mb-4">What <span className="text-teal-500">WERKY </span> is about?</h1>
+          <h1 className="text-3xl font-bold mb-4">What <span className="text-teal-500">WERKEE </span> is about?</h1>
           <p className="text-gray-500">
-            At WERKY, we're revolutionizing the way individuals explore,
+            At WERKEE, we're revolutionizing the way individuals explore,
             showcase, and advance their careers. Our comprehensive career platform empowers students, professionals,
             small businesses, and startups to connect,
             collaborate, and succeed in today's dynamic job market.

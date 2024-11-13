@@ -10,7 +10,7 @@ export default function SkillAssessment() {
               Unlock Your Potential with <span className="text-teal-500">Skill Assessments</span>
             </h1>
             <p className="text-gray-500 text-sm sm:text-base lg:text-lg">
-              At WERKY, we understand the importance of knowing your strengths and talents.
+              At WERKEE, we understand the importance of knowing your strengths and talents.
               That's why we're introducing skill assessments tailored specifically for teens. 
               Our assessments are designed to help you 
               uncover your unique skills, abilities, and interests, empowering you to make informed decisions about your future.

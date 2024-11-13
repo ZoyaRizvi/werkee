@@ -17,7 +17,7 @@ const Navbar = () => {
   return (
     <header className="max-w-screen-2xl container mx-auto xl:px-24 px-4">
         <nav className="flex justify-between items-center py-6">
-            <a href='/' className='flex items-center gap-2 text-black text-2xl'>Werky</a>
+            <a href='/' className='flex items-center gap-2 text-black text-2xl'>Werkee</a>
             {/*nav items for large devices */}
             <ul className="hidden md:flex gap-12">
                 {navItems.map(({path,title}) =>(

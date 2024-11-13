@@ -16,7 +16,7 @@ const Footer = () => {
             <a href="#" className="mr-4 hover:text-teal-600">What's New</a>
             <a href="#" className="mr-4 hover:text-teal-600">Faq</a>
           </div>
-          <p className="text-gray-700 text-sm">© Werky Ltd.2024</p>
+          <p className="text-gray-700 text-sm">© Werkee Ltd.2024</p>
         </div>
 
         <div className="w-full md:w-1/3 mb-6 md:mb-0">
