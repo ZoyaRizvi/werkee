@@ -24,7 +24,7 @@ export default function Banner() {
               <div className="flex items-center justify-center space-x-3 mt-5 md:mt-0">
                 <Link to="/how-it-works">
                   <button className="bg-white w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center">
-                    <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 28" fill="none" xmlns="https://www.w3.org/2000/svg">
                       <path d="M22.5751 12.8097C23.2212 13.1983 23.2212 14.135 22.5751 14.5236L1.51538 27.1891C0.848878 27.5899 5.91205e-07 27.1099 6.25202e-07 26.3321L1.73245e-06 1.00123C1.76645e-06 0.223477 0.848877 -0.256572 1.51538 0.14427L22.5751 12.8097Z" fill="#23BDEE"/>
                     </svg>
                   </button>
@@ -57,7 +57,7 @@ export default function Banner() {
           </div>
         </div>
         <div className="text-white -mt-14 sm:-mt-24 lg:-mt-36 z-40 relative">
-          <svg className="xl:h-40 xl:w-full" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+          <svg className="xl:h-40 xl:w-full" data-name="Layer 1" xmlns="https://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
             <path d="M600,112.77C268.63,112.77,0,65.52,0,7.23V120H1200V7.23C1200,65.52,931.37,112.77,600,112.77Z" fill="currentColor"></path>
           </svg>
           <div className="bg-white w-full h-20 -mt-px"></div>
