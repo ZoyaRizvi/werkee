@@ -298,24 +298,6 @@ const Jobs = () => {
     fullWidth
     style={{ marginBottom: '16px' }}
   />
-  {/* <div className="w-full md:w-3/12 mb-4 md:mb-0">
-    <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="employmentType">
-      Employment Type
-    </label>
-    <div className="relative">
-      <select
-        name="employmentType"
-        value={newJob.employmentType}
-        onChange={handleInputChange}
-        className="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
-      >
-        <option value="Full-time">Full-time</option>
-        <option value="Part-time">Part-time</option>
-        <option value="Freelance">Freelance</option>
-        <option value="Contract">Contract</option>
-      </select>
-    </div>
-  </div> */}
   <TextField
     name="companyName"
     label="Company Name"

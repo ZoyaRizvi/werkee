@@ -48,7 +48,7 @@ function SkillAssessment() {
     setError(null);
 
     try {
-      const response = await axios.post('https://werky-backend.onrender.com/api/assessment', { skill, level });
+      const response = await axios.post('http://werkee-backend.onrender.com/api/assessment', { skill, level });
       const quizData = response.data;
       setQuestions(quizData.questions);
       setAnswers({});
