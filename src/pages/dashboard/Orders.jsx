@@ -97,6 +97,7 @@ export default function Orders() {
         <tr>
           <th className="px-6 py-3 text-left font-medium">#Order No.</th>
           <th className="px-6 py-3 text-left font-medium">Date</th>
+          <th className="px-6 py-3 text-left font-medium">Project Title</th>
           <th className="px-6 py-3 text-left font-medium">Freelancer</th>
           <th className="px-6 py-3 text-left font-medium">Price</th>
           <th className="px-6 py-3 text-left font-medium">Status</th>
@@ -107,6 +108,7 @@ export default function Orders() {
           <tr key={order.id} className="border-b hover:bg-gray-100">
             <td className="px-6 py-4">{order.orderNumber}</td>
             <td className="px-6 py-4">{new Date(order.timestamp.seconds * 1000).toLocaleDateString()}</td>
+            <td className="px-6 py-4">{order.title}</td>
             <td className="px-6 py-4 flex items-center space-x-2">
               <img src={order.img} alt={avatarSrc} className="h-10 w-10 rounded-full" />
               <span>{order.FreelancerEmail || order.customer}</span>
