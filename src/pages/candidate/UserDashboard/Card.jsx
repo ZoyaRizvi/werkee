@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { FiCalendar, FiClock, FiMapPin } from 'react-icons/fi';
-import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
-import { IoIosArrowDroprightCircle } from "react-icons/io";
-import { db, storage, auth } from "@/firebase/firebase"; // Adjust the path as necessary
+import { IoIosArrowDroprightCircle } from 'react-icons/io';
+import { db, storage, auth } from '@/firebase/firebase';
 import { collection, addDoc, doc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { onAuthStateChanged } from 'firebase/auth'; // Import auth methods
 
 const CustomCard = ({ data }) => {
   const {
-    id, 
+    id,
     companyName,
     title,
     companyLogo,
@@ -20,7 +18,7 @@ const CustomCard = ({ data }) => {
     employmentType,
     experienceLevel,
     description,
-    recruiter, 
+    recruiter,
     jobTitle,
     recruiter_id,
   } = data;
@@ -29,9 +27,10 @@ const CustomCard = ({ data }) => {
   const [formData, setFormData] = useState({
     name: '',
     resume: null,
-    coverLetter: ''
+    coverLetter: '',
   });
   const [currentUserEmail, setCurrentUserEmail] = useState('');
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     // Listen to authentication state changes and get the current user
@@ -48,20 +47,49 @@ const CustomCard = ({ data }) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: value,
     });
   };
 
   const handleFileChange = (e) => {
     setFormData({
       ...formData,
-      resume: e.target.files[0]
+      resume: e.target.files[0],
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Perform validation checks before submission
+    const newErrors = {};
+
+    // Validate name - must not be empty and cannot contain numbers
+    if (!formData.name) {
+      newErrors.name = 'Name is required';
+    } else if (/\d/.test(formData.name)) {
+      newErrors.name = 'Name cannot contain numbers';
+    }
+
+    // Validate resume - must be uploaded
+    if (!formData.resume) {
+      newErrors.resume = 'Resume is required';
+    }
+
+    // Validate cover letter - must not be empty and must only contain text and numbers
+    if (!formData.coverLetter) {
+      newErrors.coverLetter = 'Cover letter is required';
+    } else if (!/^[A-Za-z0-9\s]*$/.test(formData.coverLetter)) {
+      newErrors.coverLetter = 'Cover letter can only contain text and numbers';
+    }
+
+    // If there are any errors, update the errors state and stop submission
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return; // Prevent form submission
+    }
+
+    // If no errors, proceed with form submission
     try {
       // Upload resume to Firebase Storage
       const resumeRef = ref(storage, `resumes/${formData.resume.name}`);
@@ -78,15 +106,14 @@ const CustomCard = ({ data }) => {
         resume: resumeUrl, // Store the download URL of the resume
         jobId: id, // Add jobId to the application data
         jobTitle: title, // Add jobTitle to the application data
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      console.log("Application submitted successfully");
+      console.log('Application submitted successfully');
+      setIsModalOpen(false);
     } catch (e) {
-      console.error("Error adding document: ", e);
+      console.error('Error adding document: ', e);
     }
-
-    setIsModalOpen(false);
   };
 
   return (
@@ -112,14 +139,14 @@ const CustomCard = ({ data }) => {
               {new Date(postedDate).toLocaleDateString()}
             </span>
           </div>
-          <p className='text-base text-primary/70 pt-3 pl-3'>{description}</p>
+          <p className="text-base text-primary/70 pt-3 pl-3">{description}</p>
           <div className="flex justify-between items-center p-4 mb-2">
-            {/* <Link to={'/dashboard/chat?reference=' + encodeURIComponent(recruiter) + '&job=' + encodeURIComponent(jobTitle)} className='text-black flex items-center'>
-              <p className='text-white bg-cyan-500 py-2 px-4 mt-4 rounded flex items-center'><IoChatbubbleEllipsesOutline className='mr-2 items-end' />Message recruiter</p>
-            </Link> */}
-
-            <button onClick={() => setIsModalOpen(true)} className="bg-teal-500 text-white py-2 px-4 mt-4 rounded w-32 flex justify-center">
-              <span className="mr-2">Apply</span><IoIosArrowDroprightCircle className="text-xl ml-3" />
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-teal-500 text-white py-2 px-4 mt-4 rounded w-32 flex justify-center"
+            >
+              <span className="mr-2">Apply</span>
+              <IoIosArrowDroprightCircle className="text-xl ml-3" />
             </button>
           </div>
 
@@ -152,9 +179,7 @@ const CustomCard = ({ data }) => {
 
               <form onSubmit={handleSubmit}>
                 <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Name
-                  </label>
+                  <label className="block text-gray-700 text-sm font-bold mb-2">Name</label>
                   <input
                     type="text"
                     name="name"
@@ -163,11 +188,11 @@ const CustomCard = ({ data }) => {
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
                   />
+                  {errors.name && <p className="text-red-500 text-xs italic">{errors.name}</p>}
                 </div>
+
                 <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Resume
-                  </label>
+                  <label className="block text-gray-700 text-sm font-bold mb-2">Resume</label>
                   <input
                     type="file"
                     name="resume"
@@ -175,34 +200,27 @@ const CustomCard = ({ data }) => {
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
                   />
+                  {errors.resume && <p className="text-red-500 text-xs italic">{errors.resume}</p>}
                 </div>
+
                 <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Cover Letter
-                  </label>
+                  <label className="block text-gray-700 text-sm font-bold mb-2">Cover Letter</label>
                   <textarea
                     name="coverLetter"
                     value={formData.coverLetter}
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
-                  ></textarea>
+                  />
+                  {errors.coverLetter && <p className="text-red-500 text-xs italic">{errors.coverLetter}</p>}
                 </div>
-                <div className="flex justify-end pt-2">
-                  <button
-                    type="submit"
-                    className="bg-cyan-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                  >
-                    Submit
-                  </button>
-                  <button
-                    type="button"
-                    className="bg-gray-300 text-black font-bold py-2 px-4 rounded ml-2 focus:outline-none focus:shadow-outline"
-                    onClick={() => setIsModalOpen(false)}
-                  >
-                    Cancel
-                  </button>
-                </div>
+
+                <button
+                  type="submit"
+                  className="bg-teal-500 text-white py-2 px-4 rounded w-full"
+                >
+                  Submit Application
+                </button>
               </form>
             </div>
           </div>
