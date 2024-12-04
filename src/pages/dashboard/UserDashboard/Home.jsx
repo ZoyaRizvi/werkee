@@ -118,6 +118,7 @@ const prevPage = () =>{
         {/*  job cards */}
         <div className=" bg-white rounded p-4 col-span-2">
           <Jobs result= {result}/>
+          
 
           {/*  Pagination here */}
           {
