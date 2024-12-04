@@ -1,25 +1,34 @@
 import { useEffect, useState } from "react";
-import { Jobs } from "./Jobs";
+import { projects } from "./projects";
 import Card from "./Card";
 import Location from "./Location";
 import Jobpostingdate from "./Jobpostingdate";
 import Banner from "./Banner";
+import { db, auth, storage, collection, addDoc, getDocs, doc, ref, uploadBytes, getDownloadURL } from "@/firebase/firebase";
+
 
 const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [jobs, setJobs] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [isLoading, setIsLoading]= useState(true);
   const [currentPage, SetCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
-  useEffect(() =>{
-    setIsLoading(true);
-    fetch("jobs.json").then(res => res.json()).then(data =>{
-      // console.log(data)
-      setJobs(data);
-      setIsLoading(false)
-    })
-  },[])
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const fetchProjects = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "Candidate_Work"));
+      const projectsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setProjects(projectsData);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      setIsLoading(false);
+    }
+  };
  // console.log(jobs)
 
 //-----handle input change---
@@ -30,8 +39,9 @@ const Home = () => {
   }
 
   //------- filter jobs by titles------
-  const filteredItems = jobs.filter((job) => job.jobTitle.toLowerCase().indexOf(query.toLowerCase()) !== -1);
-  console.log(filteredItems)
+  const filteredItems = projects.filter((project) =>
+    project.title.toLowerCase().includes(query.toLowerCase())
+  );
 
   // ------------radio filters-----------
   const handleChange =(event) =>{
@@ -65,32 +75,31 @@ const prevPage = () =>{
 }
 
   // ----------main function-----
-  const filteredData= (jobs, selected, query)=>{
-    let filteredJobs = jobs;
+  const filteredData= (Projects, selected, query)=>{
+    let filteredprojects = projects;
 
     //filtering input items
     if(query){
-        filteredJobs= filteredItems;
+        filteredprojects= filteredItems;
       }
 
     //category filtering
     if(selected){
-      filteredJobs = filteredJobs.filter(({experienceLevel, postingDate, 
+      filteredprojects = filteredprojects.filter(({experienceLevel, postingDate, 
       maxPrice}) =>(
           parseInt(maxPrice) <= parseInt(selected) 
       ));
-      console.log(filteredJobs);
+      console.log(filteredprojects);
     
     }
     //slice the data based on current page 
-    const {startIndex,endIndex}= calculatePageRange();
-    filteredJobs= filteredJobs.slice(startIndex, endIndex)
-    return filteredJobs.map((data, i) => <Card key={i} data={data}/>)
+    const { startIndex, endIndex } = calculatePageRange();
+    return filteredProjects.slice(startIndex, endIndex).map((project) => (
+      <Card key={projects.id} data={projects} />
+    ));
+  };
 
-
-  }
-
-  const result= filteredData(jobs, selectedCategory, query);
+  const result= filteredData(projects, selectedCategory, query);
 
 
   return (
