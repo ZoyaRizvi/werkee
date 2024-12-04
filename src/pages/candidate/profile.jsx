@@ -201,10 +201,10 @@ export function Profile() {
             <div className="w-96">
               <Tabs value="app">
                 <TabsHeader>
-                  <Tab value="message">
+                  {/* <Tab value="message">
                     <ChatBubbleLeftEllipsisIcon className="-mt-0.5 mr-2 inline-block h-5 w-5" />
                     Message
-                  </Tab>
+                  </Tab> */}
                   <Tab value="skillassessment" onClick={() => handleStartTest(true)}>
                     <LightBulbIcon className="-mt-1 mr-2 inline-block h-5 w-5" />
                     Skill Assessment
@@ -251,16 +251,17 @@ export function Profile() {
 
                 ),
                 badge: (
-                  <div className="badge-container">
+                  <div className="badge-container flex items-center justify-center space-x-4">
                     {badges.length > 0 ? (
                       badges.map((badge, index) => (
-                        <Tooltip key={index} content={badge} placement="top">
-                          <TrophyIcon className="h-6 w-6 text-orange-500" />
-                        </Tooltip>
+                       <div key={index} className="badge-item flex flex-col items-center">
+                        <TrophyIcon className="h-6 w-6 text-orange-500 mt-4" />
+                          <p className="text-gray-600 mt-2 text-sm" >{badge}</p> {/* Show badge title under the icon */}
+                       </div>
                       ))
                     ) : (
                       <p className="text-gray-600 mt-[-10px]">Get badge now</p>
-                    )}
+                   )}
                   </div>
 
                 )
