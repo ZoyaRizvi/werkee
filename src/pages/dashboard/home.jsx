@@ -30,7 +30,7 @@ export function Home() {
 
   const fetchPost = async () => {
     try {
-      const querySnapshot = await getDocs(collectionGroup(db, "jobs"));
+      const querySnapshot = await getDocs(collectionGroup(db, "projects"));
       const newData = querySnapshot.docs.map((doc) => ({
         ...doc.data(),
         id: doc.id,
@@ -38,7 +38,7 @@ export function Home() {
       setJobs(newData);
       setIsLoading(false);
     } catch (error) {
-      console.error("Error fetching jobs: ", error);
+      console.error("Error fetching projects: ", error);
       setIsLoading(false);
     }
   };
