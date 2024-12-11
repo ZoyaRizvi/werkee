@@ -19,7 +19,7 @@ const Jobs = () => {
   });
   const [image, setImage] = useState(null);
   const [companyLogo, setCompanyLogo] = useState(null);
-  const [editJobId, setEditJobId] = useState(null); // Track the job being edited
+  const [editJobId, setEditJobId] = useState(null); 
 
   useEffect(() => {
     fetchJobs();
@@ -70,17 +70,16 @@ const Jobs = () => {
         img: imageUrl,
         companyLogo: companyLogoUrl,
         postedDate,
-        recruiter_id: user.uid, // Add recruiter_id field
-        jobId: '' // Initialize jobId field
+        recruiter_id: user.uid, 
+        jobId: '' 
       });
 
-      // Update the document to include the jobId
       await updateDoc(jobDocRef, { jobId: jobDocRef.id });
 
       fetchJobs();
       setIsModalOpen(false);
-      setImage(null); // Reset image state
-      setCompanyLogo(null); // Reset company logo state
+      setImage(null); 
+      setCompanyLogo(null); 
       setNewJob({
         img: '',
         title: '',
@@ -110,7 +109,7 @@ const Jobs = () => {
       companyLogo: job.companyLogo,
       postedDate: job.postedDate
     });
-    setEditJobId(job.id); // Set the job ID being edited
+    setEditJobId(job.id); 
     setIsModalOpen(true);
   };
 
