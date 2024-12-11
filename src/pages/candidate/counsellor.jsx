@@ -6,14 +6,13 @@ import { useAuth } from '../../context/authContext/index';
 function Counsellor() {
   const [question, setQuestion] = useState('');
   const [messages, setMessages] = useState([
-    { sender: 'bot', text: 'Hello! How may I assist you?' } // Initial bot message
+    { sender: 'bot', text: 'Hello! How may I assist you?' } 
   ]);
   const [generatingAnswer, setGeneratingAnswer] = useState(false);
-  const [conversationStarted, setConversationStarted] = useState(false); // Track if conversation has started
+  const [conversationStarted, setConversationStarted] = useState(false); 
   const { userLoggedIn, dbUser } = useAuth();
   const userimg = JSON.parse(localStorage.getItem('user'))?.img;
 
-  // Helper function to construct conversation history as a string
   const getConversationHistory = () => {
     return messages
       .map(msg => (msg.sender === 'user' ? `User: ${msg.text}` : `Bot: ${msg.text}`))
@@ -24,17 +23,14 @@ function Counsellor() {
     e.preventDefault();
     if (!question.trim()) return;
 
-    // Add the user's message to the chat history
     const newMessages = [...messages, { sender: 'user', text: question }];
     setMessages(newMessages);
-    setQuestion(''); // Clear the input
+    setQuestion(''); 
 
     setGeneratingAnswer(true);
 
-    // Construct the full conversation prompt
     let fullPrompt = getConversationHistory() + '\nUser: ' + question;
 
-    // If it's the first message, include the predefined prompt
     if (!conversationStarted) {
       const initialPrompt =
         "You are a career counseling bot for a freelancing platform named Werkee. Guide users based on their age and interests, and suggest them latest tools and technologies which are in trend nowadays for making money. Keep track of the conversation context and provide meaningful responses.";
@@ -53,7 +49,6 @@ function Counsellor() {
 
       const botResponse = response.data.candidates[0].content.parts[0].text;
 
-      // Add the bot's response to the chat history
       setMessages([...newMessages, { sender: 'bot', text: botResponse }]);
     } catch (error) {
       console.log(error);
@@ -63,10 +58,9 @@ function Counsellor() {
     setGeneratingAnswer(false);
   }
 
-  // Handle the "Enter" key press event
   function handleKeyPress(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault(); // Prevent newline on "Enter" press
+      e.preventDefault(); 
       generateAnswer(e);
     }
   }
