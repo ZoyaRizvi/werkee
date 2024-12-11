@@ -12,7 +12,7 @@ const Jobs = () => {
     Requirements: '',
     experienceLevel: '',
     jobLocation: '',
-    employmentType: 'Full-time', // default value for dropdown
+    employmentType: 'Full-time', 
     companyName: '',
     companyLogo: '',
     postedDate: ''
