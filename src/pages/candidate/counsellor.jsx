@@ -33,7 +33,9 @@ function Counsellor() {
 
     if (!conversationStarted) {
       const initialPrompt =
-        "You are a career counseling bot for a freelancing platform named Werkee. Guide users based on their age and interests, and suggest them latest tools and technologies which are in trend nowadays for making money. Keep track of the conversation context and provide meaningful responses.";
+        "You are a career counseling bot for a freelancing platform named Werkee. 
+        Guide users based on their age and interests, and suggest them latest tools and technologies which are in trend nowadays for making money. 
+        Keep track of the conversation context and provide meaningful responses.";
       fullPrompt = `${initialPrompt}\n\n${fullPrompt}`;
       setConversationStarted(true); // Mark the conversation as started
     }
