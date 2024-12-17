@@ -4,22 +4,15 @@ import {
   Card,
   CardHeader,
   CardBody,
-  IconButton,
-  Menu,
-  MenuHandler,
-  MenuList,
-  MenuItem,
 } from "@material-tailwind/react";
-import { EllipsisVerticalIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
-import { ordersOverviewData } from "@/data";
-import Banner from "./UserDashboard/Banner";
-import { Jobs } from "./UserDashboard/Jobs";
 import CardCustom from "./UserDashboard/Card";
+import { Jobs } from "./UserDashboard/Jobs";
 import { db } from "../../firebase/firebase";
-import { collectionGroup, getDocs } from "firebase/firestore";
-import Jobpostingdate from "./Jobpostingdate";
+import { collectionGroup, getDocs, getDoc } from "firebase/firestore";
+import Banner from "./UserDashboard/Banner";
 import Location from "./Location";
-import './style.css'
+import Jobpostingdate from "./Jobpostingdate";
+import "./style.css";
 
 export function Home() {
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -31,11 +24,41 @@ export function Home() {
   const fetchPost = async () => {
     try {
       const querySnapshot = await getDocs(collectionGroup(db, "projects"));
-      const newData = querySnapshot.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      }));
-      setJobs(newData);
+      const projectData = [];
+
+      for (const doc of querySnapshot.docs) {
+        const project = doc.data();
+
+        const candidateWorkDocRef = doc.ref.parent.parent;
+        if (candidateWorkDocRef) {
+          const candidateWorkDoc = await getDoc(candidateWorkDocRef);
+          if (candidateWorkDoc.exists()) {
+            const userData = candidateWorkDoc.data();
+            projectData.push({
+              ...project,
+              id: doc.id,
+              displayName: userData.displayName || "Unknown User", // Using displayName from Firebase
+              profileImage: userData.profileImage || null, // Using profileImage from Firebase
+            });
+          } else {
+            projectData.push({
+              ...project,
+              id: doc.id,
+              displayName: "Unknown User",
+              profileImage: null,
+            });
+          }
+        } else {
+          projectData.push({
+            ...project,
+            id: doc.id,
+            displayName: "Unknown User",
+            profileImage: null,
+          });
+        }
+      }
+
+      setJobs(projectData);
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching projects: ", error);
@@ -53,7 +76,6 @@ export function Home() {
     setQuery(event.target.value);
   };
 
-  // Updated code to handle undefined titles
   const filteredItems = jobs.filter((job) =>
     job.title?.toLowerCase().includes(query.toLowerCase())
   );
@@ -116,29 +138,7 @@ export function Home() {
               shadow={false}
               color="transparent"
               className="m-0 flex items-center justify-between p-6"
-            >
-              {/* <div>
-                <Typography variant="h6" color="blue-gray" className="mb-1">
-                  Projects: Viewing as Recruiter
-                </Typography>
-              </div>
-              <Menu placement="left-start">
-                <MenuHandler>
-                  <IconButton size="sm" variant="text" color="blue-gray">
-                    <EllipsisVerticalIcon
-                      strokeWidth={3}
-                      fill="currentColor"
-                      className="h-6 w-6"
-                    />
-                  </IconButton>
-                </MenuHandler>
-                <MenuList>
-                  <MenuItem>Action</MenuItem>
-                  <MenuItem>Another Action</MenuItem>
-                  <MenuItem>Something else here</MenuItem>
-                </MenuList>
-              </Menu> */}
-            </CardHeader>
+            ></CardHeader>
             <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
               {isLoading ? (
                 <Typography>Loading...</Typography>
@@ -177,67 +177,13 @@ export function Home() {
             </CardBody>
           </Card>
           <div className=" bg-white rounded-lg p-8">
-          <Location handleChange = {handleChange} handleClick= {handleClick}/>
-        <Jobpostingdate handleChange = {handleChange} handleClick= {handleClick}/></div>
-          {/* <Card className="border border-blue-gray-100 shadow-sm">
-            <CardHeader
-              floated={false}
-              shadow={false}
-              color="transparent"
-              className="m-0 p-6"
-            >
-              <Typography variant="h6" color="blue-gray" className="mb-2">
-                Orders Overview
-              </Typography>
-              <Typography
-                variant="small"
-                className="flex items-center gap-1 font-normal text-blue-gray-600"
-              >
-                <ArrowUpIcon
-                  strokeWidth={3}
-                  className="h-3.5 w-3.5 text-teal-500"
-                />
-                <strong>24%</strong> this month
-              </Typography>
-            </CardHeader>
-            <CardBody className="pt-0">
-              {ordersOverviewData.map(
-                ({ icon, color, title, description }, key) => (
-                  <div key={title} className="flex items-start gap-4 py-3">
-                    <div
-                      className={`relative p-1 after:absolute after:-bottom-6 after:left-2/4 after:w-0.5 after:-translate-x-2/4 after:bg-blue-gray-50 after:content-[''] ${
-                        key === ordersOverviewData.length - 1
-                          ? "after:h-0"
-                          : "after:h-4/6"
-                      }`}
-                    >
-                      {React.createElement(icon, {
-                        className: `!w-5 !h-5 ${color}`,
-                      })}
-                    </div>
-                    <div>
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="block font-medium"
-                      >
-                        {title}
-                      </Typography>
-                      <Typography
-                        as="span"
-                        variant="small"
-                        className="text-xs font-medium text-blue-gray-500"
-                      >
-                        {description}
-                      </Typography>
-                    </div>
-                  </div>
-                )
-              )}
-            </CardBody>
-          </Card> */}
+            <Location handleChange={handleChange} handleClick={handleClick} />
+            <Jobpostingdate
+              handleChange={handleChange}
+              handleClick={handleClick}
+            />
+          </div>
         </div>
-
       </div>
     </>
   );
