@@ -6,16 +6,18 @@ const CustomCard = ({ data }) => {
   const {
     img,
     title,
+    displayName,
     tag,
     description,
   } = data;
+  console.log(data); // Add this in your CustomCard component
 
   return (
     <section className="card" style={{ paddingTop: '20px' }}>
       <div className="flex  flex-col sm:flex-row items-start">
         <img src={img} alt="" className="w-20 h-16 object-cover" />
         <div>
-          <h2 className="text-lg mb-2 font-semibold pl-3"> {title}</h2>
+          <h2 className="text-lg mb-2 font-semibold pl-3"> {displayName}</h2>
           <h4 className="text-lg mb-2 font-medium pl-3">Title: {title}</h4>
           
           
