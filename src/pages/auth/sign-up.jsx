@@ -27,10 +27,8 @@ export function SignUp() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    // Reset error messages
     setErrorMessage('');
     
-    // Basic validations
     if (!email || !name || !password) {
       setErrorMessage('All fields are required.');
       return;
