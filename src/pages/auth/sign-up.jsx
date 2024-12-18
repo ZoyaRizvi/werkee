@@ -27,6 +27,27 @@ export function SignUp() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    // Reset error messages
+    setErrorMessage('');
+    
+    // Basic validations
+    if (!email || !name || !password) {
+      setErrorMessage('All fields are required.');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setErrorMessage('Please enter a valid email address.');
+      return;
+    }
+    if (password.length < 6) {
+      setErrorMessage('Password must be at least 6 characters long.');
+      return;
+    }
+    if (name.trim().length < 3) {
+      setErrorMessage('Full name must be at least 3 characters.');
+      return;
+    }
+
     if (!isRegistering) {
       setIsRegistering(true);
       try {
@@ -41,6 +62,8 @@ export function SignUp() {
           role: role,
           createdAt: new Date(),
         });
+        
+        navigate('/dashboard/home');
       } catch (error) {
         setErrorMessage(error.message);
       } finally {
@@ -56,7 +79,7 @@ export function SignUp() {
       ) : (
         <section className="flex min-h-screen items-center justify-center bg-gray-100">
           <div className="flex w-full max-w-4xl bg-white shadow-lg rounded-lg overflow-hidden">
-          <div className="hidden md:flex md:w-1/2 bg-cover bg-center" style={{ backgroundImage: `url('/img/auth.png')` }}>
+            <div className="hidden md:flex md:w-1/2 bg-cover bg-center" style={{ backgroundImage: `url('/img/auth.png')` }}>
               <div className="bg-black opacity-50 w-full h-full"></div>
             </div>
             <div className="w-full md:w-1/2 p-8 flex flex-col items-center justify-center">
