@@ -71,6 +71,7 @@ const Jobs = () => {
         companyLogo: companyLogoUrl,
         postedDate,
         recruiter_id: user.uid, 
+        recruiter_email:user.email,
         jobId: '' 
       });
 

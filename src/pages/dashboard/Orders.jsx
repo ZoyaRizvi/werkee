@@ -1,225 +1,243 @@
-import React, { useState, useEffect } from 'react';
-import { Avatar } from '@material-tailwind/react';
-import {  query, where, collection, getDocs,doc, updateDoc  } from "firebase/firestore";
+import React, { useState, useEffect } from "react";
+import { collection, query, where, getDocs, doc, updateDoc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/firebase/firebase";
-import { useAuth } from '../../context/authContext/';
+import { useAuth } from "../../context/authContext/";
+import { Typography, Button, Select, Option } from "@material-tailwind/react";
 
-export default function Orders() {
-  const { userLoggedIn, dbUser } = useAuth();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [ordersData, setOrdersData] = useState([]);
-  const ordersPerPage = ordersData.length;
-  const [user, setUser] = useState(null);
-  const DEFAULT_PROFILE_IMAGE = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUFJ4m3HGM8397IWhGhLphaU38QtqrcYQoUg&s';
-  
-  // Fetch orders from Firebase
-  const fetchOrders = async () => {
+export default function COrders() {
+  const { dbUser } = useAuth();
+  const [currentTab, setCurrentTab] = useState("All Offers");
+  const [offersData, setOffersData] = useState([]);
+  const [acceptedOrders, setAcceptedOrders] = useState([]);
+
+  const DEFAULT_PROFILE_IMAGE =
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUFJ4m3HGM8397IWhGhLphaU38QtqrcYQoUg&s";
+
+  // Fetch all offers from the "Offers" collection
+  const fetchOffers = async () => {
+    const offersRef = collection(db, "Offers");
+    const q = query(offersRef, where("RecruiterEmail", "==", dbUser.email));
+
+    const querySnapshot = await getDocs(q);
+    const offers = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    setOffersData(offers);
+  };
+
+  // Fetch accepted orders from the "Orders" collection
+  const fetchAcceptedOrders = async () => {
+    const ordersRef = collection(db, "orders");
+    const q = query(
+      ordersRef,
+      where("RecruiterEmail", "==", dbUser.email)
+    );
+
+    const querySnapshot = await getDocs(q);
+    const orders = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    setAcceptedOrders(orders);
+  };
+
+  // Accept an offer and clone it to the "Orders" collection
+  const acceptOffer = async (offerId) => {
+    const offerRef = doc(db, "Offers", offerId);
+    const offerDoc = await getDoc(offerRef);
+
+    if (offerDoc.exists()) {
+      const offerData = offerDoc.data();
+
+      const orderRef = doc(collection(db, "orders"), offerId);
+      await setDoc(orderRef, {
+        ...offerData,
+        status: "Accepted",
+        timestamp: new Date().toISOString(),
+      });
+
+      alert("Offer accepted and cloned to Orders!");
+      fetchOffers();
+      fetchAcceptedOrders();
+    } else {
+      alert("Offer not found!");
+    }
+  };
+
+  // Decline an offer by updating its status to "Declined"
+  const declineOffer = async (offerId) => {
     try {
-      const ordersRef = collection(db, "orders");
-      const q = query(ordersRef, where("RecruiterEmail", "==", dbUser.email));
-      
-      const querySnapshot = await getDocs(q);
-      const orders = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      setOrdersData(orders);
+      const offerRef = doc(db, "Offers", offerId);
+      await updateDoc(offerRef, {
+        status: "Declined",
+        timestamp: new Date().toISOString(),
+      });
+  
+      // Update the local state to remove the declined offer from the UI
+      setOffersData((prevOffers) => prevOffers.filter((offer) => offer.id !== offerId));
+  
+      alert("Offer declined successfully!");
     } catch (error) {
-      console.error("Error fetching orders:", error);
+      console.error("Error declining offer:", error);
+      alert("Failed to decline the offer.");
     }
   };
   
+
+  // Update the status of an order
+  const updateOrderStatus = async (orderId, newStatus) => {
+    try {
+      const orderRef = doc(db, "orders", orderId);
+      await updateDoc(orderRef, { status: newStatus });
+      alert(`Order status updated to: ${newStatus}`);
+      fetchAcceptedOrders();
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      alert("Failed to update order status.");
+    }
+  };
+
   useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  // Get current orders for pagination
-  const indexOfLastOrder = currentPage * ordersPerPage;
-  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
-  const currentOrders = ordersData.slice(indexOfFirstOrder, indexOfLastOrder);
-
-  // Change page
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+    fetchOffers();
+    fetchAcceptedOrders();
+  }, [dbUser]);
 
   const getUserProfilePhoto = () => {
-    const user = localStorage.getItem('user');
+    const user = localStorage.getItem("user");
     if (user) {
       const parsedUser = JSON.parse(user);
       return parsedUser.img ? parsedUser.img : DEFAULT_PROFILE_IMAGE;
     }
     return DEFAULT_PROFILE_IMAGE;
   };
-  
+
   const avatarSrc = getUserProfilePhoto();
 
-  const FreelancerImg =()=>{
-    const order = localStorage.getItem('orders');
-    if (order) {
-      const parsedUser = JSON.parse(order);
-      return parsedUser.img ? parsedUser.img : DEFAULT_PROFILE_IMAGE;
-    }
-    return DEFAULT_PROFILE_IMAGE;
-  };
-  
-  const avatarSrc2 = FreelancerImg();
-  const handleStatusChange = async (e, orderId) => {
-    const newStatus = e.target.value;
-  
-    try {
-      // Update status in Firestore
-      const orderRef = doc(db, "orders", orderId);
-      await updateDoc(orderRef, { status: newStatus });
-      console.log("Order status updated successfully in Firestore");
-  
-      // Re-fetch the orders to reflect the updated status
-      fetchOrders(); // Re-fetch orders after update
-    } catch (error) {
-      console.error("Error updating order status:", error);
-    }
-  };
+  const renderAllOffers = () => (
+    <div className="mt-4 w-full p-6 bg-white shadow-lg rounded-xl border border-gray-300">
+      {offersData.map((offer) => (
+        <div key={offer.id} className="mb-6 p-4 border rounded-lg bg-gray-50 shadow-sm">
+          <Typography variant="h6" color="blue-gray" className="font-semibold mb-2">
+            Offer Details:
+          </Typography>
+          <div className="mb-2">
+            <Typography variant="small" color="blue-gray" className="font-medium">
+              Title:
+            </Typography>
+            <Typography className="text-lg font-bold">{offer.title}</Typography>
+          </div>
+          <div className="mb-2 flex flex-wrap gap-4">
+            <div className="flex items-center">
+              <Typography variant="small" color="blue-gray" className="font-medium">Delivery Time (in days):</Typography>
+              <Typography className="text-sm  ml-2">{offer.deliveryTime}</Typography>
+            </div>
 
-  return (
-<div className="p-4 sm:p-8 bg-gray-50 min-h-screen">
-  {/* Header */}
-  <div className="flex flex-col sm:flex-row justify-between items-center p-6 sm:p-8 bg-[#fff2e1] rounded-lg shadow-sm">
-    <h1 className="text-xl sm:text-2xl font-bold text-center sm:text-left">All Orders</h1>
-    <div className="flex items-center space-x-4 mt-4 sm:mt-0">
-      <img src={avatarSrc} alt="Profile" className="w-8 h-8 sm:w-10 sm:h-10 rounded-full" />
-    </div>
-  </div>
-  <br />
+            <div className="flex items-center">
+              <Typography variant="small" color="blue-gray" className="font-medium">Revision Offered:</Typography>
+              <Typography className="text-sm  ml-2">{offer.revisions}</Typography>
+            </div>
 
-  {/* Table for larger screens */}
-  <div className="overflow-x-auto hidden md:block">
-    <table className="table-auto w-full bg-white border-collapse">
-      <thead className="bg-teal-200 text-white">
-        <tr>
-          <th className="px-6 py-3 text-left font-medium">#Order No.</th>
-          <th className="px-6 py-3 text-left font-medium">Date</th>
-          <th className="px-6 py-3 text-left font-medium">Project Title</th>
-          <th className="px-6 py-3 text-left font-medium">Freelancer</th>
-          <th className="px-6 py-3 text-left font-medium">Price</th>
-          <th className="px-6 py-3 text-left font-medium">Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        {currentOrders.map((order) => (
-          <tr key={order.id} className="border-b hover:bg-gray-100">
-            <td className="px-6 py-4">{order.orderNumber}</td>
-            <td className="px-6 py-4">{new Date(order.timestamp.seconds * 1000).toLocaleDateString()}</td>
-            <td className="px-6 py-4">{order.title}</td>
-            <td className="px-6 py-4 flex items-center space-x-2">
-              <img src={order.img} alt={avatarSrc} className="h-10 w-10 rounded-full" />
-              <span>{order.FreelancerEmail || order.customer}</span>
-            </td>
-            <td className="px-6 py-4">{order.price}</td>
-            <td className="px-6 py-4">
-              <select
-                value={order.status}
-                onChange={(e) => handleStatusChange(e, order.id)}
-                className={`px-3 py-1 text-sm font-semibold rounded-full text-white ${
-                  order.status === "Pending"
-                    ? "bg-blue-100"
-                    : order.status === "Delivered"
-                    ? "bg-green-500"
-                    : "bg-red-500"
-                }`}
-              >
-                <option value="Pending" className="bg-blue-100 text-blue-900">
-                  Pending
-                </option>
-                <option value="Delivered" className="bg-green-500 text-green-900">
-                  Delivered
-                </option>
-                <option value="Cancelled" className="bg-red-500 text-red-900">
-                  Cancelled
-                </option>
-              </select>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
+            <div className="flex items-center">
+              <Typography variant="small" color="blue-gray" className="font-medium">Amount:</Typography>
+              <Typography className="text-sm  ml-2">{offer.price}</Typography>
+            </div>
+          </div>
 
-  {/* Card layout for smaller screens */}
-  <div className="md:hidden space-y-4">
-    {currentOrders.map((order) => (
-      <div key={order.id} className="bg-white shadow rounded-lg p-4">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-medium text-gray-600">Order No.</span>
-          <span className="text-sm font-semibold">{order.orderNumber}</span>
-        </div>
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-medium text-gray-600">Date</span>
-          <span className="text-sm">{new Date(order.timestamp.seconds * 1000).toLocaleDateString()}</span>
-        </div>
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-medium text-gray-600">Freelancer</span>
-          <div className="flex items-center space-x-2">
-            <img src={order.img} alt={avatarSrc} className="h-8 w-8 rounded-full" />
-            <span className="text-sm">{order.FreelancerEmail || order.customer}</span>
+          <div className="mb-2">
+            <Typography variant="small" color="blue-gray" className="font-medium">Additional Service:</Typography>
+            <Typography className="text-base">{offer.service}</Typography>
+          </div>
+
+          <div className="mb-2">
+            <Typography variant="small" color="blue-gray" className="font-medium">Description:</Typography>
+            <Typography className="text-base">{offer.description}</Typography>
+          </div>
+
+          <div className="flex items-center justify-between mt-4">
+            <Button onClick={() => acceptOffer(offer.id)} size="sm" variant="gradient" color="green">
+              Accept Offer
+            </Button>
+            <Button onClick={() => declineOffer(offer.id)} size="sm" variant="text" color="red">
+              Decline
+            </Button>
           </div>
         </div>
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-medium text-gray-600">Price</span>
-          <span className="text-sm">{order.price}</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-sm font-medium text-gray-600">Status</span>
-          <select
-            value={order.status}
-            onChange={(e) => handleStatusChange(e, order.id)}
-            className={`px-2 py-1 text-xs font-semibold rounded-full text-white ${
-              order.status === "Pending"
-                ? "bg-blue-100"
-                : order.status === "Delivered"
-                ? "bg-green-500"
-                : "bg-red-500"
-            }`}
-          >
-            <option value="Pending" className="bg-blue-100 text-blue-900">
-              Pending
-            </option>
-            <option value="Delivered" className="bg-green-500 text-green-900">
-              Delivered
-            </option>
-            <option value="Cancelled" className="bg-red-500 text-red-900">
-              Cancelled
-            </option>
-          </select>
+      ))}
+    </div>
+  );
+
+  const renderAcceptedOrders = () => (
+    <div className="overflow-x-auto mt-4">
+      <table className="table-auto w-full bg-white border-collapse">
+        <thead className="bg-teal-200 text-white">
+          <tr>
+            <th className="px-6 py-3 text-left font-medium">Order No.</th>
+            <th className="px-6 py-3 text-left font-medium">Date</th>
+            <th className="px-6 py-3 text-left font-medium">Project Title</th>
+            <th className="px-6 py-3 text-left font-medium">Freelancer's Email</th>
+            <th className="px-6 py-3 text-left font-medium">Price</th>
+            <th className="px-6 py-3 text-left font-medium">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {acceptedOrders.map((order) => (
+            <tr key={order.id} className="border-b hover:bg-gray-100">
+              <td className="px-6 py-4">{order.orderNumber || order.id}</td>
+              <td className="px-6 py-4">{new Date(order.timestamp).toLocaleDateString()}</td>
+              <td className="px-6 py-4">{order.title}</td>
+              <td className="px-6 py-4">{order.FreelancerEmail}</td>
+              <td className="px-6 py-4">{order.price}</td>
+              <td className="px-6 py-4">
+                <Select
+                  value={order.status}
+                  onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                  className="w-full"
+                  variant="standard"
+                >
+                  <Option value="Pending">Pending</Option>
+                  <Option value="Delivered">Delivered</Option>
+                  <Option value="Cancelled">Cancelled</Option>
+                  <Option value="Accepted">Accepted</Option>
+                </Select>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+
+  return (
+    <div className="p-8 bg-gray-50 min-h-screen">
+      <div className="flex justify-between items-center p-8 bg-[#fff2e1] rounded-lg shadow-sm">
+        <h1 className="text-2xl font-bold">Offers</h1>
+        <div className="flex items-center space-x-4">
+          <img src={avatarSrc} alt="Profile" className="w-10 h-10 rounded-full" />
         </div>
       </div>
-    ))}
-  </div>
 
-  {/* Pagination */}
-  <div className="flex flex-col sm:flex-row justify-between items-center mt-6 space-y-4 sm:space-y-0">
-    <div className="text-gray-700 text-xs sm:text-sm">Showing {ordersPerPage} entries</div>
-    <div className="flex space-x-2">
-      <button
-        onClick={() => paginate(currentPage - 1)}
-        disabled={currentPage === 1}
-        className={`px-3 py-1 sm:px-4 sm:py-2 ${
-          currentPage === 1 ? "bg-gray-300" : "bg-blue-500 text-white"
-        } rounded-lg text-xs sm:text-sm`}
-      >
-        Prev
-      </button>
-      <button
-        onClick={() => paginate(currentPage + 1)}
-        disabled={indexOfLastOrder >= ordersData.length}
-        className={`px-3 py-1 sm:px-4 sm:py-2 ${
-          indexOfLastOrder >= ordersData.length ? "bg-gray-300" : "bg-blue-500 text-white"
-        } rounded-lg text-xs sm:text-sm`}
-      >
-        Next
-      </button>
+      <div className="relative mt-6">
+        <div className="flex border-b border-gray-200">
+          {["All Offers", "Accepted Orders"].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setCurrentTab(tab)}
+              className={`flex-1 py-2 text-center font-medium ${currentTab === tab
+                  ? "text-blue-600 border-blue-600 border-b-2"
+                  : "text-gray-500"
+                }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {currentTab === "All Offers" && renderAllOffers()}
+      {currentTab === "Accepted Orders" && renderAcceptedOrders()}
     </div>
-  </div>
-</div>
-
-  
   );
 }
