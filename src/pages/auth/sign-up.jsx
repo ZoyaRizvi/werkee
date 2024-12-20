@@ -27,7 +27,7 @@ export function SignUp() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    setErrorMessage('');
+    setErrorMessage('Email already in use');
     
     if (!email || !name || !password) {
       setErrorMessage('All fields are required.');
@@ -63,7 +63,7 @@ export function SignUp() {
         
         navigate('/dashboard/home');
       } catch (error) {
-        setErrorMessage(error.message);
+        setErrorMessage("Email already in use");
       } finally {
         setIsRegistering(false);
       }
