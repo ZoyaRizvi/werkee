@@ -5,11 +5,33 @@ import { db, auth, storage, collection, addDoc, getDocs, updateDoc, deleteDoc, d
 const Projects = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [projects, setProjects] = useState([]);
+const getUserProfilePhoto = () => {
+    const user = localStorage.getItem('user');
+    if (user) {
+      const parsedUser = JSON.parse(user);
+      return parsedUser.img ? parsedUser.img : DEFAULT_PROFILE_IMAGE;
+    }
+
+    return DEFAULT_PROFILE_IMAGE;
+  };
+
+  const getUserName = () => {
+    const user = localStorage.getItem('user');
+    if (user) {
+      const parsedUser = JSON.parse(user);
+      return parsedUser.displayName ? parsedUser.displayName: DEFAULT_Name;
+    }
+
+  };
+  const name = getUserName();
+  const avatarSrc = getUserProfilePhoto();
   const [newProject, setNewProject] = useState({
     img: '',
     title: '',
     tag: '',
-    description: ''
+    description: '',
+    user_name:name,
+    profile_pic:avatarSrc
   });
   const [image, setImage] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -48,12 +70,21 @@ const Projects = () => {
         await uploadBytes(storageRef, image);
         imageUrl = await getDownloadURL(storageRef);
       }
-      await addDoc(collection(db, "Candidate_Work", user.uid, "projects"), { ...newProject, img: imageUrl });
+  
+      // Include user_name and profile_pic in the database entry
+      await addDoc(collection(db, "Candidate_Work", user.uid, "projects"), {
+        ...newProject,
+        img: imageUrl,
+        user_name: name, // Add the user's name
+        profile_pic: avatarSrc, // Add the user's profile picture
+      });
+  
       fetchProjects();
       setIsModalOpen(false);
       resetForm();
     }
   };
+  
 
   const handleUpdateProject = async () => {
     const user = auth.currentUser;
@@ -65,12 +96,21 @@ const Projects = () => {
         await uploadBytes(storageRef, image);
         imageUrl = await getDownloadURL(storageRef);
       }
-      await updateDoc(projectRef, { ...newProject, img: imageUrl });
+  
+      // Include user_name and profile_pic in the updated database entry
+      await updateDoc(projectRef, {
+        ...newProject,
+        img: imageUrl,
+        user_name: name, // Add the user's name
+        profile_pic: avatarSrc, // Add the user's profile picture
+      });
+  
       fetchProjects();
       setIsModalOpen(false);
       resetForm();
     }
   };
+  
 
   const handleEditClick = (project) => {
     setNewProject(project);
