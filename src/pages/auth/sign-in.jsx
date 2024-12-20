@@ -23,7 +23,7 @@ export function SignIn() {
       setIsSigningIn(true);
       await doSignInWithEmailAndPassword(email, password)
         .catch((err) => {
-          setErrorMessage(`Auth Error: ${err.code}`);
+          setErrorMessage("Invalid email or password.");
           setIsSigningIn(false);
         });
     }
