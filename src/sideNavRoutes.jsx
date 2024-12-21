@@ -25,8 +25,12 @@ import Orders from './pages/dashboard/Orders';
 import COrders from './pages/candidate/Orders';
 
 
+
 import {
   Home as AdminHome,
+  Freelancers,
+  Recruiters
+ 
  } from '@/pages/admin';
 
 const icon = {
@@ -129,13 +133,27 @@ const sideNavRoutes = (userRole) => {
   } else if (userRole === 'admin') {
     return [
       {
-        layout: 'admin',
+        layout: 'dashboard',
         pages: [
           {
             icon: <HomeIcon {...icon} />,
             name: 'Home',
             path: '/home',
             element: <AdminHome />,
+          },
+          {
+            icon: <ChatBubbleOvalLeftIcon {...icon} />,
+            name: 'Recruiters',
+            path: '/Recruiters',
+            element: <Recruiters />,
+            
+          },
+          {
+            icon: <ChatBubbleOvalLeftIcon {...icon} />,
+            name: 'Freelancers',
+            path: '/Freelancers',
+            element: <Freelancers />,
+            
           },
         ],
       },

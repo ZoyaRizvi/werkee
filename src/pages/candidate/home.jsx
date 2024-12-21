@@ -109,7 +109,7 @@ export function Home() {
     <>
       <Banner query={query} handleInputChange={handleInputChange} />
       <div className="mt-12">
-        <div className="mb-4  gap-6 xl:grid-cols-3">
+        <div className="mb-4  gap-6 ">
           <Card className="overflow-hidden xl:col-span-2 border border-blue-gray-100 shadow-sm">
             <CardHeader
               floated={false}
@@ -123,7 +123,7 @@ export function Home() {
               {isLoading ? (
                 <Typography>Loading...</Typography>
               ) : (
-                <div className="bg-[#] md:grid grid-cols-4 gap-8 lg:px-24 px-4">
+                <div className="bg-[#]  gap-8 lg:px-24 px-4">
                   <div className="bg-white rounded p-4 col-span-4">
                     <Jobs result={result} />
                     {result.length > 0 && (

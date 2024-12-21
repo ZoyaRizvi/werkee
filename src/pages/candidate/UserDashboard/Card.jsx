@@ -182,7 +182,7 @@ const CustomCard = ({ data }) => {
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2">Delivery Time (Days)</label>
                   <input
-                    type="text"
+                    type="number"
                     name="deliveryTime"
                     value={formData.deliveryTime}
                     onChange={handleInputChange}
@@ -195,7 +195,7 @@ const CustomCard = ({ data }) => {
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2">Revisions</label>
                   <input
-                    type="text"
+                    type="number"
                     name="revisions"
                     value={formData.revisions}
                     onChange={handleInputChange}
@@ -208,7 +208,7 @@ const CustomCard = ({ data }) => {
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2">Price</label>
                   <input
-                    type="text"
+                    type="number"
                     name="price"
                     value={formData.price}
                     onChange={handleInputChange}

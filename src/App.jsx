@@ -5,6 +5,7 @@ import { AuthProvider } from './context/authContext/index.jsx';
 import Dashboard from './layouts/dashboard.jsx';
 import Auth from './layouts/auth.jsx';
 import SkillAssessment from './pages/candidate/skillassessment.jsx';
+import { Freelancers } from './pages/admin/index.js';
 
 function App() {
   const routes = [
