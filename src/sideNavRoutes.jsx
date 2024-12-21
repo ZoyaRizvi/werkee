@@ -24,10 +24,13 @@ import Counsellor from './pages/candidate/counsellor';
 import Orders from './pages/dashboard/Orders';
 import COrders from './pages/candidate/Orders';
 
-
+// import { AdminDashboard } from './pages/admin/adminDashboard';
 import {
   Home as AdminHome,
  } from '@/pages/admin';
+//  import { CandidateTab } from './pages/admin/candidate';
+//  import { ProjectTab } from './pages/admin/project';
+//  import { RecruiterTab } from './pages/admin/recruiter';
 
 const icon = {
   className: 'w-5 h-5 text-inherit',
@@ -37,7 +40,7 @@ const sideNavRoutes = (userRole) => {
   if (userRole === 'candidate') {
     return [
       {
-        layout: 'dashboard',
+        layout: 'Candidate dashboard',
         pages: [
           {
             icon: <HomeIcon {...icon} />,
@@ -88,7 +91,7 @@ const sideNavRoutes = (userRole) => {
   } else if (userRole === 'recruiter') {
     return [
       {
-        layout: 'dashboard',
+        layout: 'Recruiter dashboard',
         pages: [
           {
             icon: <HomeIcon {...icon} />,
@@ -131,12 +134,31 @@ const sideNavRoutes = (userRole) => {
       {
         layout: 'admin',
         pages: [
+        
           {
-            icon: <HomeIcon {...icon} />,
+            icon: <UserCircleIcon {...icon} />,
             name: 'Home',
             path: '/home',
-            element: <AdminHome />,
+            element: <AdminHome/>,
           },
+          // {
+          //   icon: <UserCircleIcon {...icon} />,
+          //   name: 'Recruiter',
+          //   path: '/recruiter',
+          //   element: <RecruiterTab/>,
+          // },
+          // {
+          //   icon: <UserCircleIcon {...icon} />,
+          //   name: 'Candidate',
+          //   path: '/candidate',
+          //   element: <CandidateTab/>,
+          // },
+          // {
+          //   icon: <HomeIcon {...icon} />,
+          //   name: 'Project',
+          //   path: '/project',
+          //   element: <ProjectTab/>,
+          
         ],
       },
     ];
