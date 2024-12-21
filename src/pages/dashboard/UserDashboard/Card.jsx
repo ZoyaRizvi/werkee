@@ -21,24 +21,7 @@ const CustomCard = ({ data }) => {
         <div>
           <h2 className="text-lg mb-2 font-semibold pl-3">{user_name}</h2>
           <h4 className="text-lg mb-2 font-medium pl-3">Title: {title}</h4>
-          
-          
-          
-  
-          {/* <div className="text-primary/70 text-base flex flex-wrap gap-2 mb-2 pl-2">
-            <span className="flex items-center gap-2">
-              <FiMapPin />
-              {jobLocation}
-            </span>
-            <span className="flex items-center gap-2">
-              <FiClock />
-              {employmentType}
-            </span>
-            <span className="flex items-center gap-2">
-              <FiCalendar />
-              {new Date(postingDate).toLocaleDateString()}
-            </span>
-          </div> */}
+
           <img src={img} alt="" className=" w-80 h-40 object-cover ml-4 mt-5" />
           <p className="text-base text-primary/70 pt-3 pl-3">{description}</p>
           <h4 className="text-primary mb-1 pl-3 font-semibold mt-2">Tag: {tag}</h4>

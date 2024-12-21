@@ -109,37 +109,17 @@ export function Home() {
     <>
       <Banner query={query} handleInputChange={handleInputChange} />
       <div className="mt-12">
-        <div className="mb-4 grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <div className="mb-4  gap-6 xl:grid-cols-3">
           <Card className="overflow-hidden xl:col-span-2 border border-blue-gray-100 shadow-sm">
             <CardHeader
               floated={false}
               shadow={false}
               color="transparent"
-              className="m-0 flex items-center justify-between p-6"
+              className="flex items-center justify-between p-6"
             >
-              {/* <div>
-                <Typography variant="h6" color="blue-gray" className="mb-1">
-                  Projects: Viewing as Recruiter
-                </Typography>
-              </div>
-              <Menu placement="left-start">
-                <MenuHandler>
-                  <IconButton size="sm" variant="text" color="blue-gray">
-                    <EllipsisVerticalIcon
-                      strokeWidth={3}
-                      fill="currentColor"
-                      className="h-6 w-6"
-                    />
-                  </IconButton>
-                </MenuHandler>
-                <MenuList>
-                  <MenuItem>Action</MenuItem>
-                  <MenuItem>Another Action</MenuItem>
-                  <MenuItem>Something else here</MenuItem>
-                </MenuList>
-              </Menu> */}
+
             </CardHeader>
-            <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
+            <CardBody className="overflow-x-scroll px-0 pt-0 pb-2 ">
               {isLoading ? (
                 <Typography>Loading...</Typography>
               ) : (
@@ -176,9 +156,9 @@ export function Home() {
               )}
             </CardBody>
           </Card>
-          <div className=" bg-white rounded-lg p-8">
+          {/* <div className=" bg-white rounded-lg p-8">
           <Location handleChange = {handleChange} handleClick= {handleClick}/>
-        <Jobpostingdate handleChange = {handleChange} handleClick= {handleClick}/></div>
+        <Jobpostingdate handleChange = {handleChange} handleClick= {handleClick}/></div> */}
           {/* <Card className="border border-blue-gray-100 shadow-sm">
             <CardHeader
               floated={false}

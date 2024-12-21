@@ -4,6 +4,7 @@ import { db, auth, storage, collection, addDoc, getDocs, updateDoc, deleteDoc, d
 
 const Projects = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const DEFAULT_PROFILE_IMAGE = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUFJ4m3HGM8397IWhGhLphaU38QtqrcYQoUg&s';
   const [projects, setProjects] = useState([]);
 const getUserProfilePhoto = () => {
     const user = localStorage.getItem('user');
@@ -19,7 +20,7 @@ const getUserProfilePhoto = () => {
     const user = localStorage.getItem('user');
     if (user) {
       const parsedUser = JSON.parse(user);
-      return parsedUser.displayName ? parsedUser.displayName: DEFAULT_Name;
+      return parsedUser.displayName ? parsedUser.displayName: 'Werkee User';
     }
 
   };
