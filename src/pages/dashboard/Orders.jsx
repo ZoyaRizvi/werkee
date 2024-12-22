@@ -44,28 +44,36 @@ export default function COrders() {
     setAcceptedOrders(orders);
   };
 
-  // Accept an offer and clone it to the "Orders" collection
   const acceptOffer = async (offerId) => {
-    const offerRef = doc(db, "Offers", offerId);
-    const offerDoc = await getDoc(offerRef);
-
-    if (offerDoc.exists()) {
-      const offerData = offerDoc.data();
-
-      const orderRef = doc(collection(db, "orders"), offerId);
-      await setDoc(orderRef, {
-        ...offerData,
-        status: "Accepted",
-        timestamp: new Date().toISOString(),
-      });
-
-      alert("Offer accepted and cloned to Orders!");
-      fetchOffers();
-      fetchAcceptedOrders();
-    } else {
-      alert("Offer not found!");
+    try {
+      const offerRef = doc(db, "Offers", offerId);
+      const offerDoc = await getDoc(offerRef);
+  
+      if (offerDoc.exists()) {
+        const offerData = offerDoc.data();
+  
+        const orderRef = doc(collection(db, "orders"), offerId);
+        await setDoc(orderRef, {
+          ...offerData,
+          status: "Accepted",
+          timestamp: new Date().toISOString(),
+        });
+  
+        // Remove the accepted offer from the local state
+        setOffersData((prevOffers) => prevOffers.filter((offer) => offer.id !== offerId));
+  
+        alert("Offer accepted !");
+        fetchAcceptedOrders(); // Refresh accepted orders
+      } else {
+        alert("Offer not found!");
+      }
+    } catch (error) {
+      console.error("Error accepting offer:", error);
+      alert("Failed to accept the offer.");
     }
   };
+  
+
 
   // Decline an offer by updating its status to "Declined"
   const declineOffer = async (offerId) => {
@@ -203,6 +211,7 @@ export default function COrders() {
                   <Option value="Accepted">Accepted</Option>
                 </Select>
               </td>
+              
             </tr>
           ))}
         </tbody>
