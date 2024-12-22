@@ -27,12 +27,12 @@ import COrders from './pages/candidate/Orders';
 
 
 import {
-  Home as AdminHome,
+   
   Freelancers,
   Recruiters
  
  } from '@/pages/admin';
-import Home from './pages/admin/home';
+import Home  from './pages/admin/home';
 
 const icon = {
   className: 'w-5 h-5 text-inherit',
@@ -141,7 +141,7 @@ const sideNavRoutes = (userRole) => {
             icon: <HomeIcon {...icon} />,
             name: 'Home',
             path: '/home',
-            element: <AdminHome />,
+            element: <Home />,
           },
           {
             icon: <ChatBubbleOvalLeftIcon {...icon} />,
