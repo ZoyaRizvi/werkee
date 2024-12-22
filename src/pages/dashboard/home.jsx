@@ -176,13 +176,6 @@ export function Home() {
               )}
             </CardBody>
           </Card>
-          <div className=" bg-white rounded-lg p-8">
-            <Location handleChange={handleChange} handleClick={handleClick} />
-            <Jobpostingdate
-              handleChange={handleChange}
-              handleClick={handleClick}
-            />
-          </div>
         </div>
       </div>
     </>

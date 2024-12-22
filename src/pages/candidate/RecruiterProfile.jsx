@@ -28,11 +28,7 @@ import { useNavigate } from 'react-router-dom';
 import { db, storage } from "@/firebase/firebase";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import Jobs from './Jobs';
-import Responses from './Responses';
-
-import { Chat } from '../candidate';
-import Messages from './UserDashboard/Messages';
+import Jobs from './RecruiterJobs'
 
 
 // Default values
@@ -377,4 +373,3 @@ export function Profile() {
 }
 
 export default Profile;
-

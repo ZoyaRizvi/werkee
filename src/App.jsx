@@ -6,6 +6,7 @@ import Dashboard from './layouts/dashboard.jsx';
 import Auth from './layouts/auth.jsx';
 import SkillAssessment from './pages/candidate/skillassessment.jsx';
 import { Freelancers } from './pages/admin/index.js';
+import FreelancerProfile from './pages/dashboard/FreelancerProfile.jsx';
 
 function App() {
   const routes = [
@@ -24,6 +25,10 @@ function App() {
     {
       path: '/skillassessment/*',
       element: <SkillAssessment />,
+    },
+    {
+      path: '/freelancerprofile/*',
+      element: <FreelancerProfile />,
     },
     // {
     //   path: '/candidate/*',

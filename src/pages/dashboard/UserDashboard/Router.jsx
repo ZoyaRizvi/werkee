@@ -13,5 +13,12 @@ const router = createBrowserRouter([
         {path:"/",element:<Home/>},
       ]
     },
+    {
+      path: "/",
+      element: <Dashboard/>,
+      children:[
+        {path:"/",element:<Home/>},
+      ]
+    },
   ]);
   export default router

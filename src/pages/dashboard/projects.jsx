@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Typography, Grid, Card, CardContent, CardMedia, CardActions, Button, Modal, TextField } from '@mui/material';
 import { db, auth, storage, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, ref, uploadBytes, getDownloadURL } from "@/firebase/firebase";
 
-const Projects = () => {
+const Projects = ({uid}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const DEFAULT_PROFILE_IMAGE = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUFJ4m3HGM8397IWhGhLphaU38QtqrcYQoUg&s';
   const [projects, setProjects] = useState([]);
+  const userid = uid;
 const getUserProfilePhoto = () => {
     const user = localStorage.getItem('user');
     if (user) {
@@ -45,7 +46,7 @@ const getUserProfilePhoto = () => {
   const fetchProjects = async () => {
     const user = auth.currentUser;
     if (user) {
-      const querySnapshot = await getDocs(collection(db, "Candidate_Work", user.uid, "projects"));
+      const querySnapshot = await getDocs(collection(db, "Candidate_Work",userid, "projects"));
       const projectsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setProjects(projectsData);
     }
@@ -78,7 +79,6 @@ const getUserProfilePhoto = () => {
         img: imageUrl,
         user_name: name, // Add the user's name
         profile_pic: avatarSrc, // Add the user's profile picture
-        uid: user.uid
       });
   
       fetchProjects();
@@ -144,18 +144,9 @@ const getUserProfilePhoto = () => {
 
   return (
     <div>
-      <Typography variant="h4" gutterBottom>
-        My Work
-      </Typography>
+
       
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
-        <Button style={{ backgroundColor: 'teal' }}
-          variant="contained"
-          onClick={() => setIsModalOpen(true)}
-        >
-          Upload Your Work
-        </Button>
-      </div>
+
       
       <Grid container spacing={3}>
         {projects.map(({ id, img, title, tag, description }) => (
@@ -177,14 +168,6 @@ const getUserProfilePhoto = () => {
                   {description}
                 </Typography>
               </CardContent>
-              <CardActions>
-                <Button variant="outlined" size="small" onClick={() => handleEditClick({ id, img, title, tag, description })}>
-                  Edit
-                </Button>
-                <Button variant="outlined" size="small" onClick={() => handleDeleteProject(id)}>
-                  Delete
-                </Button>
-              </CardActions>
             </Card>
           </Grid>
         ))}
