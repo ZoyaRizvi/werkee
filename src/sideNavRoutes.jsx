@@ -32,6 +32,7 @@ import {
   Recruiters
  
  } from '@/pages/admin';
+import Home from './pages/admin/home';
 
 const icon = {
   className: 'w-5 h-5 text-inherit',
@@ -133,6 +134,7 @@ const sideNavRoutes = (userRole) => {
   } else if (userRole === 'admin') {
     return [
       {
+        layout: 'admin',
         layout: 'dashboard',
         pages: [
           {
