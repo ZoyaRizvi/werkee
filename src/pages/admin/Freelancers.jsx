@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { db } from "../../firebase/firebase";
-import { collection, getDocs,collectionGroup, addDoc, deleteDoc, doc, serverTimestamp, updateDoc } from "firebase/firestore";
+import { collection, query, where, getDocs,collectionGroup, addDoc, deleteDoc, doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import {
   Typography,
@@ -30,16 +30,16 @@ import { CheckCircleIcon } from "@heroicons/react/24/solid";
 export function Freelancers() {
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [openAddUserDialog, setOpenAddUserDialog] = useState(false);
-  const [openAddPostDialog, setOpenAddPostDialog] = useState(false);
-  const [openPostEditDialog, setOpenPostEditDialog] = useState(false);
-  const [openPostConfirmDialog, setOpenPostConfirmDialog] = useState(false);
+  // const [openAddPostDialog, setOpenAddPostDialog] = useState(false);
+  // const [openPostEditDialog, setOpenPostEditDialog] = useState(false);
+  // const [openPostConfirmDialog, setOpenPostConfirmDialog] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
-  const [postToDelete, setPostToDelete] = useState(null);
+  // const [postToDelete, setPostToDelete] = useState(null);
   const [usersData, setUsersData] = useState([]);
-  const [jobsData, setJobsData] = useState([]);
+  // const [jobsData, setJobsData] = useState([]);
   const [newUser, setNewUser] = useState({ displayName: '', email: '', role: '' });
-  const [newPost, setNewPost] = useState({ title: '', companyName: '', jobLocation: '', description: '', recruiter: '' });
-  const [currentPost, setCurrentPost] = useState(null);
+  // const [newPost, setNewPost] = useState({ title: '', companyName: '', jobLocation: '', description: '', recruiter: '' });
+  // const [currentPost, setCurrentPost] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const auth = getAuth();
@@ -49,35 +49,43 @@ export function Freelancers() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "users"));
-        const users = querySnapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-          .filter(user => user.id !== currentUserId); // Exclude the logged-in user
+        // Query the users collection for recruiters
+        const q = query(
+          collection(db, "users"),
+          where("role", "==", "candidate")
+        );
+
+        const querySnapshot = await getDocs(q);
+        const users = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
         setUsersData(users);
       } catch (error) {
-        console.error("Error fetching users: ", error);
+        console.error("Error fetching recruiters: ", error);
       }
     };
 
     fetchUsers();
-  }, [currentUserId]);
+  }, []);
 
-  useEffect(() => {
-    const fetchJobs = async () => {
-      try {
+  // useEffect(() => {
+  //   const fetchJobs = async () => {
+  //     try {
         
-        const jobsSnapshot = await getDocs(collectionGroup(db, "jobs"));
-        const jobs = jobsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setJobsData(jobs);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching jobs: ", error);
-        setLoading(false);
-      }
-    };
+  //       const jobsSnapshot = await getDocs(collectionGroup(db, "jobs"));
+  //       const jobs = jobsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  //       setJobsData(jobs);
+  //       setLoading(false);
+  //     } catch (error) {
+  //       console.error("Error fetching jobs: ", error);
+  //       setLoading(false);
+  //     }
+  //   };
 
-    fetchJobs();
-  }, [projectId]);
+  //   fetchJobs();
+  // }, [projectId]);
 
   const handleOpenConfirmDialog = (userId) => {
     setUserToDelete(userId);
@@ -127,75 +135,75 @@ export function Freelancers() {
     }
   };
 
-  const handleOpenPostEditDialog = (post) => {
-    setCurrentPost(post);
-    setOpenPostEditDialog(true);
-  };
+  // const handleOpenPostEditDialog = (post) => {
+  //   setCurrentPost(post);
+  //   setOpenPostEditDialog(true);
+  // };
 
-  const handleClosePostEditDialog = () => {
-    setOpenPostEditDialog(false);
-    setCurrentPost(null);
-  };
+  // const handleClosePostEditDialog = () => {
+  //   setOpenPostEditDialog(false);
+  //   setCurrentPost(null);
+  // };
 
-  const handleUpdatePost = async () => {
-    if (currentPost) {
-      try {
-        await updateDoc(doc(db, `Jobsposted/${projectId}/jobs`, currentPost.id), currentPost);
-        const jobsSnapshot = await getDocs(collection(db, `Jobsposted/${projectId}/jobs`));
-        const jobs = jobsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setJobsData(jobs);
-        handleClosePostEditDialog();
-      } catch (error) {
-        console.error("Error updating post: ", error);
-      }
-    }
-  };
+  // const handleUpdatePost = async () => {
+  //   if (currentPost) {
+  //     try {
+  //       await updateDoc(doc(db, `Jobsposted/${projectId}/jobs`, currentPost.id), currentPost);
+  //       const jobsSnapshot = await getDocs(collection(db, `Jobsposted/${projectId}/jobs`));
+  //       const jobs = jobsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  //       setJobsData(jobs);
+  //       handleClosePostEditDialog();
+  //     } catch (error) {
+  //       console.error("Error updating post: ", error);
+  //     }
+  //   }
+  // };
 
-  const handleOpenPostConfirmDialog = (postId) => {
-    setPostToDelete(postId);
-    setOpenPostConfirmDialog(true);
-  };
+  // const handleOpenPostConfirmDialog = (postId) => {
+  //   setPostToDelete(postId);
+  //   setOpenPostConfirmDialog(true);
+  // };
 
-  const handleClosePostConfirmDialog = () => {
-    setOpenPostConfirmDialog(false);
-    setPostToDelete(null);
-  };
+  // const handleClosePostConfirmDialog = () => {
+  //   setOpenPostConfirmDialog(false);
+  //   setPostToDelete(null);
+  // };
 
-  const handleConfirmPostDelete = async () => {
-    if (postToDelete) {
-      try {
-        await deleteDoc(doc(db, `Jobsposted/${projectId}/jobs`, postToDelete));
-        setJobsData(jobsData.filter(post => post.id !== postToDelete));
-        handleClosePostConfirmDialog();
-      } catch (error) {
-        console.error("Error deleting post: ", error);
-      }
-    }
-  };
+  // const handleConfirmPostDelete = async () => {
+  //   if (postToDelete) {
+  //     try {
+  //       await deleteDoc(doc(db, `Jobsposted/${projectId}/jobs`, postToDelete));
+  //       setJobsData(jobsData.filter(post => post.id !== postToDelete));
+  //       handleClosePostConfirmDialog();
+  //     } catch (error) {
+  //       console.error("Error deleting post: ", error);
+  //     }
+  //   }
+  // };
 
-  const handleOpenAddPostDialog = () => {
-    setOpenAddPostDialog(true);
-  };
+  // const handleOpenAddPostDialog = () => {
+  //   setOpenAddPostDialog(true);
+  // };
 
-  const handleCloseAddPostDialog = () => {
-    setOpenAddPostDialog(false);
-    setNewPost({ title: '', companyName: '', jobLocation: '', description: '', recruiter: '' });
-  };
+  // const handleCloseAddPostDialog = () => {
+  //   setOpenAddPostDialog(false);
+  //   setNewPost({ title: '', companyName: '', jobLocation: '', description: '', recruiter: '' });
+  // };
 
-  const handleAddPost = async () => {
-    try {
-      await addDoc(collection(db, `Jobsposted/${projectId}/jobs`), {
-        ...newPost,
-        createdAt: serverTimestamp(),
-      });
-      const jobsSnapshot = await getDocs(collection(db, `Jobsposted/${projectId}/jobs`));
-      const jobs = jobsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setJobsData(jobs);
-      handleCloseAddPostDialog();
-    } catch (error) {
-      console.error("Error adding post: ", error);
-    }
-  };
+  // const handleAddPost = async () => {
+  //   try {
+  //     await addDoc(collection(db, `Jobsposted/${projectId}/jobs`), {
+  //       ...newPost,
+  //       createdAt: serverTimestamp(),
+  //     });
+  //     const jobsSnapshot = await getDocs(collection(db, `Jobsposted/${projectId}/jobs`));
+  //     const jobs = jobsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  //     setJobsData(jobs);
+  //     handleCloseAddPostDialog();
+  //   } catch (error) {
+  //     console.error("Error adding post: ", error);
+  //   }
+  // };
 
   return (
     <div className="mt-12">
@@ -210,7 +218,7 @@ export function Freelancers() {
           >
             <div>
               <Typography variant="h6" color="blue-gray" className="mb-1">
-                Users
+                Candidates
               </Typography>
               <Typography
                 variant="small"
@@ -294,7 +302,7 @@ export function Freelancers() {
       </div>
 
       {/* Jobs Table */}
-      <div className="mb-4 grid grid-cols-1 gap-6 xl:grid-cols-2">
+      {/* <div className="mb-4 grid grid-cols-1 gap-6 xl:grid-cols-2">
         <Card className="overflow-hidden xl:col-span-2 border border-blue-gray-100 shadow-sm">
           <CardHeader
             floated={false}
@@ -395,7 +403,7 @@ export function Freelancers() {
             </table>
           </CardBody>
         </Card>
-      </div>
+      </div> */}
 
       {/* Add User Dialog */}
       <Dialog open={openAddUserDialog} onClose={handleCloseAddUserDialog}>
@@ -426,7 +434,7 @@ export function Freelancers() {
       </Dialog>
 
       {/* Add Job Dialog */}
-      <Dialog open={openAddPostDialog} onClose={handleCloseAddPostDialog}>
+      {/* <Dialog open={openAddPostDialog} onClose={handleCloseAddPostDialog}>
         <DialogHeader>Create Job</DialogHeader>
         <DialogBody>
           <Input
@@ -461,10 +469,10 @@ export function Freelancers() {
           </Button>
           <Button onClick={handleAddPost}>Add Job</Button>
         </DialogFooter>
-      </Dialog>
+      </Dialog> */}
 
       {/* Edit Job Dialog */}
-      <Dialog open={openPostEditDialog} onClose={handleClosePostEditDialog}>
+      {/* <Dialog open={openPostEditDialog} onClose={handleClosePostEditDialog}>
         <DialogHeader>Edit Job</DialogHeader>
         <DialogBody>
           <Input
@@ -499,7 +507,7 @@ export function Freelancers() {
           </Button>
           <Button onClick={handleUpdatePost}>Update Job</Button>
         </DialogFooter>
-      </Dialog>
+      </Dialog> */}
 
       {/* Confirm User Deletion Dialog */}
       <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
@@ -516,7 +524,7 @@ export function Freelancers() {
       </Dialog>
 
       {/* Confirm Job Deletion Dialog */}
-      <Dialog open={openPostConfirmDialog} onClose={handleClosePostConfirmDialog}>
+      {/* <Dialog open={openPostConfirmDialog} onClose={handleClosePostConfirmDialog}>
         <DialogHeader>Confirm Delete</DialogHeader>
         <DialogBody>
           Are you sure you want to delete this job?
@@ -527,10 +535,11 @@ export function Freelancers() {
           </Button>
           <Button onClick={handleConfirmPostDelete}>Delete</Button>
         </DialogFooter>
-      </Dialog>
+      </Dialog> */}
     </div>
   );
 }
+
 
 
 export default Freelancers;
