@@ -108,64 +108,88 @@ export default function COrders() {
 
   const avatarSrc = getUserProfilePhoto();
 
-const renderAllOffers = (offersData, removeOffer) => (
-  <ScrollView style={styles.container}>
+  const renderAllOffers = () => (
+    <div className="mt-4 w-full p-6 bg-white shadow-lg rounded-xl border border-gray-300">
     {offersData
-      .filter((offer) => offer.status !== 'Accepted') // Filter out accepted offers
+      .filter((offer) => offer.status !== "Accepted") // Filter out accepted offers
       .map((offer) => (
-        <View
+        <div
           key={offer.id}
-          style={[
-            styles.offerCard,
-            offer.status === 'Declined' ? styles.declinedOffer : styles.defaultOffer,
-          ]}
+          className={`mb-6 p-4 border rounded-lg shadow-sm ${
+            offer.status === "Declined" ? "bg-red-50" : "bg-gray-50"
+          }`}
         >
-          {offer.status === 'Declined' ? (
+          {offer.status === "Declined" ? (
             <>
-              <Text style={[styles.heading, styles.declinedText]}>Offer Declined</Text>
-              <Text style={styles.title}>{offer.title}</Text>
-
-              <View style={styles.buttonContainer}>
-                <Button
-                  onPress={() => removeOffer(offer.id)}
-                  title="Remove Offer"
-                  color="red"
-                />
-              </View>
+              <Typography variant="h6" color="red" className="font-semibold mb-2">
+                Offer Declined
+              </Typography>
+              <Typography className="text-lg font-bold mb-4">{offer.title}</Typography>
+  
+              <Button
+                onClick={() => removeOffer(offer.id)}
+                size="sm"
+                variant="gradient"
+                color="red"
+              >
+                Remove Offer
+              </Button>
             </>
           ) : (
             <>
-              <Text style={styles.heading}>Offer Details:</Text>
-              <View style={styles.detailRow}>
-                <Text style={styles.label}>Title:</Text>
-                <Text style={styles.value}>{offer.title}</Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.label}>Delivery Time (in days):</Text>
-                <Text style={styles.value}>{offer.deliveryTime}</Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.label}>Revision Offered:</Text>
-                <Text style={styles.value}>{offer.revisions}</Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.label}>Amount:</Text>
-                <Text style={styles.value}>{offer.price}</Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.label}>Additional Service:</Text>
-                <Text style={styles.value}>{offer.service}</Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.label}>Description:</Text>
-                <Text style={styles.value}>{offer.description}</Text>
-              </View>
+              <Typography variant="h6" color="blue-gray" className="font-semibold mb-2">
+                Offer Details:
+              </Typography>
+              <div className="mb-2">
+                <Typography variant="small" color="blue-gray" className="font-medium">
+                  Title:
+                </Typography>
+                <Typography className="text-lg font-bold">{offer.title}</Typography>
+              </div>
+              <div className="mb-2 flex flex-wrap gap-4">
+                <div className="flex items-center">
+                  <Typography variant="small" color="blue-gray" className="font-medium">
+                    Delivery Time (in days):
+                  </Typography>
+                  <Typography className="text-sm  ml-2">{offer.deliveryTime}</Typography>
+                </div>
+  
+                <div className="flex items-center">
+                  <Typography variant="small" color="blue-gray" className="font-medium">
+                    Revision Offered:
+                  </Typography>
+                  <Typography className="text-sm  ml-2">{offer.revisions}</Typography>
+                </div>
+  
+                <div className="flex items-center">
+                  <Typography variant="small" color="blue-gray" className="font-medium">
+                    Amount:
+                  </Typography>
+                  <Typography className="text-sm  ml-2">{offer.price}</Typography>
+                </div>
+              </div>
+  
+              <div className="mb-2">
+                <Typography variant="small" color="blue-gray" className="font-medium">
+                  Additional Service:
+                </Typography>
+                <Typography className="text-base">{offer.service}</Typography>
+              </div>
+  
+              <div className="mb-2">
+                <Typography variant="small" color="blue-gray" className="font-medium">
+                  Description:
+                </Typography>
+                <Typography className="text-base">{offer.description}</Typography>
+              </div>
+
             </>
           )}
-        </View>
+        </div>
       ))}
-  </ScrollView>
-);
+  </div>
+  
+  );
 
   // Remove offer from the database permanently
   const removeOffer = async (offerId) => {

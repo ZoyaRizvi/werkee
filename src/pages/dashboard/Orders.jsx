@@ -3,8 +3,6 @@ import { collection, query, where, getDocs, doc, updateDoc, getDoc, setDoc } fro
 import { db } from "@/firebase/firebase";
 import { useAuth } from "../../context/authContext/";
 import { Typography, Button, Select, Option } from "@material-tailwind/react";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 export default function COrders() {
   const { dbUser } = useAuth();
@@ -50,30 +48,32 @@ export default function COrders() {
     try {
       const offerRef = doc(db, "Offers", offerId);
       const offerDoc = await getDoc(offerRef);
-
+  
       if (offerDoc.exists()) {
         const offerData = offerDoc.data();
-
+  
         const orderRef = doc(collection(db, "orders"), offerId);
         await setDoc(orderRef, {
           ...offerData,
           status: "Accepted",
           timestamp: new Date().toISOString(),
         });
-
+  
         // Remove the accepted offer from the local state
         setOffersData((prevOffers) => prevOffers.filter((offer) => offer.id !== offerId));
-
-        toast.success("Offer accepted successfully!");
+  
+        alert("Offer accepted !");
         fetchAcceptedOrders(); // Refresh accepted orders
       } else {
-        toast.error("Offer not found!");
+        alert("Offer not found!");
       }
     } catch (error) {
       console.error("Error accepting offer:", error);
-      toast.error("Failed to accept the offer.");
+      alert("Failed to accept the offer.");
     }
   };
+  
+
 
   // Decline an offer by updating its status to "Declined"
   const declineOffer = async (offerId) => {
@@ -83,27 +83,28 @@ export default function COrders() {
         status: "Declined",
         timestamp: new Date().toISOString(),
       });
-
+  
       // Update the local state to remove the declined offer from the UI
       setOffersData((prevOffers) => prevOffers.filter((offer) => offer.id !== offerId));
-
-      toast.info("Offer declined successfully!");
+  
+      alert("Offer declined successfully!");
     } catch (error) {
       console.error("Error declining offer:", error);
-      toast.error("Failed to decline the offer.");
+      alert("Failed to decline the offer.");
     }
   };
+  
 
   // Update the status of an order
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
       const orderRef = doc(db, "orders", orderId);
       await updateDoc(orderRef, { status: newStatus });
-      toast.success(`Order status updated to: ${newStatus}`);
+      alert(`Order status updated to: ${newStatus}`);
       fetchAcceptedOrders();
     } catch (error) {
       console.error("Error updating order status:", error);
-      toast.error("Failed to update order status.");
+      alert("Failed to update order status.");
     }
   };
 
@@ -246,9 +247,6 @@ export default function COrders() {
 
       {currentTab === "All Offers" && renderAllOffers()}
       {currentTab === "Accepted Orders" && renderAcceptedOrders()}
-
-      {/* ToastContainer to display notifications */}
-      <ToastContainer />
     </div>
   );
 }
