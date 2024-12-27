@@ -76,7 +76,7 @@ const Home = () => {
     ],
     datasets: [
       {
-        label: "Candidates Registered",
+        label: "Project Posted",
         data: monthlyData,
         backgroundColor: monthlyData.map((count) => {
           if (count > 10) {
@@ -96,8 +96,13 @@ const Home = () => {
   const monthlyChartOptions = {
     responsive: true,
     plugins: {
-      legend: { position: "top" },
-      title: { display: true, text: "Jobs Posted Per Month" },
+      legend: {
+        position: "top",
+      },
+      title: {
+        display: true,
+        text: "Monthly Posted Projects",
+      },
     },
     scales: {
       y: {
@@ -144,7 +149,7 @@ const Home = () => {
       <Card className="w-full">
         <CardBody>
           <Typography variant="h6" className="text-center mb-4">
-            Jobs Posted Per Month
+            Projects Posted Per Month
           </Typography>
           <div className="w-full">
             <Bar data={monthlyChartData} options={monthlyChartOptions} />
@@ -200,59 +205,62 @@ const Home = () => {
       Project Listings
     </Typography>
     <Card>
-      <CardBody>
-        <table className="w-full table-auto text-left">
-          <thead>
-            <tr>
-              {["Title", "Company", "Location", "Description", "Recruiter Email", ""].map((header, index) => (
-                <th
-                  key={index}
-                  className="border-b border-blue-gray-100 py-3 px-5 text-left"
-                >
-                  <Typography variant="small" className="font-bold">
-                    {header}
-                  </Typography>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {jobsData.map(({ id, title, companyName, jobLocation, description, recruiter_email }, index) => {
-              const isLast = index === jobsData.length - 1;
-              const classes = isLast
-                ? "py-3 px-5"
-                : "py-3 px-5 border-b border-blue-gray-50";
-  
-              return (
-                <tr key={id}>
-                  <td className={classes}>{title}</td>
-                  <td className={classes}>{companyName}</td>
-                  <td className={classes}>{jobLocation}</td>
-                  <td className={classes}>{description}</td>
-                  <td className={classes}>{recruiter_email}</td>
-                  <td className={classes}>
-                    <IconButton
-                      size="sm"
-                      variant="text"
-                      onClick={() => console.log("Delete job ID:", id)}
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                    </IconButton>
-                    <IconButton
-                      size="sm"
-                      variant="text"
-                      onClick={() => console.log("Edit job ID:", id)}
-                    >
-                      <PencilIcon className="h-4 w-4" />
-                    </IconButton>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </CardBody>
-    </Card>
+  <CardBody>
+    <div className="overflow-x-auto">
+      <table className="w-full table-auto text-left">
+        <thead>
+          <tr>
+            {["Title", "Company", "Location", "Description", "Recruiter Email", ""].map((header, index) => (
+              <th
+                key={index}
+                className="border-b border-blue-gray-100 py-3 px-5 text-left"
+              >
+                <Typography variant="small" className="font-bold">
+                  {header}
+                </Typography>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {jobsData.map(({ id, title, companyName, jobLocation, description, recruiter_email }, index) => {
+            const isLast = index === jobsData.length - 1;
+            const classes = isLast
+              ? "py-3 px-5"
+              : "py-3 px-5 border-b border-blue-gray-50";
+
+            return (
+              <tr key={id}>
+                <td className={classes}>{title}</td>
+                <td className={classes}>{companyName}</td>
+                <td className={classes}>{jobLocation}</td>
+                <td className={classes}>{description}</td>
+                <td className={classes}>{recruiter_email}</td>
+                <td className={classes}>
+                  <IconButton
+                    size="sm"
+                    variant="text"
+                    onClick={() => console.log("Delete job ID:", id)}
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                  </IconButton>
+                  <IconButton
+                    size="sm"
+                    variant="text"
+                    onClick={() => console.log("Edit job ID:", id)}
+                  >
+                    <PencilIcon className="h-4 w-4" />
+                  </IconButton>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  </CardBody>
+</Card>
+
   </div>
   
   );
