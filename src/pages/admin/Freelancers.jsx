@@ -197,14 +197,14 @@ export function Freelancers() {
     <div className="mt-12">
       {/* Chart */}
       <div className="mb-8">
-        <Card>
-          <CardHeader floated={false} shadow={false} className="p-6">
-            <Typography variant="h6" color="blue-gray">
-              Candidates Registration Chart
-            </Typography>
-          </CardHeader>
+        <Card className="w-full">
           <CardBody>
-            <Bar data={data} options={options} />
+            <Typography variant="h6" className="text-center mb-4">
+              Candidate Registration Chart
+            </Typography>
+              <div className="w-full">
+              <Bar data={data} options={options} />
+              </div>
           </CardBody>
         </Card>
       </div>
