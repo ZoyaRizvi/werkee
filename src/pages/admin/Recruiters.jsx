@@ -153,7 +153,7 @@ export function Recruiters() {
     ],
     datasets: [
       {
-        label: "Candidates Registered",
+        label: "Recruiters Registered",
         data: monthlyData,
         backgroundColor: monthlyData.map((count) => {
           if (count > 10) {
@@ -179,7 +179,7 @@ export function Recruiters() {
       },
       title: {
         display: true,
-        text: "Monthly Registrations of Candidates",
+        text: "Monthly Registrations of Recruiters",
       },
     },
     scales: {
