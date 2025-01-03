@@ -208,6 +208,16 @@ export default function COrders() {
             <Typography variant="small" color="blue-gray" className="font-medium">Description:</Typography>
             <Typography className="text-base">{offer.description}</Typography>
           </div>
+          <Tooltip content="Remove this declined offer permanently" placement="top">
+                  <Button
+                    onClick={() => removeOffer(offer.id)}
+                    size="sm"
+                    variant="gradient"
+                    color="red"
+                  >
+                    Delete Offer
+                  </Button>
+                </Tooltip>
                
   
               </>
@@ -216,7 +226,47 @@ export default function COrders() {
         ))}
     </div>
   );
-
+  const renderAcceptedOrders = () => (
+    <div className="overflow-x-auto mt-4">
+      <table className="table-auto bg-white border-collapse">
+        <thead className="bg-teal-200 text-white">
+          <tr>
+            <th className="px-6 py-3 text-left font-medium">Order No.</th>
+            <th className="px-6 py-3 text-left font-medium">Date</th>
+            <th className="px-6 py-3 text-left font-medium">Project Title</th>
+            <th className="px-6 py-3 text-left font-medium">Freelancer's Email</th>
+            <th className="px-6 py-3 text-left font-medium">Price</th>
+            <th className="px-6 py-3 text-left font-medium">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {acceptedOrders.map((order) => (
+            <tr key={order.id} className="border-b hover:bg-gray-100">
+              <td className="px-6 py-4">{order.orderNumber || order.id}</td>
+              <td className="px-6 py-4">{new Date(order.timestamp).toLocaleDateString()}</td>
+              <td className="px-6 py-4">{order.title}</td>
+              <td className="px-6 py-4">{order.FreelancerEmail}</td>
+              <td className="px-6 py-4">{order.price}</td>
+              <td className="px-6 py-4">
+                <Select
+                  value={order.status}
+                  onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                  className="w-20"
+                  variant="standard"
+                >
+                  <Option value="Pending">Pending</Option>
+                  <Option value="Delivered">Delivered</Option>
+                  <Option value="Cancelled">Cancelled</Option>
+                  <Option value="Accepted">Accepted</Option>
+                </Select>
+              </td>
+              
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
       <ToastContainer />
@@ -250,6 +300,7 @@ export default function COrders() {
         </div>
       </div>
       {currentTab === "All Offers" && renderAllOffers()}
+      {currentTab === "Accepted Orders" && renderAcceptedOrders()}
     </div>
   );
 }
