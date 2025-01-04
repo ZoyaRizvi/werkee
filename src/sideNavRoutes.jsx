@@ -81,12 +81,12 @@ const sideNavRoutes = (userRole) => {
             element: <COrders />,
             
           },
-          // {
-          //   icon: <InformationCircleIcon {...icon} />,
-          //   name: 'Notifications',
-          //   path: '/notifications',
-          //   element: <CandidateNotifications />,
-          // },
+          {
+            icon: <InformationCircleIcon {...icon} />,
+            name: 'Notifications',
+            path: '/notifications',
+            element: <CandidateNotifications />,
+          },
         ],
       },
     ];
@@ -121,12 +121,12 @@ const sideNavRoutes = (userRole) => {
             element: <Orders />,
             
           },
-          // {
-          //   icon: <InformationCircleIcon {...icon} />,
-          //   name: 'Notifications',
-          //   path: '/notifications',
-          //   element: <DashboardNotifications />,
-          // },
+          {
+            icon: <InformationCircleIcon {...icon} />,
+            name: 'Notifications',
+            path: '/notifications',
+            element: <DashboardNotifications />,
+          },
           
         ],
       },

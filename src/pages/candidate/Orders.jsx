@@ -106,19 +106,18 @@ export default function COrders() {
       toast.error("Failed to remove the offer.");
     }
   };
-
-  // Update the status of an order
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
       const orderRef = doc(db, "orders", orderId);
-      await updateDoc(orderRef, { status: newStatus });
+      await updateDoc(orderRef, { status: newStatus }); // Update status in Firestore
       toast.success(`Order status updated to: ${newStatus}`);
-      fetchAcceptedOrders();
+      fetchAcceptedOrders(); // Fetch the updated orders after the status change
     } catch (error) {
       console.error("Error updating order status:", error);
       toast.error("Failed to update order status.");
     }
   };
+
 
   useEffect(() => {
     fetchOffers();
@@ -143,9 +142,8 @@ export default function COrders() {
         .map((offer) => (
           <div
             key={offer.id}
-            className={`mb-6 p-4 border rounded-lg shadow-sm ${
-              offer.status === "Declined" ? "bg-red-50" : "bg-gray-50"
-            }`}
+            className={`mb-6 p-4 border rounded-lg shadow-sm ${offer.status === "Declined" ? "bg-red-50" : "bg-gray-50"
+              }`}
           >
             {offer.status === "Declined" ? (
               <>
@@ -173,42 +171,42 @@ export default function COrders() {
               </>
             ) : (
               <>
-          <Typography variant="h6" color="blue-gray" className="font-semibold mb-2">
-            Offer Details:
-          </Typography>
-          <div className="mb-2">
-            <Typography variant="small" color="blue-gray" className="font-medium">
-              Title:
-            </Typography>
-            <Typography className="text-lg font-bold">{offer.title}</Typography>
-          </div>
-          <div className="mb-2 flex flex-wrap gap-4">
-            <div className="flex items-center">
-              <Typography variant="small" color="blue-gray" className="font-medium">Delivery Time (in days):</Typography>
-              <Typography className="text-sm  ml-2">{offer.deliveryTime}</Typography>
-            </div>
+                <Typography variant="h6" color="blue-gray" className="font-semibold mb-2">
+                  Offer Details:
+                </Typography>
+                <div className="mb-2">
+                  <Typography variant="small" color="blue-gray" className="font-medium">
+                    Title:
+                  </Typography>
+                  <Typography className="text-lg font-bold">{offer.title}</Typography>
+                </div>
+                <div className="mb-2 flex flex-wrap gap-4">
+                  <div className="flex items-center">
+                    <Typography variant="small" color="blue-gray" className="font-medium">Delivery Time (in days):</Typography>
+                    <Typography className="text-sm  ml-2">{offer.deliveryTime}</Typography>
+                  </div>
 
-            <div className="flex items-center">
-              <Typography variant="small" color="blue-gray" className="font-medium">Revision Offered:</Typography>
-              <Typography className="text-sm  ml-2">{offer.revisions}</Typography>
-            </div>
+                  <div className="flex items-center">
+                    <Typography variant="small" color="blue-gray" className="font-medium">Revision Offered:</Typography>
+                    <Typography className="text-sm  ml-2">{offer.revisions}</Typography>
+                  </div>
 
-            <div className="flex items-center">
-              <Typography variant="small" color="blue-gray" className="font-medium">Amount:</Typography>
-              <Typography className="text-sm  ml-2">{offer.price}</Typography>
-            </div>
-          </div>
+                  <div className="flex items-center">
+                    <Typography variant="small" color="blue-gray" className="font-medium">Amount:</Typography>
+                    <Typography className="text-sm  ml-2">{offer.price}</Typography>
+                  </div>
+                </div>
 
-          <div className="mb-2">
-            <Typography variant="small" color="blue-gray" className="font-medium">Additional Service:</Typography>
-            <Typography className="text-base">{offer.service}</Typography>
-          </div>
+                <div className="mb-2">
+                  <Typography variant="small" color="blue-gray" className="font-medium">Additional Service:</Typography>
+                  <Typography className="text-base">{offer.service}</Typography>
+                </div>
 
-          <div className="mb-2">
-            <Typography variant="small" color="blue-gray" className="font-medium">Description:</Typography>
-            <Typography className="text-base">{offer.description}</Typography>
-          </div>
-          <Tooltip content="Remove this declined offer permanently" placement="top">
+                <div className="mb-2">
+                  <Typography variant="small" color="blue-gray" className="font-medium">Description:</Typography>
+                  <Typography className="text-base">{offer.description}</Typography>
+                </div>
+                <Tooltip content="Remove this declined offer permanently" placement="top">
                   <Button
                     onClick={() => removeOffer(offer.id)}
                     size="sm"
@@ -218,14 +216,13 @@ export default function COrders() {
                     Delete Offer
                   </Button>
                 </Tooltip>
-               
-  
               </>
             )}
           </div>
         ))}
     </div>
   );
+
   const renderAcceptedOrders = () => (
     <div className="overflow-x-auto mt-4">
       <table className="table-auto bg-white border-collapse">
@@ -249,9 +246,13 @@ export default function COrders() {
               <td className="px-6 py-4">{order.price}</td>
               <td className="px-6 py-4">
                 <Select
-                  value={order.status}
-                  onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                  className="w-20"
+                  value={order?.status || ""} // Ensure the status is set to the current status value (fallback to empty string if undefined)
+                  onChange={(e) => {
+                    if (e.target && e.target.value) {
+                      updateOrderStatus(order.id, e.target.value); // Safely update the status
+                    }
+                  }}
+                  className="w-60-"
                   variant="standard"
                 >
                   <Option value="Pending">Pending</Option>
@@ -259,14 +260,15 @@ export default function COrders() {
                   <Option value="Cancelled">Cancelled</Option>
                   <Option value="Accepted">Accepted</Option>
                 </Select>
+
               </td>
-              
             </tr>
           ))}
         </tbody>
       </table>
     </div>
   );
+
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
       <ToastContainer />
@@ -288,11 +290,10 @@ export default function COrders() {
             <button
               key={tab}
               onClick={() => setCurrentTab(tab)}
-              className={`flex-1 py-2 text-center font-medium ${
-                currentTab === tab
+              className={`flex-1 py-2 text-center font-medium ${currentTab === tab
                   ? "text-teal-600 border-teal-600 border-b-2"
                   : "text-gray-500"
-              }`}
+                }`}
             >
               {tab}
             </button>

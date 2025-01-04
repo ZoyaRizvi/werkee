@@ -1,4 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { db } from "@/firebase/firebase"; // Assuming you've set up Firebase properly
+import { collection, query, getDocs, where } from "firebase/firestore";
+import { useAuth } from "../../context/authContext/";
 import {
   Typography,
   Alert,
@@ -9,19 +12,46 @@ import {
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 
 export function Notifications() {
-  const [showAlerts, setShowAlerts] = React.useState({
-    blue: true,
-    green: true,
-    orange: true,
-    red: true,
-  });
-  const [showAlertsWithIcon, setShowAlertsWithIcon] = React.useState({
-    blue: true,
-    green: true,
-    orange: true,
-    red: true,
-  });
-  const alerts = ["gray", "green", "orange", "red"];
+   const { dbUser } = useAuth();
+  const [notifications, setNotifications] = useState([]);
+  const [showAlerts, setShowAlerts] = useState({}); // To track visibility of alerts
+
+  // Fetch notifications from Firestore
+  const fetchNotifications = async () => {
+    try {
+      const notificationsRef = collection(db, "notifications");
+      const q = query(notificationsRef, where("Email", "==", dbUser.email)); // Adjust this as needed
+      const querySnapshot = await getDocs(q);
+
+      const fetchedNotifications = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      // Set notifications and show them all initially
+      setNotifications(fetchedNotifications);
+      const initialAlertsState = fetchedNotifications.reduce((acc, notification) => {
+        acc[notification.id] = true;
+        return acc;
+      }, {});
+      setShowAlerts(initialAlertsState);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  // Fetch notifications when component mounts
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  // Handle alert close action
+  const handleClose = (notificationId) => {
+    setShowAlerts((prevState) => ({
+      ...prevState,
+      [notificationId]: false,
+    }));
+  };
 
   return (
     <div className="mx-auto my-20 flex max-w-screen-lg flex-col gap-8">
@@ -33,50 +63,19 @@ export function Notifications() {
           className="m-0 p-4"
         >
           <Typography variant="h5" color="blue-gray">
-            Alerts
+            Notifications
           </Typography>
         </CardHeader>
         <CardBody className="flex flex-col gap-4 p-4">
-          {alerts.map((color) => (
+          {notifications.map((notification) => (
             <Alert
-              key={color}
-              open={showAlerts[color]}
-              color={color}
-              onClose={() => setShowAlerts((current) => ({ ...current, [color]: false }))}
+              key={notification.id}
+              open={showAlerts[notification.id]}
+              color={notification.color || "blue"} // Use 'color' field or default to 'blue'
+              icon={<InformationCircleIcon strokeWidth={2} className="h-6 w-6" />}
+              onClose={() => handleClose(notification.id)}
             >
-              A simple {color} alert with an <a href="#">example link</a>. Give
-              it a click if you like.
-            </Alert>
-          ))}
-        </CardBody>
-      </Card>
-      <Card>
-        <CardHeader
-          color="transparent"
-          floated={false}
-          shadow={false}
-          className="m-0 p-4"
-        >
-          <Typography variant="h5" color="blue-gray">
-            Alerts with Icon
-          </Typography>
-        </CardHeader>
-        <CardBody className="flex flex-col gap-4 p-4">
-          {alerts.map((color) => (
-            <Alert
-              key={color}
-              open={showAlertsWithIcon[color]}
-              color={color}
-              icon={
-                <InformationCircleIcon strokeWidth={2} className="h-6 w-6" />
-              }
-              onClose={() => setShowAlertsWithIcon((current) => ({
-                ...current,
-                [color]: false,
-              }))}
-            >
-              A simple {color} alert with an <a href="#">example link</a>. Give
-              it a click if you like.
+              {notification.message || "No message available."}
             </Alert>
           ))}
         </CardBody>
