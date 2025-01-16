@@ -20,7 +20,7 @@ export function Notifications() {
   const fetchNotifications = async () => {
     try {
       const notificationsRef = collection(db, "notifications");
-      const q = query(notificationsRef, where("Email", "==", dbUser.email)); // Adjust this as needed
+      const q = query(notificationsRef, where("Email", "==", dbUser.email)); 
       const querySnapshot = await getDocs(q);
 
       const fetchedNotifications = querySnapshot.docs.map((doc) => ({

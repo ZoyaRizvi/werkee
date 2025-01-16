@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { collection, query, where, getDocs, doc, updateDoc, getDoc, setDoc ,deleteDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, updateDoc, getDoc, setDoc, deleteDoc, orderBy } from "firebase/firestore";
 import { db } from "@/firebase/firebase";
 import { useAuth } from "../../context/authContext/";
 import { Typography, Button, Select, Option, Input } from "@material-tailwind/react";
@@ -22,33 +22,36 @@ export default function COrders() {
   const DEFAULT_PROFILE_IMAGE =
     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUFJ4m3HGM8397IWhGhLphaU38QtqrcYQoUg&s";
 
-  // Fetch all offers from the "Offers" collection
-  const fetchOffers = async () => {
-    const offersRef = collection(db, "Offers");
-    const q = query(offersRef, where("RecruiterEmail", "==", dbUser.email));
-
-    const querySnapshot = await getDocs(q);
-    const offers = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-
-    setOffersData(offers);
-  };
-
-  // Fetch accepted orders from the "Orders" collection
-  const fetchAcceptedOrders = async () => {
-    const ordersRef = collection(db, "orders");
-    const q = query(ordersRef, where("RecruiterEmail", "==", dbUser.email));
-
-    const querySnapshot = await getDocs(q);
-    const orders = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-
-    setAcceptedOrders(orders);
-  };
+    const fetchOffers = async () => {
+      const offersRef = collection(db, "Offers");
+      const q = query(offersRef, where("RecruiterEmail", "==", dbUser.email));
+    
+      const querySnapshot = await getDocs(q);
+      const offers = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+    
+      // Sort offers by timestamp in descending order after fetching data
+      const sortedOffers = offers.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      setOffersData(sortedOffers);
+    };
+    
+    const fetchAcceptedOrders = async () => {
+      const ordersRef = collection(db, "orders");
+      const q = query(ordersRef, where("RecruiterEmail", "==", dbUser.email));
+    
+      const querySnapshot = await getDocs(q);
+      const orders = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+    
+      // Sort orders by timestamp in descending order after fetching data
+      const sortedOrders = orders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      setAcceptedOrders(sortedOrders);
+    };
+    
 
   const acceptOffer = async (offerId, FreelancerEmail , title) => {
     try {
@@ -93,8 +96,6 @@ export default function COrders() {
     }
     setShowModal(false)
   };
-  
-  
 
   // Decline an offer by updating its status to "Declined"
   const declineOffer = async (offerId) => {
@@ -151,7 +152,6 @@ export default function COrders() {
       toast.error("Failed to update order status.");
     }
   };
-  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -271,25 +271,13 @@ export default function COrders() {
           </thead>
           <tbody>
             {acceptedOrders.map((order) => (
-              <tr key={order.id} className="border-b hover:bg-teal-50 transition duration-300">
-                <td className="px-6 py-4 font-semibold">{order.orderNumber || order.id}</td>
+              <tr key={order.id}>
+                <td className="px-6 py-4">{order.id}</td>
                 <td className="px-6 py-4">{new Date(order.timestamp).toLocaleDateString()}</td>
                 <td className="px-6 py-4">{order.title}</td>
                 <td className="px-6 py-4">{order.FreelancerEmail}</td>
-                <td className="px-6 py-4 text-teal-600 font-semibold">{order.price}</td>
-                <td className="px-6 py-4">
-                  <Select
-                    value={order.status}
-                    onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                    className="w-full text-gray-600 bg-teal-100 hover:bg-teal-200 rounded-md transition duration-300"
-                    variant="standard"
-                  >
-                    <Option value="Pending">Pending</Option>
-                    <Option value="Delivered">Delivered</Option>
-                    <Option value="Cancelled">Cancelled</Option>
-                    <Option value="Accepted">Accepted</Option>
-                  </Select>
-                </td>
+                <td className="px-6 py-4">{order.price}</td>
+                <td className="px-6 py-4">{order.status}</td>
               </tr>
             ))}
           </tbody>
@@ -297,94 +285,74 @@ export default function COrders() {
       </div>
     </div>
   );
-  
-  
-  
- 
-  
-  
-
-  // Payment Modal Styling
-  const renderPaymentModal = () => (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-auto transform transition-transform duration-300 ease-out scale-100">
-        <Typography variant="h6" color="blue-gray" className="font-semibold mb-4">Pay to Werkee</Typography>
-
-        <Input
-          label="Card Number"
-          name="cardNumber"
-          value={paymentForm.cardNumber}
-          onChange={handleInputChange}
-          required
-          className="mb-4"
-        /> <br/>
-
-        <div className="flex gap-4">
-          <Input
-            label="Expiry Date (MM/YY)"
-            name="expiryDate"
-            value={paymentForm.expiryDate}
-            onChange={handleInputChange}
-            required
-            className="mb-4"
-          />
-          <Input
-            label="CVV"
-            name="cvv"
-            value={paymentForm.cvv}
-            onChange={handleInputChange}
-            required
-            className="mb-4"
-          />
-        </div>
-        <br/>
-
-        <div className="flex justify-between">
-          <Button onClick={() => setShowModal(false)} variant="text" color="red" className="w-24">
-            Cancel
-          </Button>
-          <Button onClick={handlePayment} variant="gradient" color="green" className="w-40">
-            Pay Now
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
-      <div className="flex justify-between items-center p-8 bg-[#fff2e1] rounded-lg shadow-sm">
-        <h1 className="text-2xl font-bold">Offers</h1>
-        <div className="flex items-center space-x-4">
-          <img src={avatarSrc} alt="Profile" className="w-10 h-10 rounded-full" />
-        </div>
-      </div>
+    <div className="p-6">
+      <Typography variant="h4" className="font-semibold">Order Management</Typography>
 
-      <div className="relative mt-6">
-        <div className="flex border-b border-gray-200">
-          {["All Offers", "Accepted Orders"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setCurrentTab(tab)}
-              className={`flex-1 py-2 text-center font-medium ${currentTab === tab
-                  ? "text-blue-600 border-blue-600 border-b-2"
-                  : "text-gray-500"
-                }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
+      <div className="flex items-center justify-start gap-4 mt-6">
+        <Button
+          onClick={() => setCurrentTab("All Offers")}
+          size="sm"
+          variant={currentTab === "All Offers" ? "filled" : "outlined"}
+          color="teal"
+        >
+          All Offers
+        </Button>
+        <Button
+          onClick={() => setCurrentTab("Accepted Orders")}
+          size="sm"
+          variant={currentTab === "Accepted Orders" ? "filled" : "outlined"}
+          color="teal"
+        >
+          Accepted Orders
+        </Button>
       </div>
 
       {currentTab === "All Offers" && renderAllOffers()}
       {currentTab === "Accepted Orders" && renderAcceptedOrders()}
 
-      {/* ToastContainer to display notifications */}
-      <ToastContainer />
+      {/* Modal for Payment Form */}
+      {showModal && (
+        <div className="fixed inset-0 z-10 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white rounded-lg p-6 w-96">
+            <Typography variant="h6">Payment Details</Typography>
+            <div className="mt-4">
+              <Input
+                name="cardNumber"
+                value={paymentForm.cardNumber}
+                onChange={handleInputChange}
+                label="Card Number"
+                className="mb-4"
+              />
+              <Input
+                name="expiryDate"
+                value={paymentForm.expiryDate}
+                onChange={handleInputChange}
+                label="Expiry Date"
+                className="mb-4"
+              />
+              <Input
+                name="cvv"
+                value={paymentForm.cvv}
+                onChange={handleInputChange}
+                label="CVV"
+                className="mb-4"
+              />
+            </div>
+            <div className="flex justify-between mt-6">
+              <Button variant="outlined" color="red" onClick={() => setShowModal(false)}>
+                Cancel
+              </Button>
+              <Button variant="filled" color="green" onClick={handlePayment}>
+                Pay Now
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
-      {/* Payment Modal */}
-      {showModal && renderPaymentModal()}
+      <ToastContainer />
     </div>
   );
 }

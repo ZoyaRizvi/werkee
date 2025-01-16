@@ -34,30 +34,34 @@ export default function COrders() {
   // Fetch all offers from the "Offers" collection
   const fetchOffers = async () => {
     const offersRef = collection(db, "Offers");
-    const q = query(offersRef, where("FreelancerEmail", "==", dbUser.email));
-
+    const q = query(offersRef, where("RecruiterEmail", "==", dbUser.email));
+  
     const querySnapshot = await getDocs(q);
     const offers = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
-
-    setOffersData(offers);
+  
+    // Sort offers by timestamp in descending order after fetching data
+    const sortedOffers = offers.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    setOffersData(sortedOffers);
   };
-
-  // Fetch accepted orders from the "Orders" collection
+  
   const fetchAcceptedOrders = async () => {
     const ordersRef = collection(db, "orders");
-    const q = query(ordersRef, where("FreelancerEmail", "==", dbUser.email));
-
+    const q = query(ordersRef, where("RecruiterEmail", "==", dbUser.email));
+  
     const querySnapshot = await getDocs(q);
     const orders = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
-
-    setAcceptedOrders(orders);
+  
+    // Sort orders by timestamp in descending order after fetching data
+    const sortedOrders = orders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    setAcceptedOrders(sortedOrders);
   };
+  
 
   // Accept an offer and clone it to the "Orders" collection
   const acceptOffer = async (offerId) => {

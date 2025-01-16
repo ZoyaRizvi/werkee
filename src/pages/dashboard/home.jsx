@@ -25,13 +25,16 @@ export function Home() {
     try {
       const querySnapshot = await getDocs(collectionGroup(db, "projects"));
       const projectData = [];
-
+  
+      // Fetch each project and add additional user data
       for (const doc of querySnapshot.docs) {
         const project = doc.data();
-
+        
         const candidateWorkDocRef = doc.ref.parent.parent;
+        
         if (candidateWorkDocRef) {
           const candidateWorkDoc = await getDoc(candidateWorkDocRef);
+          
           if (candidateWorkDoc.exists()) {
             const userData = candidateWorkDoc.data();
             projectData.push({
@@ -57,14 +60,20 @@ export function Home() {
           });
         }
       }
-
-      setJobs(projectData);
+  
+      // Sorting the projects by the `timestamp` field (latest first)
+      const sortedProjects = projectData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  
+      // Set the sorted data
+      setJobs(sortedProjects);
       setIsLoading(false);
+  
     } catch (error) {
       console.error("Error fetching projects: ", error);
       setIsLoading(false);
     }
   };
+  
 
   useEffect(() => {
     setIsLoading(true);

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, createContext } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Avatar,
@@ -27,9 +27,53 @@ export function Chat() {
   const [recruiter, setRecruiter] = useState(null);
   const [jobTitle, setJobTitle] = useState(null);
   const [newMessagePost, setNewMessagePost] = useState("");
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false); // Modal open state
   const navigate = useNavigate();
 
+  // Open/close modal explicitly via button press, not through `useEffect`
+  const handleOpen = () => {
+    setOpen(!open);
+  };
+
+  // Handle sending the message for job details and new message post
+  const handleNewSendMessage = async () => {
+    if (newMessagePost.trim()) {
+      // First message with job details
+      await addDoc(collection(db, 'messages'), {
+        from: dbUser.email,
+        to: recruiter,
+        users: [dbUser.email, recruiter],
+        text: `New message for job: ${jobTitle} from ${dbUser.email}`,
+        timestamp: Timestamp.now(),
+      });
+
+      // Second message with the new message content
+      await addDoc(collection(db, 'messages'), {
+        from: dbUser.email,
+        to: recruiter,
+        users: [dbUser.email, recruiter],
+        text: newMessagePost,
+        timestamp: Timestamp.now(),
+      });
+
+      // Adding a notification for the recruiter
+      await addDoc(collection(db, 'notifications'), {
+        Email: recruiter, // Add the email
+        message: `You have a new message from ${dbUser.displayName}`, // Custom message
+        seen: false, // Setting seen as false initially
+        timestamp: new Date().toISOString(), // Current timestamp
+      });
+
+      // Reset the input and handle the opening of the modal
+      setNewMessagePost("");
+      setOpen(false); // Close the modal after sending the message
+
+      // // Redirect to the chat page
+      // window.location.href = '/dashboard/chat';
+    }
+  };
+
+  // Handle sending messages within the chat
   const handleSendMessage = async () => {
     if (newMessage.trim()) {
       await addDoc(collection(db, 'messages'), {
@@ -39,43 +83,17 @@ export function Chat() {
         text: newMessage,
         timestamp: Timestamp.now(),
       });
+
+      // Adding a notification for the recruiter
+      await addDoc(collection(db, 'notifications'), {
+        Email: recruiter, // Add the email
+        message: `You have a new message from ${dbUser.displayName}`, // Custom message
+        seen: false, // Setting seen as false initially
+        timestamp: new Date().toISOString(), // Current timestamp
+      });
       setNewMessage("");
     }
   };
-
-  const handleNewSendMessage = async () => {
-    if (newMessagePost.trim()) {
-      await addDoc(collection(db, 'messages'), {
-        from: dbUser.email,
-        to: recruiter,
-        users: [dbUser.email, recruiter],
-        text: `New message for job: ${jobTitle} from ${dbUser.email}`,
-        timestamp: Timestamp.now(),
-      });
-      await addDoc(collection(db, 'messages'), {
-        from: dbUser.email,
-        to: recruiter,
-        users: [dbUser.email, recruiter],
-        text: newMessagePost,
-        timestamp: Timestamp.now(),
-      });
-      setNewMessagePost("");
-      handleOpen();
-      window.location.href = '/dashboard/chat';
-    }
-  };
-
-  const handleOpen = () => {
-    setOpen(!open);
-  };
-
-  useEffect(() => {
-    if (recruiter) {
-      handleOpen();
-    } else {
-      setSelectedChat(uniqueUsersList[0]);
-    }
-  }, [uniqueUsersList, recruiter]);
 
   useEffect(() => {
     if (!dbUser) return;
@@ -126,29 +144,37 @@ export function Chat() {
       handleSendMessage();
     }
   };
+
   const handleSearch = (event) => {
     setSearchQuery(event.target.value);
   };
+
   const filteredChats = uniqueUsersList.filter((chat) =>
     chat.displayName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <div className="flex" style={{ height: 'calc(100vh - 100px)' }}>
+      {/* Modal */}
       <Dialog open={open} handler={handleOpen}>
         <DialogBody>
           <form onSubmit={handleNewSendMessage} className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
-            {recruiter &&
-              <Typography variant="regular" color="blue-gray" className="font-medium">Applying for {jobTitle ? jobTitle : null}</Typography>}
+            {recruiter && (
+              <Typography variant="regular" color="blue-gray" className="font-medium">
+                Applying for {jobTitle ? jobTitle : null}
+              </Typography>
+            )}
             <Input
               size="lg"
               placeholder="name@mail.com"
               className="border border-gray-300 rounded-md mt-2"
               value={recruiter}
-              onChange={e => setRecruiter(e.target.value)}
+              onChange={(e) => setRecruiter(e.target.value)}
             />
             <div className="mb-4">
-              <Typography variant="small" color="blue-gray" className="font-medium">Add a message</Typography>
+              <Typography variant="small" color="blue-gray" className="font-medium">
+                Add a message
+              </Typography>
               <div className="flex items-center">
                 <Input
                   type="text"
@@ -166,16 +192,12 @@ export function Chat() {
           </form>
         </DialogBody>
         <DialogFooter>
-          <Button
-            variant="text"
-            color="red"
-            onClick={handleOpen}
-            className="mr-1"
-          >
+          <Button variant="text" color="red" onClick={handleOpen} className="mr-1">
             <span>Cancel</span>
           </Button>
         </DialogFooter>
       </Dialog>
+
       <div className="w-1/4 bg-white border-r border-gray-200 p-4 overflow-y-auto" style={{ height: 'calc(100vh - 120px)' }}>
         <div className="flex items-center justify-between mb-4">
           <Input
@@ -191,9 +213,7 @@ export function Chat() {
           </Button>
         </div>
         {filteredChats.map((chat) => (
-          <div key={chat.email}
-            className={`flex items-center gap-4 p-4 cursor-pointer hover:bg-gray-100`}
-            onClick={() => setSelectedChat(chat)}>
+          <div key={chat.email} className={`flex items-center gap-4 p-4 cursor-pointer hover:bg-gray-100`} onClick={() => setSelectedChat(chat)}>
             <div>
               <Typography variant="small" color="blue-gray" className={(selectedChat && selectedChat.email === chat.email) ? 'font-semibold' : ''}>
                 {chat.displayName}
@@ -260,4 +280,5 @@ export function Chat() {
     </div>
   );
 }
+
 export default Chat;

@@ -32,13 +32,18 @@ export function Home() {
         ...doc.data(),
         id: doc.id,
       }));
-      setJobs(newData);
+  
+      // Sort the jobs by the timestamp field in descending order (latest first)
+      const sortedJobs = newData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  
+      setJobs(sortedJobs);
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching jobs: ", error);
       setIsLoading(false);
     }
   };
+  
 
   useEffect(() => {
     setIsLoading(true);
