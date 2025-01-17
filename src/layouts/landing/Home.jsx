@@ -18,7 +18,6 @@ export default function Home() {
       <Switch>
         <Route exact path="/">
           <Banner />
-          <TrustedBy />
           <Whyteens />
           <AboutWerky />
           <Counselling />

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FiCalendar, FiClock, FiMapPin } from 'react-icons/fi';
 import { IoIosArrowDroprightCircle } from 'react-icons/io';
-import { db, storage, auth } from '@/firebase/firebase';
+import { db, storage , auth } from '@/firebase/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 
@@ -21,7 +21,7 @@ const CustomCard = ({ data }) => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
+    title: '', // Title will be auto-filled
     deliveryTime: '',
     revisions: '',
     price: '',
@@ -31,6 +31,7 @@ const CustomCard = ({ data }) => {
   const [currentUserEmail, setCurrentUserEmail] = useState('');
   const [errors, setErrors] = useState({});
 
+  // Effect to fetch the current user's email on auth state change
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -40,6 +41,20 @@ const CustomCard = ({ data }) => {
     return () => unsubscribe();
   }, []);
 
+  // When modal is opened, pre-fill the title and reset other fields
+  const openModal = () => {
+    setFormData({
+      title: title, // Automatically set the job title in the form
+      deliveryTime: '', // Empty by default
+      revisions: '',
+      price: '',
+      service: '',
+      description: '', // Empty by default
+    });
+    setIsModalOpen(true);
+  };
+
+  // Handle input changes in the form
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -48,13 +63,12 @@ const CustomCard = ({ data }) => {
     });
   };
 
+  // Handle form submission for making an offer
   const handleOfferSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
-
-    if (!formData.title) {
-      newErrors.title = 'Title is required';
-    }
+  
+    // Validate required fields
     if (!formData.deliveryTime) {
       newErrors.deliveryTime = 'Delivery time is required';
     }
@@ -70,16 +84,17 @@ const CustomCard = ({ data }) => {
     if (!formData.description) {
       newErrors.description = 'Description is required';
     }
-
+  
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-
+  
     const orderNumber = Math.floor(100000 + Math.random() * 90000);
     const offerId = `offer_${orderNumber}`;
-
+  
     try {
+      // Create offer data
       const offerData = {
         title: formData.title,
         deliveryTime: formData.deliveryTime,
@@ -93,16 +108,37 @@ const CustomCard = ({ data }) => {
         orderNumber: offerId,
         status: 'Pending',
       };
-
+  
+      // Save offer data to Firestore
       const offersCollectionRef = doc(db, "Offers", offerId);
       await setDoc(offersCollectionRef, offerData);
-
+  
       console.log('Offer submitted successfully');
+  
+      // Add a new notification to the notification collection
+      const notificationMessage = `You have a new offer on ${formData.title}`;
+  
+      // Create notification data
+      const notificationData = {
+        message: notificationMessage,
+        Email: recruiter_email,  // The recruiter is the recipient of the notification
+        timestamp: new Date(),
+        isRead: false,  // Set to false initially, meaning the recruiter hasn't read the notification yet
+      };
+  
+      // Save the notification data to Firestore
+      const notificationCollectionRef = doc(db, "notifications", offerId);  // We use the offerId to associate it with the offer
+      await setDoc(notificationCollectionRef, notificationData);
+  
+      console.log('Notification added successfully');
+  
+      // Close the modal after submitting the offer
       setIsModalOpen(false);
     } catch (e) {
       console.error('Error adding document: ', e);
     }
   };
+  
 
   return (
     <section className="card" style={{ paddingTop: '20px' }}>
@@ -130,7 +166,7 @@ const CustomCard = ({ data }) => {
           <p className="text-base text-primary/70 pt-3 pl-3">{description}</p>
           <div className="flex justify-between items-center p-4 mb-2">
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={openModal}
               className="bg-teal-500 text-white py-2 px-4 mt-4 rounded w-40 flex justify-center"
             >
               <span className="mr-2 ">Make Offer</span>
@@ -171,12 +207,11 @@ const CustomCard = ({ data }) => {
                   <input
                     type="text"
                     name="title"
-                    value={formData.title}
+                    value={formData.title} // Automatically set the title field
                     onChange={handleInputChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
+                    disabled
                   />
-                  {errors.title && <p className="text-red-500 text-xs italic">{errors.title}</p>}
                 </div>
 
                 <div className="mb-4">
@@ -259,3 +294,4 @@ const CustomCard = ({ data }) => {
 };
 
 export default CustomCard;
+
