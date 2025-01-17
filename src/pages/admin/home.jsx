@@ -110,9 +110,9 @@ const Home = () => {
         label: "Projects Posted",
         data: monthlyData,
         backgroundColor: monthlyData.map((count) =>
-          count > 10 ? "rgba(255, 0, 0, 0.8)" :
+          count > 10 ? "rgba(54, 162, 235, 0.6)" :
           count > 5 ? "rgba(0, 0, 255, 0.6)" :
-          "rgba(255, 255, 0, 0.6)"
+          "rgba(75, 192, 192, 0.6)"
         ),
         borderColor: "rgba(75, 192, 192, 1)",
         borderWidth: 1,
