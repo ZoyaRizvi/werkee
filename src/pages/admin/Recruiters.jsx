@@ -157,11 +157,11 @@ export function Recruiters() {
         data: monthlyData,
         backgroundColor: monthlyData.map((count) => {
           if (count > 10) {
-            return "rgba(255, 0, 0, 0.8)"; // Red for > 7
+            return "rgba(54, 162, 235, 0.6)"; // Red for > 7
           } else if (count > 5) {
-            return "rgba(0, 0, 255, 0.6)"; // Blue for > 5 and <= 7
+            return "rgba(255, 206, 86, 0.6)"; // Blue for > 5 and <= 7
           } else {
-            return "rgba(255, 255, 0, 0.6)"; // Yellow for <= 5
+            return "rgba(75, 192, 192, 0.6)"; // Yellow for <= 5
           }
         }),
         borderColor: "rgba(75, 192, 192, 1)",
