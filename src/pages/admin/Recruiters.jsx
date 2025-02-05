@@ -84,13 +84,13 @@ export function Recruiters() {
             }
           }
         });
-
+  
         setMonthlyData(months);
       } catch (error) {
-        console.error("Error fetching recruiter: ", error);
+        console.error("Error fetching recruiters: ", error);
       }
     };
-
+  
     fetchUsers();
   }, []);
 
