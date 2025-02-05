@@ -34,7 +34,7 @@ export default function COrders() {
   // Fetch all offers from the "Offers" collection
   const fetchOffers = async () => {
     const offersRef = collection(db, "Offers");
-    const q = query(offersRef, where("RecruiterEmail", "==", dbUser.email));
+    const q = query(offersRef, where("FreelancerEmail", "==", dbUser.email));
   
     const querySnapshot = await getDocs(q);
     const offers = querySnapshot.docs.map((doc) => ({
@@ -49,7 +49,7 @@ export default function COrders() {
   
   const fetchAcceptedOrders = async () => {
     const ordersRef = collection(db, "orders");
-    const q = query(ordersRef, where("RecruiterEmail", "==", dbUser.email));
+    const q = query(ordersRef, where("FreelancerEmail", "==", dbUser.email));
   
     const querySnapshot = await getDocs(q);
     const orders = querySnapshot.docs.map((doc) => ({
@@ -248,22 +248,7 @@ export default function COrders() {
               <td className="px-6 py-4">{order.title}</td>
               <td className="px-6 py-4">{order.FreelancerEmail}</td>
               <td className="px-6 py-4">{order.price}</td>
-              <td className="px-6 py-4">
-                <Select
-                  value={order?.status || ""} // Ensure the status is set to the current status value (fallback to empty string if undefined)
-                  onChange={(e) => {
-                    if (e.target && e.target.value) {
-                      updateOrderStatus(order.id, e.target.value); // Safely update the status
-                    }
-                  }}
-                  className="w-60-"
-                  variant="standard"
-                >
-                  <Option value="Pending">Pending</Option>
-                  <Option value="Delivered">Delivered</Option>
-                  <Option value="Cancelled">Cancelled</Option>
-                  <Option value="Accepted">Accepted</Option>
-                </Select>
+              <td className="px-6 py-4">{order.status}
 
               </td>
             </tr>
