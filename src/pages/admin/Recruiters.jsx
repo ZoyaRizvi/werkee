@@ -70,11 +70,18 @@ export function Recruiters() {
 
         // Process data for the chart
         const months = Array(12).fill(0);
+        const currentYear = new Date().getFullYear();
+  
         users.forEach((user) => {
           if (user.createdAt) {
             const registrationDate = user.createdAt.toDate();
             const month = registrationDate.getMonth();
-            months[month]++;
+            const year = registrationDate.getFullYear();
+  
+            // Only count registrations from the current year
+            if (year === currentYear) {
+              months[month]++;
+            }
           }
         });
 
