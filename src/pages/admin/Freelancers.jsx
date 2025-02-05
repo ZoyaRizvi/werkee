@@ -79,23 +79,29 @@ export function Freelancers() {
 
         // Process data for the chart
         const months = Array(12).fill(0);
+        const currentYear = new Date().getFullYear();
+  
         users.forEach((user) => {
           if (user.createdAt) {
             const registrationDate = user.createdAt.toDate();
             const month = registrationDate.getMonth();
-            months[month]++;
+            const year = registrationDate.getFullYear();
+  
+            // Only count registrations from the current year
+            if (year === currentYear) {
+              months[month]++;
+            }
           }
         });
-
+  
         setMonthlyData(months);
       } catch (error) {
         console.error("Error fetching candidates: ", error);
       }
     };
-
+  
     fetchUsers();
   }, []);
-
   const handleOpenConfirmDialog = (userId) => {
     setUserToDelete(userId);
     setOpenConfirmDialog(true);
@@ -180,6 +186,7 @@ export function Freelancers() {
     ],
   };
 
+
   const options = {
     responsive: true,
     plugins: {
@@ -192,7 +199,7 @@ export function Freelancers() {
       },
     },
   };
-
+  
   return (
     <div className="mt-12">
       {/* Chart */}
