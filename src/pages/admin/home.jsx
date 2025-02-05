@@ -18,8 +18,6 @@ const Home = () => {
   const [jobsData, setJobsData] = useState([]);
   const [monthlyData, setMonthlyData] = useState([]);
   const [titleData, setTitleData] = useState({});
-  const [acceptedCount, setAcceptedCount] = useState(0);
-  const [declinedCount, setDeclinedCount] = useState(0);
 
   // Fetch jobs from Firebase
   const fetchJobs = async () => {
@@ -31,16 +29,23 @@ const Home = () => {
       }));
       setJobsData(jobs);
 
-      // Process data for the charts
+      // Get the current year
+      const currentYear = new Date().getFullYear();
+
+      // Initialize monthly data array
       const months = Array(12).fill(0);
       const titlesCount = {};
 
       jobs.forEach((job) => {
-        // Monthly data
         if (job.postedDate) {
           const postedDate = new Date(job.postedDate);
-          const month = postedDate.getMonth(); // 0 = January
-          months[month]++;
+          const jobYear = postedDate.getFullYear();
+          const jobMonth = postedDate.getMonth(); // 0 = January
+
+          // Only count projects from the current year
+          if (jobYear === currentYear) {
+            months[jobMonth]++;
+          }
         }
 
         // Titles data
@@ -56,7 +61,6 @@ const Home = () => {
     }
   };
 
-  // Call fetchJobs when the component mounts
   useEffect(() => {
     fetchJobs();
   }, []);
@@ -92,18 +96,8 @@ const Home = () => {
   // Chart data and options
   const monthlyChartData = {
     labels: [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
     ],
     datasets: [
       {
@@ -160,40 +154,15 @@ const Home = () => {
     ],
   };
 
-  const acceptedChartData = {
-    labels: ["Accepted Offers"],
-    datasets: [
-      {
-        label: "Total",
-        data: [acceptedCount],
-        backgroundColor: "rgba(75, 192, 192, 0.6)",
-        borderColor: "rgba(75, 192, 192, 1)",
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  const declinedChartData = {
-    labels: ["Declined Offers"],
-    datasets: [
-      {
-        label: "Total",
-        data: [declinedCount],
-        backgroundColor: "rgba(255, 99, 132, 0.6)",
-        borderColor: "rgba(255, 99, 132, 1)",
-        borderWidth: 1,
-      },
-    ],
-  };
 
   return (
     <div className="container mx-auto p-6">
       {/* Monthly Jobs Chart */}
       <div className="mb-8">
         <Card className="w-full">
-          <CardBody>
+        <CardBody>
             <Typography variant="h6" className="text-center mb-4">
-              Projects Posted Per Month
+              Projects Posted Per Month (Current Year)
             </Typography>
             <div className="w-full">
               <Bar data={monthlyChartData} options={monthlyChartOptions} />
@@ -277,7 +246,7 @@ const Home = () => {
                             onClick={() => console.log("Edit job ID:", id)}
                           >
                             <PencilIcon className="h-4 w-4" />
-                          </IconButton>
+                          </IconButton> */}
                         </td>
                       </tr>
                     );
