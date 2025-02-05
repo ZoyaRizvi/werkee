@@ -61,33 +61,33 @@ const Home = () => {
     fetchJobs();
   }, []);
 
-  // Fetch offers from Firebase
-  const fetchOffers = async () => {
-    try {
-      const offersSnapshot = await getDocs(collection(db, "Offers"));
-      let accepted = 0;
-      let declined = 0;
+  // // Fetch offers from Firebase
+  // const fetchOffers = async () => {
+  //   try {
+  //     const offersSnapshot = await getDocs(collection(db, "Offers"));
+  //     let accepted = 0;
+  //     let declined = 0;
 
-      offersSnapshot.forEach((doc) => {
-        const offer = doc.data();
-        if (offer.status === "accepted") {
-          accepted++;
-        } else if (offer.status === "declined") {
-          declined++;
-        }
-      });
+  //     offersSnapshot.forEach((doc) => {
+  //       const offer = doc.data();
+  //       if (offer.status === "accepted") {
+  //         accepted++;
+  //       } else if (offer.status === "declined") {
+  //         declined++;
+  //       }
+  //     });
 
-      setAcceptedCount(accepted);
-      setDeclinedCount(declined);
-    } catch (error) {
-      console.error("Error fetching offers: ", error);
-    }
-  };
+  //     setAcceptedCount(accepted);
+  //     setDeclinedCount(declined);
+  //   } catch (error) {
+  //     console.error("Error fetching offers: ", error);
+  //   }
+  // };
 
-  // Call fetchOffers when the component mounts
-  useEffect(() => {
-    fetchOffers();
-  }, []);
+  // // Call fetchOffers when the component mounts
+  // useEffect(() => {
+  //   fetchOffers();
+  // }, []);
 
   // Chart data and options
   const monthlyChartData = {
@@ -213,16 +213,7 @@ const Home = () => {
           </CardBody>
         </Card>
         {/* Accepted and Declined Offers */}
-        {/* <Card>
-          <CardBody>
-            <Bar data={acceptedChartData} />
-          </CardBody>
-        </Card>
-        <Card>
-          <CardBody>
-            <Bar data={declinedChartData} />
-          </CardBody>
-        </Card> */}
+      
       </div>
       
 {/* Existing Table */}
