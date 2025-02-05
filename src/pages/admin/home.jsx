@@ -65,35 +65,6 @@ const Home = () => {
     fetchJobs();
   }, []);
 
-  // // Fetch offers from Firebase
-  // const fetchOffers = async () => {
-  //   try {
-  //     const offersSnapshot = await getDocs(collection(db, "Offers"));
-  //     let accepted = 0;
-  //     let declined = 0;
-
-  //     offersSnapshot.forEach((doc) => {
-  //       const offer = doc.data();
-  //       if (offer.status === "accepted") {
-  //         accepted++;
-  //       } else if (offer.status === "declined") {
-  //         declined++;
-  //       }
-  //     });
-
-  //     setAcceptedCount(accepted);
-  //     setDeclinedCount(declined);
-  //   } catch (error) {
-  //     console.error("Error fetching offers: ", error);
-  //   }
-  // };
-
-  // // Call fetchOffers when the component mounts
-  // useEffect(() => {
-  //   fetchOffers();
-  // }, []);
-
-  // Chart data and options
   const monthlyChartData = {
     labels: [
       "January", "February", "March", "April", "May", "June",
@@ -240,7 +211,7 @@ const Home = () => {
                           >
                             <TrashIcon className="h-4 w-4" />
                           </IconButton>
-                          <IconButton
+                          {/* <IconButton
                             size="sm"
                             variant="text"
                             onClick={() => console.log("Edit job ID:", id)}
