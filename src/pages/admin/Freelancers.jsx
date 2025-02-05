@@ -195,7 +195,16 @@ export function Freelancers() {
       },
       title: {
         display: true,
-        text: "Monthly Registrations of Candidates",
+        text: "Monthly Registrations of Recruiters",
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: false,
+        ticks: {
+          min: 1, // Starts the Y-axis from 1
+          stepSize: 1, // Increments by 1
+        },
       },
     },
   };
