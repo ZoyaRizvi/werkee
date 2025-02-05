@@ -195,7 +195,7 @@ export function Freelancers() {
       },
       title: {
         display: true,
-        text: "Monthly Registrations of Recruiters",
+        text: "Monthly Registrations of Candidates",
       },
     },
     scales: {
@@ -208,7 +208,7 @@ export function Freelancers() {
       },
     },
   };
-  
+
   return (
     <div className="mt-12">
       {/* Chart */}
