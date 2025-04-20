@@ -80,14 +80,14 @@ export default function COrders() {
     }
   };
 
-  const declineOffer = async (offerId) => {
+  const deleteOffer = async (offerId) => {
     const offerRef = doc(db, "Offers", offerId);
     await updateDoc(offerRef, {
-      status: "Declined",
+      status: "Delete",
       timestamp: new Date().toISOString(),
     });
 
-    toast.info("Offer declined successfully!");
+    toast.info("Offer deleted successfully!");
     fetchOffers();
   };
 
@@ -207,21 +207,21 @@ export default function COrders() {
                   <Typography className="text-base">{offer.description}</Typography>
                 </div>
                 <div className="flex gap-4 mt-4">
-                  <Button
+                  {/* <Button
                     onClick={() => acceptOffer(offer.id)}
                     size="sm"
                     variant="gradient"
                     color="green"
                   >
                     Accept Offer
-                  </Button>
+                  </Button> */}
                   <Button
                     onClick={() => declineOffer(offer.id)}
                     size="sm"
                     variant="gradient"
                     color="red"
                   >
-                    Decline Offer
+                    Delete Offer
                   </Button>
                 </div>
               </>
