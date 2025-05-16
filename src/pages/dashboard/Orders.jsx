@@ -11,7 +11,6 @@ export default function COrders() {
   const [currentTab, setCurrentTab] = useState("All Offers");
   const [offersData, setOffersData] = useState([]);
   const [acceptedOrders, setAcceptedOrders] = useState([]);
-  // const [updateOrderStatus, setUpdateOrderStatus]= useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedOffer, setSelectedOffer] = useState(null);
   const [paymentForm, setPaymentForm] = useState({
