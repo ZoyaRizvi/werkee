@@ -241,13 +241,13 @@ export default function COrders() {
                 setSelectedOffer(offer);
                 setShowModal(true);
               }}
-              size="me"
+              size="sm"
               variant="gradient"
               color="green"
             >
               Accept Offer
             </Button>
-            <Button onClick={() => declineOffer(offer.id)} size="me" variant="gradient" color="red" >
+            <Button onClick={() => declineOffer(offer.id)} size="sm" variant="text" color="red">
               Decline
             </Button>
           </div>
