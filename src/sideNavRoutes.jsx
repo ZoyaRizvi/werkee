@@ -5,7 +5,7 @@ import {
   ChatBubbleLeftEllipsisIcon,
   LightBulbIcon,
   InformationCircleIcon,
-  ShoppingCartIcon,
+  ShoppingCartIcon
 } from '@heroicons/react/24/solid';
 import {
   Home as DashboardHome,
@@ -76,7 +76,7 @@ const sideNavRoutes = (userRole) => {
           },
           {
             icon: <ShoppingCartIcon {...icon} />,
-            name: 'Offers',
+            name: 'Orders',
             path: '/orders',
             element: <COrders />,
             
@@ -116,7 +116,7 @@ const sideNavRoutes = (userRole) => {
           },
           {
             icon: <ShoppingCartIcon {...icon} />,
-            name: 'Offers',
+            name: 'Orders',
             path: '/orders',
             element: <Orders />,
             
