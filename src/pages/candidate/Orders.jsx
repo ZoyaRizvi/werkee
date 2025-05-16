@@ -31,44 +31,50 @@ export default function COrders() {
   const DEFAULT_PROFILE_IMAGE =
     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUFJ4m3HGM8397IWhGhLphaU38QtqrcYQoUg&s";
 
+  // Fetch all offers from the "Offers" collection
   const fetchOffers = async () => {
     const offersRef = collection(db, "Offers");
     const q = query(offersRef, where("FreelancerEmail", "==", dbUser.email));
+  
     const querySnapshot = await getDocs(q);
     const offers = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
-    const sortedOffers = offers.sort(
-      (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
-    );
+  
+    // Sort offers by timestamp in descending order after fetching data
+    const sortedOffers = offers.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     setOffersData(sortedOffers);
   };
-
+  
   const fetchAcceptedOrders = async () => {
     const ordersRef = collection(db, "orders");
     const q = query(ordersRef, where("FreelancerEmail", "==", dbUser.email));
+  
     const querySnapshot = await getDocs(q);
     const orders = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
-    const sortedOrders = orders.sort(
-      (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
-    );
+  
+    // Sort orders by timestamp in descending order after fetching data
+    const sortedOrders = orders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     setAcceptedOrders(sortedOrders);
   };
+  
 
+  // Accept an offer and clone it to the "Orders" collection
   const acceptOffer = async (offerId) => {
     const offerRef = doc(db, "Offers", offerId);
     const offerDoc = await getDoc(offerRef);
 
     if (offerDoc.exists()) {
       const offerData = offerDoc.data();
+
       const orderRef = doc(collection(db, "orders"), offerId);
       await setDoc(orderRef, {
         ...offerData,
-        status: "Working",
+        status: "Accepted",
         timestamp: new Date().toISOString(),
       });
 
@@ -80,6 +86,7 @@ export default function COrders() {
     }
   };
 
+  // Decline an offer by updating its status to "Declined"
   const declineOffer = async (offerId) => {
     const offerRef = doc(db, "Offers", offerId);
     await updateDoc(offerRef, {
@@ -91,6 +98,7 @@ export default function COrders() {
     fetchOffers();
   };
 
+  // Remove an offer from the database
   const removeOffer = async (offerId) => {
     try {
       const offerRef = doc(db, "Offers", offerId);
@@ -102,31 +110,29 @@ export default function COrders() {
       toast.error("Failed to remove the offer.");
     }
   };
-
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
       const orderRef = doc(db, "orders", orderId);
-      await updateDoc(orderRef, { status: newStatus });
+      await updateDoc(orderRef, { status: newStatus }); // Update status in Firestore
       toast.success(`Order status updated to: ${newStatus}`);
-      fetchAcceptedOrders();
+      fetchAcceptedOrders(); // Fetch the updated orders after the status change
     } catch (error) {
       console.error("Error updating order status:", error);
       toast.error("Failed to update order status.");
     }
   };
 
+
   useEffect(() => {
-    if (dbUser?.email) {
-      fetchOffers();
-      fetchAcceptedOrders();
-    }
+    fetchOffers();
+    fetchAcceptedOrders();
   }, [dbUser]);
 
   const getUserProfilePhoto = () => {
     const user = localStorage.getItem("user");
     if (user) {
       const parsedUser = JSON.parse(user);
-      return parsedUser.img || DEFAULT_PROFILE_IMAGE;
+      return parsedUser.img ? parsedUser.img : DEFAULT_PROFILE_IMAGE;
     }
     return DEFAULT_PROFILE_IMAGE;
   };
@@ -136,22 +142,26 @@ export default function COrders() {
   const renderAllOffers = () => (
     <div className="mt-4 w-full p-6 bg-white shadow-lg rounded-xl border border-gray-300">
       {offersData
-        .filter((offer) => offer.status !== "Accepted")
+        .filter((offer) => offer.status !== "Accepted") // Filter out accepted offers
         .map((offer) => (
           <div
             key={offer.id}
-            className={`mb-6 p-4 border rounded-lg shadow-sm ${
-              offer.status === "Declined" ? "bg-red-50" : "bg-gray-50"
-            }`}
+            className={`mb-6 p-4 border rounded-lg shadow-sm ${offer.status === "Declined" ? "bg-red-50" : "bg-gray-50"
+              }`}
           >
             {offer.status === "Declined" ? (
               <>
-                <Typography variant="h6" color="red" className="font-semibold mb-2">
+                <Typography
+                  variant="h6"
+                  color="red"
+                  className="font-semibold mb-2"
+                >
                   Offer Declined
                 </Typography>
                 <Typography className="text-lg font-bold mb-4">
                   {offer.title}
                 </Typography>
+
                 <Tooltip content="Remove this declined offer permanently" placement="top">
                   <Button
                     onClick={() => removeOffer(offer.id)}
@@ -176,54 +186,40 @@ export default function COrders() {
                 </div>
                 <div className="mb-2 flex flex-wrap gap-4">
                   <div className="flex items-center">
-                    <Typography variant="small" color="blue-gray" className="font-medium">
-                      Delivery Time (in days):
-                    </Typography>
-                    <Typography className="text-sm ml-2">{offer.deliveryTime}</Typography>
+                    <Typography variant="small" color="blue-gray" className="font-medium">Delivery Time (in days):</Typography>
+                    <Typography className="text-sm  ml-2">{offer.deliveryTime}</Typography>
                   </div>
+
                   <div className="flex items-center">
-                    <Typography variant="small" color="blue-gray" className="font-medium">
-                      Revision Offered:
-                    </Typography>
-                    <Typography className="text-sm ml-2">{offer.revisions}</Typography>
+                    <Typography variant="small" color="blue-gray" className="font-medium">Revision Offered:</Typography>
+                    <Typography className="text-sm  ml-2">{offer.revisions}</Typography>
                   </div>
+
                   <div className="flex items-center">
-                    <Typography variant="small" color="blue-gray" className="font-medium">
-                      Amount:
-                    </Typography>
-                    <Typography className="text-sm ml-2">{offer.price}</Typography>
+                    <Typography variant="small" color="blue-gray" className="font-medium">Amount:</Typography>
+                    <Typography className="text-sm  ml-2">{offer.price}</Typography>
                   </div>
                 </div>
+
                 <div className="mb-2">
-                  <Typography variant="small" color="blue-gray" className="font-medium">
-                    Additional Service:
-                  </Typography>
+                  <Typography variant="small" color="blue-gray" className="font-medium">Additional Service:</Typography>
                   <Typography className="text-base">{offer.service}</Typography>
                 </div>
+
                 <div className="mb-2">
-                  <Typography variant="small" color="blue-gray" className="font-medium">
-                    Description:
-                  </Typography>
+                  <Typography variant="small" color="blue-gray" className="font-medium">Description:</Typography>
                   <Typography className="text-base">{offer.description}</Typography>
                 </div>
-                <div className="flex gap-4 mt-4">
+                <Tooltip content="Remove this declined offer permanently" placement="top">
                   <Button
-                    onClick={() => acceptOffer(offer.id)}
-                    size="sm"
-                    variant="gradient"
-                    color="green"
-                  >
-                    Accept Offer
-                  </Button>
-                  <Button
-                    onClick={() => declineOffer(offer.id)}
+                    onClick={() => removeOffer(offer.id)}
                     size="sm"
                     variant="gradient"
                     color="red"
                   >
-                    Decline Offer
+                    Delete Offer
                   </Button>
-                </div>
+                </Tooltip>
               </>
             )}
           </div>
@@ -252,16 +248,8 @@ export default function COrders() {
               <td className="px-6 py-4">{order.title}</td>
               <td className="px-6 py-4">{order.FreelancerEmail}</td>
               <td className="px-6 py-4">{order.price}</td>
-              <td className="px-6 py-4">
-                <select
-                  className="border border-gray-300 rounded px-2 py-1"
-                  value={order.status}
-                  onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                >
-                  <option value="Working">Working</option>
-                  <option value="Delivered">Delivered</option>
-                  <option value="Completed">Completed</option>
-                </select>
+              <td className="px-6 py-4">{order.status}
+
               </td>
             </tr>
           ))}
@@ -275,22 +263,31 @@ export default function COrders() {
       <ToastContainer />
       <div className="flex justify-between items-center p-8 bg-[#fff2e1] rounded-lg shadow-sm">
         <h1 className="text-2xl font-bold">Offers</h1>
-        <Tooltip content="This is your profile picture" placement="bottom">
-          <img src={avatarSrc} alt="Profile" className="w-10 h-10 rounded-full" />
-        </Tooltip>
+        <div className="flex items-center space-x-4">
+          <Tooltip content="This is your profile picture" placement="bottom">
+            <img
+              src={avatarSrc}
+              alt="Profile"
+              className="w-10 h-10 rounded-full"
+            />
+          </Tooltip>
+        </div>
       </div>
-      <div className="mt-6 border-b border-gray-200 flex">
-        {["All Offers", "Accepted Orders"].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setCurrentTab(tab)}
-            className={`flex-1 py-2 text-center font-medium ${
-              currentTab === tab ? "text-teal-600 border-b-2 border-teal-600" : "text-gray-500"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
+      <div className="relative mt-6">
+        <div className="flex border-b border-gray-200">
+          {["All Offers", "Accepted Orders"].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setCurrentTab(tab)}
+              className={`flex-1 py-2 text-center font-medium ${currentTab === tab
+                  ? "text-teal-600 border-teal-600 border-b-2"
+                  : "text-gray-500"
+                }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
       </div>
       {currentTab === "All Offers" && renderAllOffers()}
       {currentTab === "Accepted Orders" && renderAcceptedOrders()}
